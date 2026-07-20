@@ -1,88 +1,34 @@
-import {
-  SiReact, SiNextdotjs, SiTypescript, SiTailwindcss, SiHtml5,
-  SiNodedotjs, SiExpress, SiPython, SiFastapi,
-  SiPostgresql, SiMysql, SiMongodb, SiRedis,
-  SiGit, SiGithub, SiDocker, SiVercel,
-} from "react-icons/si";
-import type { IconType } from "react-icons";
-
-const skillGroups: { category: string; skills: { name: string; Icon?: IconType }[] }[] = [
-  {
-    category: "Frontend",
-    skills: [
-      { name: "React", Icon: SiReact },
-      { name: "Next.js", Icon: SiNextdotjs },
-      { name: "TypeScript", Icon: SiTypescript },
-      { name: "Tailwind CSS", Icon: SiTailwindcss },
-      { name: "HTML / CSS", Icon: SiHtml5 },
-    ],
-  },
-  {
-    category: "Backend",
-    skills: [
-      { name: "Node.js", Icon: SiNodedotjs },
-      { name: "Express", Icon: SiExpress },
-      { name: "Python", Icon: SiPython },
-      { name: "FastAPI", Icon: SiFastapi },
-      { name: "REST API" },
-    ],
-  },
-  {
-    category: "Database",
-    skills: [
-      { name: "PostgreSQL", Icon: SiPostgresql },
-      { name: "MySQL", Icon: SiMysql },
-      { name: "MongoDB", Icon: SiMongodb },
-      { name: "Redis", Icon: SiRedis },
-    ],
-  },
-  {
-    category: "DevOps & Tools",
-    skills: [
-      { name: "Git", Icon: SiGit },
-      { name: "GitHub", Icon: SiGithub },
-      { name: "Docker", Icon: SiDocker },
-      { name: "Vercel", Icon: SiVercel },
-      { name: "VS Code" },
-    ],
-  },
-];
+import { skillGroups } from "@/lib/profile";
+import { Section } from "./Section";
 
 export default function Skills() {
   return (
-    <section id="skills" className="py-24 px-6 bg-stone-50">
-      <div className="max-w-5xl mx-auto">
-        <div className="mb-14">
-          <p className="text-amber-600 font-semibold text-sm uppercase tracking-widest mb-2">
-            Skills
-          </p>
-          <h2 className="text-3xl font-bold text-stone-900">기술 스택</h2>
-        </div>
-
-        <div className="grid sm:grid-cols-2 gap-6">
-          {skillGroups.map((group) => (
-            <div
-              key={group.category}
-              className="bg-white rounded-2xl p-7 border border-stone-200"
-            >
-              <h3 className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-5">
-                {group.category}
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {group.skills.map(({ name, Icon }) => (
-                  <span
-                    key={name}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-stone-100 text-stone-700 text-sm font-medium rounded-lg hover:bg-stone-200 transition-colors"
-                  >
-                    {Icon && <Icon className="w-3.5 h-3.5 flex-shrink-0" />}
-                    {name}
-                  </span>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
+    <Section
+      id="skills"
+      title="Skills"
+      subtitle="AI 모델링부터 서비스 배포까지, 넓게 다룹니다."
+    >
+      <div className="grid sm:grid-cols-2 gap-5">
+        {skillGroups.map((group) => (
+          <div
+            key={group.name}
+            className="rounded-2xl bg-surface border border-line shadow-[0_1px_2px_rgba(26,19,47,0.04),0_8px_24px_-12px_rgba(26,19,47,0.12)] p-7"
+          >
+            <h3 className="text-base font-bold tracking-tight">{group.name}</h3>
+            <p className="mt-2 text-sm text-muted">{group.caption}</p>
+            <ul className="mt-5 flex flex-wrap gap-2">
+              {group.items.map((item) => (
+                <li
+                  key={item}
+                  className="rail bg-ground border border-line rounded-md px-2.5 py-1 text-ink/75"
+                >
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
       </div>
-    </section>
+    </Section>
   );
 }

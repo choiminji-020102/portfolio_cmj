@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const navLinks = [
-  { label: "Home", href: "#hero" },
+  { label: "Experience", href: "#experience" },
   { label: "Projects", href: "#projects" },
+  { label: "Education", href: "#education" },
   { label: "Credentials", href: "#credentials" },
   { label: "Skills", href: "#skills" },
   { label: "Contact", href: "#contact" },
@@ -12,32 +13,31 @@ const navLinks = [
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", onScroll);
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? "bg-white/90 backdrop-blur-md border-b border-stone-200" : "bg-transparent"
+      className={`fixed top-0 inset-x-0 z-50 transition-colors duration-300 ${
+        scrolled ? "bg-ground/85 backdrop-blur-md border-b border-line" : ""
       }`}
     >
-      <nav className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
-        <a href="#hero" className="text-base font-bold text-stone-900 tracking-tight">
-          CMJ<span className="text-amber-600">.</span>
+      <nav className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between gap-6">
+        <a href="#hero" className="rail text-ink">
+          CHOI MINJI
         </a>
 
-        {/* Desktop */}
-        <ul className="hidden md:flex items-center gap-8">
+        <ul className="hidden md:flex items-center gap-7">
           {navLinks.map((link) => (
             <li key={link.href}>
               <a
                 href={link.href}
-                className="text-sm font-medium text-stone-500 hover:text-amber-600 transition-colors"
+                className="rail hover:text-ink transition-colors"
               >
                 {link.label}
               </a>
@@ -45,36 +45,13 @@ export default function Navbar() {
           ))}
         </ul>
 
-        {/* Mobile hamburger */}
-        <button
-          className="md:hidden p-2 text-stone-600"
-          onClick={() => setMenuOpen(!menuOpen)}
-          aria-label="메뉴 열기"
+        <a
+          href="#contact"
+          className="rail md:hidden hover:text-ink transition-colors"
         >
-          <span className={`block w-5 h-0.5 bg-current mb-1 transition-transform ${menuOpen ? "translate-y-1.5 rotate-45" : ""}`} />
-          <span className={`block w-5 h-0.5 bg-current mb-1 transition-opacity ${menuOpen ? "opacity-0" : ""}`} />
-          <span className={`block w-5 h-0.5 bg-current transition-transform ${menuOpen ? "-translate-y-1.5 -rotate-45" : ""}`} />
-        </button>
+          Contact
+        </a>
       </nav>
-
-      {/* Mobile menu */}
-      {menuOpen && (
-        <div className="md:hidden bg-white border-t border-stone-200 px-6 py-4">
-          <ul className="flex flex-col gap-4">
-            {navLinks.map((link) => (
-              <li key={link.href}>
-                <a
-                  href={link.href}
-                  className="text-sm font-medium text-stone-600 hover:text-amber-600 transition-colors"
-                  onClick={() => setMenuOpen(false)}
-                >
-                  {link.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
     </header>
   );
 }
