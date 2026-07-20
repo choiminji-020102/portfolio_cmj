@@ -8,6 +8,7 @@ export type Track =
   | "AI · 의료영상"
   | "AI · 비전"
   | "AI · LLM"
+  | "AI · 생성형"
   | "풀스택"
   | "데이터 · 통계";
 
@@ -248,34 +249,14 @@ export const projectCards: ProjectCard[] = [
     slug: "magazine-manager",
   },
   {
-    title: "킥보드 교통법규 위반 탐지",
+    title: "다 맡케팅 — 소상공인 AI 마케팅 자동화",
     summary:
-      "안전모 미착용과 동승자 탑승을 탐지합니다. 라이선스 제약 없는 구조로 YOLOv3를 직접 구현하고 웹 서비스까지 연결했습니다.",
-    badge: "NIPA-Google",
-    track: "AI · 비전",
-    period: "2024.10 — 2024.11",
-    teamSize: "팀 프로젝트",
-    stack: ["PyTorch", "YOLOv3", "OpenCV", "FastAPI", "React"],
-  },
-  {
-    title: "KT AIVLE 빅프로젝트",
-    summary: "",
+      "홍보 쇼츠 자동 제작부터 SNS 게시글·성과 리포트까지 생성형 AI로 연결한 플랫폼. 장면 일관성 유지와 게시글 생성 파이프라인을 직접 설계했습니다.",
     badge: "KT AIVLE · 대상",
-    track: "AI · 비전",
-    period: "2025",
-    teamSize: "",
-    stack: [],
-    draft: true,
-  },
-  {
-    title: "KT AIVLE 미니프로젝트",
-    summary: "",
-    badge: "KT AIVLE",
-    track: "AI · 비전",
-    period: "2025",
-    teamSize: "",
-    stack: [],
-    draft: true,
+    track: "AI · 생성형",
+    period: "2025.08 — 2025.09",
+    teamSize: "팀 프로젝트",
+    stack: ["LangGraph", "GPT-4o", "Flux.1 Kontext", "Seedance", "KoELECTRA", "FastAPI"],
   },
   {
     title: "소담소담 — 낙농업 통합 관리 앱",
@@ -286,6 +267,26 @@ export const projectCards: ProjectCard[] = [
     period: "2025.04 — 2025.06",
     teamSize: "팀 프로젝트",
     stack: ["Flutter", "LangChain", "LangGraph", "FastAPI"],
+  },
+  {
+    title: "킥보드 교통법규 위반 탐지",
+    summary:
+      "안전모 미착용과 동승자 탑승을 탐지합니다. 라이선스 제약 없는 구조로 YOLOv3를 직접 구현하고 웹 서비스까지 연결했습니다.",
+    badge: "NIPA-Google",
+    track: "AI · 비전",
+    period: "2024.10 — 2024.11",
+    teamSize: "팀 프로젝트",
+    stack: ["PyTorch", "YOLOv3", "OpenCV", "FastAPI", "React"],
+  },
+  {
+    title: "KT AIVLE 미니프로젝트",
+    summary: "",
+    badge: "KT AIVLE",
+    track: "AI · 비전",
+    period: "2025",
+    teamSize: "",
+    stack: [],
+    draft: true,
   },
 ];
 
