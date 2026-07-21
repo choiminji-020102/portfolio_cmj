@@ -4,6 +4,8 @@
   CSS 애니메이션만 쓴다. reduced-motion 은 globals.css 에서 즉시 완료 처리.
 */
 
+import Image from "next/image";
+
 // 픽셀 마스크의 계단형 경계 (직각). 둥글게 감싸면 형광펜처럼 읽혀서 각지게.
 const CONTOUR =
   "1,80 1,62 4,62 4,44 7,44 7,28 12,28 12,16 22,16 22,9 38,9 38,14 54,14 54,7 72,7 72,12 86,12 86,6 95,6 95,20 98,20 98,40 96,40 96,60 99,60 99,78 95,78 95,88 88,88 88,94 70,94 70,89 52,89 52,95 34,95 34,89 16,89 16,94 6,94 6,86 1,86";
@@ -56,12 +58,31 @@ export default function Hero() {
           </p>
         </div>
 
-        {/* 오른쪽 — 요약 정보 블록 */}
-        <dl className="rail space-y-6 md:text-right md:min-w-[13rem]">
-          <div>
-            <dt className="text-muted mb-1.5">FIELD</dt>
-            <dd className="text-ink text-sm">AI · 의료영상 / 풀스택</dd>
+        {/* 오른쪽 — 프로필 사진 + 요약 정보 블록 */}
+        <div className="flex flex-col gap-8 md:items-end">
+          {/* 프로필 사진 — 세로 카드에 청록 하단 강조 바 */}
+          <div className="relative w-40 sm:w-44 shrink-0">
+            <div className="relative aspect-[3/4] overflow-hidden rounded-2xl border border-line shadow-[0_8px_24px_-12px_rgba(26,19,47,0.2)]">
+              <Image
+                src="/profile.jpg"
+                alt="최민지 프로필 사진"
+                fill
+                sizes="176px"
+                className="object-cover object-top"
+                priority
+              />
+            </div>
+            <span
+              aria-hidden="true"
+              className="absolute -bottom-1.5 left-5 right-5 h-[3px] rounded-full bg-tide"
+            />
           </div>
+
+          <dl className="rail space-y-6 md:text-right md:min-w-[13rem]">
+            <div>
+              <dt className="text-muted mb-1.5">FIELD</dt>
+              <dd className="text-ink text-sm">AI · 의료영상 / 풀스택</dd>
+            </div>
           <div>
             <dt className="text-muted mb-1.5">EDUCATION</dt>
             <dd className="text-ink text-sm">한림대 인공지능융합학부</dd>
@@ -80,7 +101,8 @@ export default function Hero() {
               ))}
             </dd>
           </div>
-        </dl>
+          </dl>
+        </div>
       </div>
 
       <style>{`
