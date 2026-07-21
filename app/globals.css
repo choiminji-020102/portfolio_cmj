@@ -25,6 +25,23 @@
 
   --font-sans: var(--font-plex-kr);
   --font-mono: var(--font-plex-mono);
+
+  /*
+    프로젝트 상세 페이지(및 다이어그램)는 amber/stone 유틸리티로 짜여 있다.
+    클래스를 일일이 고치는 대신 색 토큰만 우리 팔레트로 재매핑해
+    메인과 톤을 통일한다. amber는 메인에서 안 쓰므로 부작용 없음.
+  */
+  --color-amber-50: #edf4f6;
+  --color-amber-100: #dcebef;
+  --color-amber-200: #c4dde4;
+  --color-amber-300: #9ec8d5;
+  --color-amber-400: #6fabbd;
+  --color-amber-500: #4d6d9f;
+  --color-amber-600: #45638f;
+  --color-amber-700: #3a5478;
+  --color-amber-800: #324a6a;
+  --color-amber-900: #2a3d58;
+  --color-stone-900: #1a132f; /* 제목·본문 진한 텍스트 → 잉크 */
 }
 
 html {

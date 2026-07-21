@@ -47,9 +47,9 @@ export default async function ProjectPage({ params }: Props) {
   if (!project) notFound();
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-ground">
       {/* Top bar */}
-      <div className="border-b border-stone-200 sticky top-0 z-10 bg-white/90 backdrop-blur-md">
+      <div className="border-b border-stone-200 sticky top-0 z-10 bg-ground/90 backdrop-blur-md">
         <div className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between">
           <Link
             href="/#projects"
