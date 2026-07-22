@@ -234,6 +234,8 @@ export interface ProjectCard {
   stack: string[];
   slug?: string;
   draft?: boolean;
+  /** 카드 썸네일. 없으면 track 기반 플레이스홀더가 표시된다. */
+  thumbnail?: string;
 }
 
 export const projectCards: ProjectCard[] = [
@@ -247,6 +249,7 @@ export const projectCards: ProjectCard[] = [
     teamSize: "1인",
     stack: ["FastAPI", "SQLAlchemy", "MySQL", "React", "TypeScript"],
     slug: "magazine-manager",
+    thumbnail: "/magazine-manager/after.png",
   },
   {
     title: "다 맡케팅 — 소상공인 AI 마케팅 자동화",
@@ -267,6 +270,7 @@ export const projectCards: ProjectCard[] = [
     period: "2025.04 — 2025.06",
     teamSize: "팀 프로젝트",
     stack: ["Flutter", "LangChain", "LangGraph", "FastAPI"],
+    slug: "sodam",
   },
   {
     title: "킥보드 교통법규 위반 탐지",

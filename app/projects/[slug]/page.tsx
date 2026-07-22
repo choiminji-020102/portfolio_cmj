@@ -1,7 +1,9 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getProject, projects } from "@/lib/projects";
+import { getLightProject, lightProjects } from "@/lib/projectDetails";
 import ProjectInteractive from "@/components/ProjectInteractive";
+import LightProjectView from "@/components/LightProjectView";
 import type { Metadata } from "next";
 
 interface Props {
@@ -9,12 +11,15 @@ interface Props {
 }
 
 export async function generateStaticParams() {
-  return projects.map((p) => ({ slug: p.slug }));
+  return [
+    ...projects.map((p) => ({ slug: p.slug })),
+    ...lightProjects.map((p) => ({ slug: p.slug })),
+  ];
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const project = getProject(slug);
+  const project = getProject(slug) ?? getLightProject(slug);
   if (!project) return {};
   return { title: `${project.title} | Portfolio`, description: project.summary };
 }
@@ -43,6 +48,11 @@ function ExternalIcon() {
 
 export default async function ProjectPage({ params }: Props) {
   const { slug } = await params;
+
+  // 경량(min-hyuk 스타일) 프로젝트는 별도 뷰로 렌더
+  const light = getLightProject(slug);
+  if (light) return <LightProjectView project={light} />;
+
   const project = getProject(slug);
   if (!project) notFound();
 
