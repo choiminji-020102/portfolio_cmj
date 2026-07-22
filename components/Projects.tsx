@@ -63,7 +63,7 @@ export default function Projects() {
                     href={`/projects/${card.slug}`}
                     className="rail mt-5 inline-flex items-center gap-1.5 text-deep hover:underline underline-offset-4"
                   >
-                    문제와 해결 과정 보기 <span aria-hidden="true">→</span>
+                    Project Detail <span aria-hidden="true">→</span>
                   </Link>
                 )}
               </div>
