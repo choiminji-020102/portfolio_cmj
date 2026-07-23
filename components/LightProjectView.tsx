@@ -99,6 +99,33 @@ export default function LightProjectView({
           </section>
         )}
 
+        {/* 팀 구성 — 본인 역할 강조 */}
+        {project.team && project.team.length > 0 && (
+          <section className="mt-16">
+            <h2 className="text-2xl font-bold tracking-tight">팀 구성</h2>
+            <ul className="mt-6 space-y-3">
+              {project.team.map((member) => (
+                <li
+                  key={member.name}
+                  className={`flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-4 rounded-xl border p-4 ${
+                    member.mine
+                      ? "border-tide/40 bg-tide/8"
+                      : "border-line bg-surface"
+                  }`}
+                >
+                  <span className="rail text-ink sm:w-32 shrink-0">
+                    {member.name}
+                    {member.mine && (
+                      <span className="ml-1.5 text-tide">●</span>
+                    )}
+                  </span>
+                  <span className="text-[0.95rem]">{member.role}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
         {/* 핵심 AI 기능 — 문제 → 해결 → 수치 */}
         {project.aiFeatures && project.aiFeatures.length > 0 && (
           <section className="mt-16">
