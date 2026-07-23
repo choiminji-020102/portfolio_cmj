@@ -262,15 +262,16 @@ export const projectCards: ProjectCard[] = [
     stack: ["LangGraph", "GPT-4o", "Flux.1 Kontext", "Seedance", "KoELECTRA", "FastAPI"],
   },
   {
-    title: "소담소담 — 낙농업 통합 관리 앱",
+    title: "소담소담 — AI 젖소 관리 앱",
     summary:
-      "낙농업 종사자를 위한 도메인 특화 RAG 챗봇을 Flutter 앱에 탑재했습니다. LangGraph로 질문 분기와 응답 흐름을 직접 설계했습니다.",
+      "소규모 낙농가를 위한 AI 젖소 관리 앱. 비싼 스마트팜 장비 없이 질병 진단·생산성 예측을 앱으로 대체하고, RAG 챗봇 '소담이'를 직접 설계했습니다.",
     badge: "창업경진대회 · 우수상",
     track: "AI · LLM",
     period: "2025.04 — 2025.06",
     teamSize: "팀 프로젝트",
-    stack: ["Flutter", "LangChain", "LangGraph", "FastAPI"],
+    stack: ["Flutter", "LangGraph", "YOLOv8", "FastAPI"],
     slug: "sodam",
+    thumbnail: "/sodam/lumpy.png",
   },
   {
     title: "킥보드 교통법규 위반 탐지",

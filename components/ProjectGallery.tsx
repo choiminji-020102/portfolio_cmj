@@ -35,14 +35,14 @@ export default function ProjectGallery({
 
   return (
     <div className="relative">
-      <div className="relative aspect-[16/9] rounded-2xl border border-line overflow-hidden bg-surface">
+      <div className="relative aspect-[4/3] sm:aspect-[16/10] rounded-2xl border border-line overflow-hidden bg-gradient-to-br from-tide/8 to-deep/5">
         <Image
           key={screenshots[index]}
           src={screenshots[index]}
           alt={`${title} 스크린샷 ${index + 1}`}
           fill
           sizes="(max-width: 768px) 100vw, 768px"
-          className="object-contain"
+          className="object-contain py-4"
           priority={index === 0}
         />
       </div>
