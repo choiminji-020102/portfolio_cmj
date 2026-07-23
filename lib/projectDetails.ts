@@ -22,8 +22,10 @@ export interface SolutionBlock {
 export interface AiFeature {
   name: string;
   metric?: string; // 강조 수치 (정확도 96.8% 등)
+  problemLabel?: string; // 문제 섹션 라벨 (기본 "문제")
   problem?: string; // 단순 문제 (한 문단)
   problemList?: string[]; // 여러 문제 불릿
+  solutionLabel?: string; // 해결 섹션 라벨 (기본 "해결")
   solution?: string; // 단순 해결 (한 문단)
   solutionBlocks?: SolutionBlock[]; // 여러 갈래 해결 (제목+불릿)
   image?: string; // 관련 앱 스크린샷
@@ -94,11 +96,13 @@ export const lightProjects: LightProject[] = [
       {
         name: "AI 챗봇 '소담이'",
         metric: "RAG · Query Routing",
+        problemLabel: "기존 챗GPT를 그대로 쓸 때의 한계",
         problemList: [
-          "환각(Hallucination) — 낙농 도메인에서 없는 정보를 지어냄",
-          "최신 정보 반영 불가",
-          "전문 용어 혼동 가능성",
+          "환각(Hallucination) — 낙농 전문 지식을 물으면 근거 없는 답을 지어냄",
+          "질병·정책·시세 등 최신 낙농 정보를 반영하지 못함",
+          "낙농 전문 용어를 일상 용어와 혼동",
         ],
+        solutionLabel: "소담이의 기술적 해결책",
         solutionBlocks: [
           {
             title: "RAG (Retrieval-Augmented Generation)",

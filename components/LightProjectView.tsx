@@ -153,7 +153,9 @@ export default function LightProjectView({
                     {/* 문제 */}
                     {feature.problemList ? (
                       <div>
-                        <p className="font-semibold text-muted mb-2">문제</p>
+                        <p className="font-semibold text-muted mb-2">
+                          {feature.problemLabel ?? "문제"}
+                        </p>
                         <ul className="space-y-1.5">
                           {feature.problemList.map((p) => (
                             <li
@@ -179,7 +181,9 @@ export default function LightProjectView({
                     {/* 해결 */}
                     {feature.solutionBlocks ? (
                       <div>
-                        <p className="font-semibold text-deep mb-3">해결</p>
+                        <p className="font-semibold text-deep mb-3">
+                          {feature.solutionLabel ?? "해결"}
+                        </p>
                         <div className="space-y-4">
                           {feature.solutionBlocks.map((block) => (
                             <div
