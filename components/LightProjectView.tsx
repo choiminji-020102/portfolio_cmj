@@ -89,6 +89,16 @@ export default function LightProjectView({
           ))}
         </ul>
 
+        {/* 제안 배경 */}
+        {project.background && (
+          <section className="mt-16">
+            <h2 className="text-2xl font-bold tracking-tight">제안 배경</h2>
+            <p className="mt-6 text-[0.95rem] leading-relaxed text-muted">
+              {project.background}
+            </p>
+          </section>
+        )}
+
         {/* 주요 기능 개발 */}
         <section className="mt-16">
           <h2 className="text-2xl font-bold tracking-tight">주요 기능 개발</h2>
@@ -103,6 +113,42 @@ export default function LightProjectView({
             ))}
           </ul>
         </section>
+
+        {/* 차별성 */}
+        {project.differentiators && project.differentiators.length > 0 && (
+          <section className="mt-16">
+            <h2 className="text-2xl font-bold tracking-tight">
+              기존 서비스와의 차별성
+            </h2>
+            <ul className="mt-6 space-y-3">
+              {project.differentiators.map((item) => (
+                <li
+                  key={item}
+                  className="relative pl-5 text-[0.95rem] leading-relaxed before:absolute before:left-0 before:top-[0.6em] before:h-1.5 before:w-1.5 before:rounded-full before:bg-tide"
+                >
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        {/* 활용 데이터 */}
+        {project.dataSources && project.dataSources.length > 0 && (
+          <section className="mt-16">
+            <h2 className="text-2xl font-bold tracking-tight">활용 데이터</h2>
+            <ul className="mt-6 grid sm:grid-cols-2 gap-3">
+              {project.dataSources.map((item) => (
+                <li
+                  key={item}
+                  className="rounded-xl bg-surface border border-line p-4 text-sm leading-relaxed"
+                >
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         {/* 트러블슈팅 */}
         {project.troubles && project.troubles.length > 0 && (
