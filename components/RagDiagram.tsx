@@ -53,7 +53,7 @@ function Box({
   const iconCls =
     tone === "accent" ? "bg-tide/15 text-deep" : "bg-ground text-muted";
   return (
-    <div className={`w-full max-w-sm rounded-xl border px-5 py-4 ${cls}`}>
+    <div className={`w-full max-w-xl rounded-xl border px-5 py-4 ${cls}`}>
       <div className="flex items-center gap-3">
         <span
           className={`shrink-0 grid place-items-center w-9 h-9 rounded-lg ${iconCls}`}
@@ -91,7 +91,7 @@ export default function RagDiagram() {
       />
 
       {/* 단계 구분 */}
-      <div className="my-7 w-full max-w-sm border-t border-dashed border-line" />
+      <div className="my-7 w-full max-w-xl border-t border-dashed border-line" />
 
       {/* 2단계 — 실시간 질문 처리 */}
       <p className="eyebrow mb-4">STEP 2 · 실시간 질문 처리</p>
