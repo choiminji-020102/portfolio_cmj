@@ -149,15 +149,68 @@ export default function LightProjectView({
                       </span>
                     )}
                   </div>
-                  <div className="mt-4 space-y-3 text-[0.95rem] leading-relaxed">
-                    <p>
-                      <span className="font-semibold text-muted">문제&nbsp;&nbsp;</span>
-                      {feature.problem}
-                    </p>
-                    <p>
-                      <span className="font-semibold text-deep">해결&nbsp;&nbsp;</span>
-                      {feature.solution}
-                    </p>
+                  <div className="mt-4 space-y-6 text-[0.95rem] leading-relaxed">
+                    {/* 문제 */}
+                    {feature.problemList ? (
+                      <div>
+                        <p className="font-semibold text-muted mb-2">문제</p>
+                        <ul className="space-y-1.5">
+                          {feature.problemList.map((p) => (
+                            <li
+                              key={p}
+                              className="relative pl-5 before:absolute before:left-0 before:top-[0.6em] before:h-1.5 before:w-1.5 before:rounded-full before:bg-muted/50"
+                            >
+                              {p}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : (
+                      feature.problem && (
+                        <p>
+                          <span className="font-semibold text-muted">
+                            문제&nbsp;&nbsp;
+                          </span>
+                          {feature.problem}
+                        </p>
+                      )
+                    )}
+
+                    {/* 해결 */}
+                    {feature.solutionBlocks ? (
+                      <div>
+                        <p className="font-semibold text-deep mb-3">해결</p>
+                        <div className="space-y-4">
+                          {feature.solutionBlocks.map((block) => (
+                            <div
+                              key={block.title}
+                              className="border-l-2 border-tide/40 pl-4"
+                            >
+                              <p className="font-semibold">{block.title}</p>
+                              <ul className="mt-1.5 space-y-1">
+                                {block.points.map((pt) => (
+                                  <li
+                                    key={pt}
+                                    className="relative pl-5 text-muted before:absolute before:left-0 before:top-[0.6em] before:h-1.5 before:w-1.5 before:rounded-full before:bg-tide"
+                                  >
+                                    {pt}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      feature.solution && (
+                        <p>
+                          <span className="font-semibold text-deep">
+                            해결&nbsp;&nbsp;
+                          </span>
+                          {feature.solution}
+                        </p>
+                      )
+                    )}
                   </div>
 
                   {/* 앱 화면 데모 */}

@@ -11,12 +11,21 @@ export interface Trouble {
   image?: string;
 }
 
-/* 핵심 AI 기능 — 문제 → 해결 → 수치 구조 */
+/* 해결책을 제목+불릿으로 쪼갠 블록 (챗봇처럼 해결이 여러 갈래일 때) */
+export interface SolutionBlock {
+  title: string;
+  points: string[];
+}
+
+/* 핵심 AI 기능 — 문제 → 해결 → 수치 구조.
+   단순 항목은 problem/solution(문단), 복합 항목은 problemList/solutionBlocks 사용 */
 export interface AiFeature {
   name: string;
   metric?: string; // 강조 수치 (정확도 96.8% 등)
-  problem: string; // 왜 필요한가
-  solution: string; // 어떻게 해결했나 (데이터·모델·출력)
+  problem?: string; // 단순 문제 (한 문단)
+  problemList?: string[]; // 여러 문제 불릿
+  solution?: string; // 단순 해결 (한 문단)
+  solutionBlocks?: SolutionBlock[]; // 여러 갈래 해결 (제목+불릿)
   image?: string; // 관련 앱 스크린샷
   diagram?: "rag"; // 구조 다이어그램 종류
 }
@@ -85,10 +94,34 @@ export const lightProjects: LightProject[] = [
       {
         name: "AI 챗봇 '소담이'",
         metric: "RAG · Query Routing",
-        problem:
-          "범용 챗GPT는 낙농 도메인에서 환각(없는 정보를 지어냄)·최신 정보 미반영·전문 용어 혼동 문제가 있어, 농가가 믿고 쓸 수 없었습니다.",
-        solution:
-          "낙농 전문 문서(이미지·PDF·텍스트)를 임베딩해 Vector DB에 저장하고, 질문과 관련된 문서를 먼저 검색해 그 내용을 근거로 답변하는 RAG 구조를 적용했습니다. 답변에는 항상 출처를 함께 표시합니다. LangChain 기반 Agent로 질문을 '낙농 전문 지식 / 농장 기록 조회 / 일반 대화 / 무관 질문' 4가지 유형으로 자동 분류(Query Routing)하고, Prompt Engineering으로 GPT에 '낙농 상담사' 역할을 부여해 사용자 연령대·상황에 맞게 설명 방식을 조절했습니다. 과거 대화 히스토리 기반의 1:1 상담 UI와 앱 어디서나 부르는 떠다니는 챗봇 버튼도 함께 구현했습니다.",
+        problemList: [
+          "환각(Hallucination) — 낙농 도메인에서 없는 정보를 지어냄",
+          "최신 정보 반영 불가",
+          "전문 용어 혼동 가능성",
+        ],
+        solutionBlocks: [
+          {
+            title: "RAG (Retrieval-Augmented Generation)",
+            points: [
+              "질문 관련 문서를 먼저 검색하고 그 내용을 바탕으로 답변 생성",
+              "출처를 함께 표시해 신뢰도 높은 정보 제공",
+            ],
+          },
+          {
+            title: "Prompt Engineering",
+            points: [
+              "GPT에 '낙농 상담사' 역할 부여, 사용자 맞춤형 설명 방식 적용",
+              "연령대와 상황에 따라 표현 방식 자동 조절",
+            ],
+          },
+          {
+            title: "LangChain 기반 Agent",
+            points: [
+              "질문을 4가지 유형으로 자동 분류해 맞춤 대응 (Query Routing)",
+              "전문 지식·농장 데이터·일상 대화 등 상황별 응답 최적화",
+            ],
+          },
+        ],
         diagram: "rag",
         image: "/sodam/chatbot-demo.png",
       },
