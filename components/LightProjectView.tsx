@@ -99,9 +99,45 @@ export default function LightProjectView({
           </section>
         )}
 
+        {/* 핵심 AI 기능 — 문제 → 해결 → 수치 */}
+        {project.aiFeatures && project.aiFeatures.length > 0 && (
+          <section className="mt-16">
+            <h2 className="text-2xl font-bold tracking-tight">핵심 AI 기능</h2>
+            <div className="mt-8 space-y-6">
+              {project.aiFeatures.map((feature) => (
+                <div
+                  key={feature.name}
+                  className="rounded-2xl bg-surface border border-line p-6 sm:p-7"
+                >
+                  <div className="flex flex-wrap items-center gap-3">
+                    <h3 className="text-lg font-semibold tracking-tight">
+                      {feature.name}
+                    </h3>
+                    {feature.metric && (
+                      <span className="rail rounded-full bg-tide/15 border border-tide/30 px-2.5 py-0.5">
+                        {feature.metric}
+                      </span>
+                    )}
+                  </div>
+                  <div className="mt-4 space-y-3 text-[0.95rem] leading-relaxed">
+                    <p>
+                      <span className="font-semibold text-muted">문제&nbsp;&nbsp;</span>
+                      {feature.problem}
+                    </p>
+                    <p>
+                      <span className="font-semibold text-deep">해결&nbsp;&nbsp;</span>
+                      {feature.solution}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* 주요 기능 개발 */}
         <section className="mt-16">
-          <h2 className="text-2xl font-bold tracking-tight">주요 기능 개발</h2>
+          <h2 className="text-2xl font-bold tracking-tight">그 외 기능</h2>
           <ul className="mt-6 space-y-3">
             {project.features.map((feature) => (
               <li
