@@ -29,6 +29,8 @@ export interface LightProject {
   stack: string[];
   github?: string;
   homepage?: string;
+  /** homepage 버튼 라벨. 기본값 '홈페이지' */
+  homepageLabel?: string;
   screenshots: string[];
   /** 왜 만들었나 — 문제 배경 */
   background?: string;
@@ -59,6 +61,9 @@ export const lightProjects: LightProject[] = [
       "YOLOv8",
       "OpenAI GPT",
     ],
+    github: "https://github.com/BlackCows-Team",
+    homepage: "https://blackcows-team.github.io/blackcows-privacy/index.html",
+    homepageLabel: "소개 페이지",
     screenshots: [
       "/sodam/home.png",
       "/sodam/chatbot.png",

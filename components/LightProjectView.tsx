@@ -60,7 +60,7 @@ export default function LightProjectView({
                   rel="noreferrer"
                   className="rail inline-flex items-center gap-1.5 rounded-full border border-line px-4 py-2 hover:bg-surface transition-colors"
                 >
-                  홈페이지 ↗
+                  {project.homepageLabel ?? "홈페이지"} ↗
                 </a>
               )}
             </div>
