@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { LightProject } from "@/lib/projectDetails";
 import ProjectGallery from "./ProjectGallery";
 import GitHubIcon from "./GitHubIcon";
+import RagDiagram from "./RagDiagram";
 
 export default function LightProjectView({
   project,
@@ -158,6 +159,28 @@ export default function LightProjectView({
                       {feature.solution}
                     </p>
                   </div>
+
+                  {/* 구조 다이어그램 + 스크린샷 */}
+                  {(feature.diagram || feature.image) && (
+                    <div className="mt-7 grid md:grid-cols-[1fr_auto] gap-6 items-center">
+                      {feature.diagram === "rag" && (
+                        <div className="rounded-xl bg-ground/60 border border-line p-6">
+                          <RagDiagram />
+                        </div>
+                      )}
+                      {feature.image && (
+                        <div className="justify-self-center w-44 shrink-0">
+                          <Image
+                            src={feature.image}
+                            alt={`${feature.name} 화면`}
+                            width={352}
+                            height={720}
+                            className="w-full h-auto rounded-xl border border-line"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
