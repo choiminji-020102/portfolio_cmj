@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { LightProject } from "@/lib/projectDetails";
 import ProjectGallery from "./ProjectGallery";
+import GitHubIcon from "./GitHubIcon";
 
 export default function LightProjectView({
   project,
@@ -50,7 +51,8 @@ export default function LightProjectView({
                   rel="noreferrer"
                   className="rail inline-flex items-center gap-1.5 rounded-full border border-line px-4 py-2 hover:bg-surface transition-colors"
                 >
-                  GitHub ↗
+                  <GitHubIcon className="w-3.5 h-3.5" />
+                  GitHub
                 </a>
               )}
               {project.homepage && (

@@ -236,6 +236,8 @@ export interface ProjectCard {
   draft?: boolean;
   /** 카드 썸네일. 없으면 track 기반 플레이스홀더가 표시된다. */
   thumbnail?: string;
+  /** GitHub 저장소. 있으면 카드에 GitHub 아이콘 링크가 뜬다. */
+  github?: string;
 }
 
 export const projectCards: ProjectCard[] = [
@@ -272,6 +274,7 @@ export const projectCards: ProjectCard[] = [
     stack: ["Flutter", "LangGraph", "YOLOv8", "FastAPI"],
     slug: "sodam",
     thumbnail: "/sodam/lumpy.png",
+    github: "https://github.com/BlackCows-Team",
   },
   {
     title: "킥보드 교통법규 위반 탐지",

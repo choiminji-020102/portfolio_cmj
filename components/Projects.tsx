@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { projectCards } from "@/lib/profile";
 import { Badge, CardHead, Section, Tags } from "./Section";
+import GitHubIcon from "./GitHubIcon";
 
 export default function Projects() {
   const cards = projectCards.filter((card) => !card.draft);
@@ -58,13 +59,30 @@ export default function Projects() {
 
               <div className="mt-auto pt-6">
                 <Tags items={card.stack} />
-                {card.slug && (
-                  <Link
-                    href={`/projects/${card.slug}`}
-                    className="rail mt-5 inline-flex items-center gap-1.5 text-deep hover:underline underline-offset-4"
-                  >
-                    Project Detail <span aria-hidden="true">→</span>
-                  </Link>
+                {(card.slug || card.github) && (
+                  <div className="mt-5 flex items-center justify-between gap-3">
+                    {card.slug ? (
+                      <Link
+                        href={`/projects/${card.slug}`}
+                        className="rail inline-flex items-center gap-1.5 text-deep hover:underline underline-offset-4"
+                      >
+                        Project Detail <span aria-hidden="true">→</span>
+                      </Link>
+                    ) : (
+                      <span />
+                    )}
+                    {card.github && (
+                      <a
+                        href={card.github}
+                        target="_blank"
+                        rel="noreferrer"
+                        aria-label={`${card.title} GitHub 저장소`}
+                        className="text-muted hover:text-ink transition-colors"
+                      >
+                        <GitHubIcon className="w-[18px] h-[18px]" />
+                      </a>
+                    )}
+                  </div>
                 )}
               </div>
             </div>
