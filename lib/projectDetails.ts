@@ -90,7 +90,7 @@ export const lightProjects: LightProject[] = [
         solution:
           "낙농 전문 문서(이미지·PDF·텍스트)를 임베딩해 Vector DB에 저장하고, 질문과 관련된 문서를 먼저 검색해 그 내용을 근거로 답변하는 RAG 구조를 적용했습니다. 답변에는 항상 출처를 함께 표시합니다. LangChain 기반 Agent로 질문을 '낙농 전문 지식 / 농장 기록 조회 / 일반 대화 / 무관 질문' 4가지 유형으로 자동 분류(Query Routing)하고, Prompt Engineering으로 GPT에 '낙농 상담사' 역할을 부여해 사용자 연령대·상황에 맞게 설명 방식을 조절했습니다. 과거 대화 히스토리 기반의 1:1 상담 UI와 앱 어디서나 부르는 떠다니는 챗봇 버튼도 함께 구현했습니다.",
         diagram: "rag",
-        image: "/sodam/chatbot.png",
+        image: "/sodam/chatbot-demo.png",
       },
       {
         name: "럼피스킨병 AI 진단",

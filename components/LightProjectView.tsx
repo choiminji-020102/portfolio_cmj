@@ -160,25 +160,23 @@ export default function LightProjectView({
                     </p>
                   </div>
 
-                  {/* 구조 다이어그램 + 스크린샷 */}
-                  {(feature.diagram || feature.image) && (
-                    <div className="mt-7 grid md:grid-cols-[1fr_auto] gap-6 items-center">
-                      {feature.diagram === "rag" && (
-                        <div className="rounded-xl bg-ground/60 border border-line p-6">
-                          <RagDiagram />
-                        </div>
-                      )}
-                      {feature.image && (
-                        <div className="justify-self-center w-44 shrink-0">
-                          <Image
-                            src={feature.image}
-                            alt={`${feature.name} 화면`}
-                            width={352}
-                            height={720}
-                            className="w-full h-auto rounded-xl border border-line"
-                          />
-                        </div>
-                      )}
+                  {/* 앱 화면 데모 */}
+                  {feature.image && (
+                    <div className="mt-7 rounded-xl bg-ground/60 border border-line p-4 sm:p-6">
+                      <Image
+                        src={feature.image}
+                        alt={`${feature.name} 화면`}
+                        width={814}
+                        height={858}
+                        className="w-full max-w-md mx-auto h-auto"
+                      />
+                    </div>
+                  )}
+
+                  {/* 구조 다이어그램 */}
+                  {feature.diagram === "rag" && (
+                    <div className="mt-5 rounded-xl bg-ground/60 border border-line p-6">
+                      <RagDiagram />
                     </div>
                   )}
                 </div>
