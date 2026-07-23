@@ -14,7 +14,7 @@ export default function LightProjectView({
     <div className="min-h-screen bg-ground">
       {/* 상단바 */}
       <div className="border-b border-line sticky top-0 z-10 bg-ground/90 backdrop-blur-md">
-        <div className="max-w-4xl mx-auto px-6 h-14 flex items-center">
+        <div className="max-w-5xl mx-auto px-6 h-14 flex items-center">
           <Link
             href="/#projects"
             className="rail inline-flex items-center gap-2 text-muted hover:text-ink transition-colors"
@@ -24,7 +24,7 @@ export default function LightProjectView({
         </div>
       </div>
 
-      <main className="max-w-4xl mx-auto px-6 py-12 sm:py-14">
+      <main className="max-w-5xl mx-auto px-6 py-12 sm:py-14">
         {/* 스크린샷 갤러리 */}
         <ProjectGallery
           screenshots={project.screenshots}
