@@ -135,19 +135,18 @@ export const lightProjects: LightProject[] = [
         solutionLabel: "소담소담 솔루션",
         solutionBlocks: [
           {
-            title: "학습 데이터셋 (공개 데이터 2종 · 약 2,000장)",
+            title: "데이터셋 (Training / Test · 공개 데이터 2종)",
             points: [
-              "Kaggle · Mendeley 럼피스킨 이미지 — 정상 700장 + 럼피스킨 324장 (1,024장)",
-              "Kaggle Cow Lumpy Disease 데이터셋 — 정상 515장 + 럼피스킨 421장 (936장)",
-              "검증셋은 두 데이터셋에서 정상·럼피 각 50장씩 균형 있게 구성",
+              "Training set — Kaggle·Mendeley 럼피스킨 이미지(정상 700 + 럼피스킨 324) + Kaggle Cow Lumpy Disease(정상 515 + 럼피스킨 421), 약 2,000장",
+              "Test set — 두 데이터셋에서 정상·럼피스킨 각 50장씩 균형 있게 구성",
             ],
           },
           {
             title: "AI 모델 개발",
             points: [
-              "사전 학습된 YOLOv8 분류 모델을 위 데이터셋으로 추가 학습",
+              "사전 학습된 YOLOv8 분류 모델을 Training set으로 추가 학습",
               "2개 클래스 분류: 정상 / 럼피스킨병 의심",
-              "정확도 96.8% (Test data 기준)",
+              "정확도 96.8% (Test set 기준)",
             ],
           },
           {
