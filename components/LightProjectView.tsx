@@ -102,30 +102,13 @@ export default function LightProjectView({
           </section>
         )}
 
-        {/* 팀 구성 — 본인 역할 강조 */}
-        {project.team && project.team.length > 0 && (
+        {/* 내가 맡은 역할 */}
+        {project.myRole && (
           <section className="mt-16">
-            <h2 className="text-2xl font-bold tracking-tight">팀 구성</h2>
-            <ul className="mt-6 space-y-3">
-              {project.team.map((member) => (
-                <li
-                  key={member.name}
-                  className={`flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-4 rounded-xl border p-4 ${
-                    member.mine
-                      ? "border-tide/40 bg-tide/8"
-                      : "border-line bg-surface"
-                  }`}
-                >
-                  <span className="rail text-ink sm:w-32 shrink-0">
-                    {member.name}
-                    {member.mine && (
-                      <span className="ml-1.5 text-tide">●</span>
-                    )}
-                  </span>
-                  <span className="text-[0.95rem]">{member.role}</span>
-                </li>
-              ))}
-            </ul>
+            <h2 className="text-2xl font-bold tracking-tight">내가 맡은 역할</h2>
+            <div className="mt-6 rounded-xl border border-tide/40 bg-tide/8 p-5 sm:p-6">
+              <p className="text-[0.95rem] leading-relaxed">{project.myRole}</p>
+            </div>
           </section>
         )}
 
@@ -149,7 +132,12 @@ export default function LightProjectView({
                       </span>
                     )}
                   </div>
-                  <div className="mt-4 space-y-6 text-[0.95rem] leading-relaxed">
+                  {feature.tagline && (
+                    <p className="mt-1.5 text-sm text-muted">{feature.tagline}</p>
+                  )}
+                  <div className="mt-5 grid lg:grid-cols-2 gap-6 lg:gap-8 items-start">
+                    {/* 왼쪽 — 문제/해결 글 */}
+                    <div className="space-y-6 text-[0.95rem] leading-relaxed">
                     {/* 문제 */}
                     {feature.problemList ? (
                       <div>
@@ -215,24 +203,40 @@ export default function LightProjectView({
                         </p>
                       )
                     )}
+                    </div>
+
+                    {/* 오른쪽 — 시연 영상 (없으면 사진). 박스를 영상 폭에 맞춤 */}
+                    {feature.video ? (
+                      <div className="mx-auto lg:ml-auto lg:mr-0 w-fit rounded-xl bg-ground/60 border border-line p-3">
+                        <video
+                          src={feature.video}
+                          poster={feature.image}
+                          muted
+                          loop
+                          autoPlay
+                          playsInline
+                          controls
+                          className="w-[240px] h-auto rounded-lg"
+                        />
+                      </div>
+                    ) : (
+                      feature.image && (
+                        <div className="mx-auto lg:ml-auto lg:mr-0 w-fit rounded-xl bg-ground/60 border border-line p-3">
+                          <Image
+                            src={feature.image}
+                            alt={`${feature.name} 화면`}
+                            width={480}
+                            height={506}
+                            className="w-[240px] h-auto"
+                          />
+                        </div>
+                      )
+                    )}
                   </div>
 
-                  {/* 앱 화면 데모 */}
-                  {feature.image && (
-                    <div className="mt-7 rounded-xl bg-ground/60 border border-line p-4 sm:p-6">
-                      <Image
-                        src={feature.image}
-                        alt={`${feature.name} 화면`}
-                        width={814}
-                        height={858}
-                        className="w-full max-w-md mx-auto h-auto"
-                      />
-                    </div>
-                  )}
-
-                  {/* 구조 다이어그램 */}
+                  {/* 구조 다이어그램 — 아래 풀폭 (챗봇) */}
                   {feature.diagram === "rag" && (
-                    <div className="mt-5 rounded-xl bg-ground/60 border border-line p-6">
+                    <div className="mt-6 rounded-xl bg-ground/60 border border-line p-4 sm:p-6">
                       <RagDiagram />
                     </div>
                   )}

@@ -21,6 +21,7 @@ export interface SolutionBlock {
    단순 항목은 problem/solution(문단), 복합 항목은 problemList/solutionBlocks 사용 */
 export interface AiFeature {
   name: string;
+  tagline?: string; // 기능 한 줄 부제
   metric?: string; // 강조 수치 (정확도 96.8% 등)
   problemLabel?: string; // 문제 섹션 라벨 (기본 "문제")
   problem?: string; // 단순 문제 (한 문단)
@@ -28,7 +29,8 @@ export interface AiFeature {
   solutionLabel?: string; // 해결 섹션 라벨 (기본 "해결")
   solution?: string; // 단순 해결 (한 문단)
   solutionBlocks?: SolutionBlock[]; // 여러 갈래 해결 (제목+불릿)
-  image?: string; // 관련 앱 스크린샷
+  image?: string; // 관련 앱 스크린샷 (영상 poster로도 사용)
+  video?: string; // 시연 영상
   diagram?: "rag"; // 구조 다이어그램 종류
 }
 
@@ -47,8 +49,8 @@ export interface LightProject {
   screenshots: string[];
   /** 왜 만들었나 — 문제 배경 */
   background?: string;
-  /** 팀 구성과 역할. mine: true 인 항목이 본인 */
-  team?: { name: string; role: string; mine?: boolean }[];
+  /** 팀 프로젝트에서 본인이 담당한 역할 */
+  myRole?: string;
   /** 핵심 AI 기능 상세 (문제→해결→수치) */
   aiFeatures?: AiFeature[];
   features: string[];
@@ -65,7 +67,7 @@ export const lightProjects: LightProject[] = [
     title: "소담소담",
     badge: "창업경진대회 · 우수상",
     period: "2025.04 — 2025.06",
-    teamSize: "3인 팀 프로젝트",
+    teamSize: "팀 프로젝트 · AI 파트 담당",
     summary:
       "센서 없이, 앱의 AI 분석만으로 젖소를 관리하는 소규모 낙농가 전용 서비스. 비싼 스마트팜 장비 대신 공공데이터와 AI로 질병 진단·생산성 예측을 대체하고, 도메인 특화 RAG 챗봇 '소담이'를 직접 설계했습니다.",
     stack: [
@@ -79,19 +81,11 @@ export const lightProjects: LightProject[] = [
     github: "https://github.com/BlackCows-Team",
     homepage: "https://blackcows-team.github.io/blackcows-privacy/index.html",
     homepageLabel: "소개 페이지",
-    screenshots: [
-      "/sodam/home.png",
-      "/sodam/lumpy.png",
-      "/sodam/mastitis.png",
-      "/sodam/milk.png",
-    ],
+    screenshots: ["/sodam/home.png"],
     background:
       "소규모 젖소농가(50두 미만)는 3년 새 15%가 폐업할 만큼 빠르게 사라지고 있습니다. 원인은 ICT 스마트팜의 높은 도입 장벽(설치비용 부담 35.6%)과 청년 후계자 부재였습니다. 팀원의 외삼촌이 운영하던 20두 소규모 젖소농장의 폐업 경험에서 출발해, 비싼 센서 장비 없이도 앱의 AI 분석만으로 소규모 농가가 기술 격차 없이 농장을 운영할 수 있게 만드는 것을 목표로 했습니다.",
-    team: [
-      { name: "최민지", role: "AI 예측 모델 · AI 챗봇 개발 (팀장)", mine: true },
-      { name: "SeulGi0117", role: "백엔드 개발 · DevOps" },
-      { name: "BogyunJeong", role: "프론트엔드 개발 · UI/UX" },
-    ],
+    myRole:
+      "RAG 챗봇 '소담이'와 4종 AI 예측 모델(럼피스킨병·유방염·착유량·유성분)을 전담 — 데이터 수집·전처리부터 모델 학습, LangChain 기반 Query Routing 설계, 서비스 연동까지 AI 파트 전 과정을 담당했습니다.",
     aiFeatures: [
       {
         name: "AI 챗봇 '소담이'",
@@ -128,30 +122,93 @@ export const lightProjects: LightProject[] = [
         ],
         diagram: "rag",
         image: "/sodam/chatbot-demo.png",
+        video: "/sodam/videos/chatbot.mp4",
       },
       {
         name: "럼피스킨병 AI 진단",
         metric: "테스트 정확도 96.8%",
-        problem:
-          "럼피스킨병은 제1종 가축전염병으로 젖소에 치명적입니다(유량 감소·유산·불임). 젖소 발병률이 육우보다 5.4배 높아 조기 발견이 중요합니다.",
-        solution:
-          "소의 피부 상태를 촬영해 업로드하면 사전 학습된 YOLOv8 분류 모델이 감염 여부를 분석합니다. 젖소 피부 이미지 약 2,000장으로 추가 학습해 '정상 / 럼피스킨병 의심' 2개 클래스로 분류하고, 위험도와 신뢰도 수치를 함께 표시합니다. 의심 시에는 수의사 연락 가이드를 안내합니다.",
+        problemLabel: "럼피스킨병의 위협",
+        problemList: [
+          "제1종 가축전염병으로 젖소에 치명적 — 유량 감소·유산·불임을 유발",
+          "젖소 발병률이 육우보다 5.4배 높아 조기 발견이 중요",
+        ],
+        solutionLabel: "소담소담 솔루션",
+        solutionBlocks: [
+          {
+            title: "AI 모델 개발",
+            points: [
+              "사전 학습된 YOLOv8 분류 모델 기반",
+              "약 2,000장의 젖소 피부 이미지로 추가 학습",
+              "2개 클래스 분류: 정상 / 럼피스킨병 의심",
+              "정확도 96.8% (Test data 기준)",
+            ],
+          },
+          {
+            title: "예측 결과 제공 항목",
+            points: [
+              "정상 여부 및 위험도 표시",
+              "신뢰도 수치 제공",
+              "의심 시 수의사 연락 가이드 안내",
+            ],
+          },
+        ],
+        image: "/sodam/lumpy.png",
+        video: "/sodam/videos/lumpy.mp4",
       },
       {
         name: "유방염 위험도 예측",
+        tagline: "발병 후 발견, 이미 늦을 수 있습니다.",
         metric: "정확도 83.9%",
-        problem:
-          "유방염은 젖소에서 가장 흔하고 경제적 손실이 큰 질병입니다. 조기 발견을 놓치면 우유 생산량이 6~20% 감소할 수 있습니다.",
-        solution:
-          "스마트팜 빅데이터 API를 활용해 착유량·전도율·유지방비율·유단백비율·산차수를 분석합니다. 체세포수 데이터 유무에 따라 2가지 분석 모드를 제공하며, '정상 / 주의 / 염증 가능성'을 확신도·모델 정확도와 함께 4단계로 판정합니다.",
+        problemLabel: "유방염의 위험",
+        problemList: [
+          "젖소에서 가장 흔하고 경제적 손실이 큰 질병",
+          "조기 발견을 놓치면 우유 생산량이 6~20% 감소",
+        ],
+        solutionLabel: "소담소담 솔루션",
+        solutionBlocks: [
+          {
+            title: "공공데이터 활용",
+            points: ["스마트팜 빅데이터 API (농림수산식품교육문화정보원)"],
+          },
+          {
+            title: "AI 분류 모델 개발",
+            points: [
+              "데이터 분석: 착유량·전도율·유지방비율·유단백비율·산차수",
+              "체세포수 데이터 유무에 따라 2가지 분석 모드 제공",
+              "출력: 정상 / 주의 / 염증 가능성 판단 + 확신도 + 모델 정확도",
+              "정확도 83.9%",
+            ],
+          },
+        ],
+        image: "/sodam/mastitis.png",
+        video: "/sodam/videos/mastitis.mp4",
       },
       {
         name: "착유량 예측",
+        tagline: "생산량 변화에 미리 대비하세요.",
         metric: "모델 설명력 82.4%",
-        problem:
-          "착유량은 젖소 건강과 농장 수익성의 대표 지표입니다. 데이터 기반 예측은 한 해 평균 10% 내외의 수익 변동을 미리 대비할 수 있게 합니다.",
-        solution:
-          "착유 횟수·전도율·환경 온도·유지방비율·유단백비율·사료 섭취량·착유기 측정일자를 회귀 모델로 분석해 향후 착유량을 예측합니다. 예측 착유량과 함께 AI 확신도·모델 설명력을 제공해 결과의 신뢰 수준을 투명하게 보여줍니다.",
+        problemLabel: "착유량, 왜 중요한가",
+        problemList: [
+          "젖소 건강과 농장 수익성의 대표 지표",
+          "데이터 기반 예측으로 한 해 평균 10% 내외의 수익 변동을 미리 대비",
+        ],
+        solutionLabel: "소담소담 솔루션",
+        solutionBlocks: [
+          {
+            title: "공공데이터 활용",
+            points: ["스마트팜 빅데이터 API (농림수산식품교육문화정보원)"],
+          },
+          {
+            title: "AI 회귀 모델 개발",
+            points: [
+              "데이터 분석: 착유 횟수·전도율·환경 온도·유지방비율·유단백비율·사료 섭취량·착유기 측정일자",
+              "출력: 예측 착유량 + AI 확신도 + 모델 설명력",
+              "모델 설명력 82.4% (MAE 3.41 · RMSE 4.94)",
+            ],
+          },
+        ],
+        image: "/sodam/milk.png",
+        video: "/sodam/videos/milk.mp4",
       },
     ],
     features: [
