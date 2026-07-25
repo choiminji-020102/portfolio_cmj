@@ -135,7 +135,7 @@ export default function LightProjectView({
                   {feature.tagline && (
                     <p className="mt-1.5 text-sm text-muted">{feature.tagline}</p>
                   )}
-                  <div className="mt-5 grid lg:grid-cols-2 gap-6 lg:gap-8 items-start">
+                  <div className="mt-5 grid lg:grid-cols-[1fr_auto] gap-6 lg:gap-10 items-start">
                     {/* 왼쪽 — 문제/해결 글 */}
                     <div className="space-y-6 text-[0.95rem] leading-relaxed">
                     {/* 문제 */}
