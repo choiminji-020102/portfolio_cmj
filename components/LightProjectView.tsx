@@ -240,6 +240,35 @@ export default function LightProjectView({
                       <RagDiagram />
                     </div>
                   )}
+
+                  {/* 트러블슈팅 · 기술적 의사결정 */}
+                  {feature.troubles && feature.troubles.length > 0 && (
+                    <div className="mt-8">
+                      <p className="font-semibold text-deep mb-4">
+                        트러블슈팅 · 기술적 의사결정
+                      </p>
+                      <div className="space-y-6">
+                        {feature.troubles.map((trouble, ti) => (
+                          <div
+                            key={trouble.title}
+                            className="rounded-xl bg-ground/60 border border-line p-5"
+                          >
+                            <h4 className="flex gap-2.5 font-semibold text-[0.95rem] leading-snug">
+                              <span className="rail text-tide shrink-0">
+                                {String(ti + 1).padStart(2, "0")}
+                              </span>
+                              <span>{trouble.title}</span>
+                            </h4>
+                            <div className="mt-3 space-y-2.5 pl-9 text-[0.9rem] leading-relaxed text-muted">
+                              {trouble.body.map((para, pi) => (
+                                <p key={pi}>{para}</p>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
