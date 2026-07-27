@@ -152,135 +152,6 @@ export const lightProjects: LightProject[] = [
         video: "/sodam/videos/chatbot.mp4",
         troubles: [
           {
-            title:
-              "배포 환경과 실행 환경 차이로 인한 Vector DB 생성 및 캐시 무효화 문제 해결",
-            stars: 5,
-            problem:
-              "로컬에서는 정상 동작하던 RAG가 배포 환경에서 Chroma Vector DB 생성에 실패했고, 캐시가 있어도 Vector DB를 매 요청마다 다시 로드해 불필요한 파일 접근과 재임베딩이 반복됐습니다.",
-            solution:
-              "절대경로를 프로젝트 기준 상대경로로 변경해 환경 의존성을 제거하고, _vectordb = None 초기화를 제거해 인메모리 캐시를 복구했으며, 경로·빈 문서에 대한 예외 처리를 추가했습니다.",
-            effect:
-              "로컬과 배포 환경에서 동일하게 동작하는 구조를 구축하고, 첫 요청 이후에는 Vector DB를 재사용해 반복적인 로딩과 재임베딩을 제거했습니다.",
-            tags: ["배포환경", "벡터DB", "캐싱", "RAG"],
-            tech: ["LangGraph", "LangChain", "ChromaDB", "OpenAI Embedding", "Python"],
-            details: [
-              {
-                heading: "문제 상황",
-                blocks: [
-                  {
-                    type: "text",
-                    text: "소담이 챗봇은 낙농 문서를 임베딩하여 Chroma Vector DB에 저장한 뒤, 사용자 질문과 가장 유사한 문서를 검색하는 RAG 구조로 구현하였다.",
-                  },
-                  {
-                    type: "text",
-                    text: "로컬 환경에서는 정상적으로 동작했지만, 배포 서버에서는 Vector DB 생성 단계에서 실패하여 RAG가 동작하지 않았다. 또한 DB가 정상적으로 생성된 경우에도 질문이 들어올 때마다 Vector DB를 다시 로드하여 불필요한 I/O가 반복되는 문제가 있었다.",
-                  },
-                ],
-              },
-              {
-                heading: "원인 분석",
-                blocks: [
-                  { type: "sub", text: "1. 배포 환경에서 Vector DB 생성 실패" },
-                  {
-                    type: "text",
-                    text: "persist_dir의 기본 경로를 다음과 같이 설정해두었다.",
-                  },
-                  { type: "code", code: `persist_dir="/RAG/chroma"` },
-                  {
-                    type: "text",
-                    text: "앞의 / 때문에 프로젝트 내부가 아닌 파일 시스템 루트 경로를 의미하게 되었고, 배포 환경에서는 해당 위치에 디렉터리를 생성할 권한이 없어 Vector DB 생성이 실패했다.",
-                  },
-                  {
-                    type: "text",
-                    text: "즉, 로컬과 배포 환경의 파일 시스템 및 권한 차이를 고려하지 못한 것이 원인이었다.",
-                  },
-                  { type: "sub", text: "2. 캐시가 동작하지 않는 구조" },
-                  {
-                    type: "text",
-                    text: "Vector DB를 한 번만 생성하여 재사용하기 위해 전역 캐시(_vectordb)를 두었지만, 함수가 호출될 때마다 다음 코드가 실행되고 있었다.",
-                  },
-                  { type: "code", code: `global _vectordb
-_vectordb = None` },
-                  {
-                    type: "text",
-                    text: "이 때문에 아래 캐시 분기는 항상 실행되지 않았다.",
-                  },
-                  { type: "code", code: `if _vectordb:
-    return _vectordb` },
-                  {
-                    type: "text",
-                    text: "결과적으로 Vector DB는 매 요청마다 다시 로드되었고, 캐시를 구현했음에도 실제로는 전혀 활용되지 않는 구조였다.",
-                  },
-                ],
-              },
-              {
-                heading: "해결 과정",
-                blocks: [
-                  { type: "sub", text: "1. 저장 경로를 상대경로로 변경" },
-                  {
-                    type: "text",
-                    text: "절대경로 대신 프로젝트 기준 상대경로를 사용하도록 변경하였다.",
-                  },
-                  { type: "code", code: `- persist_dir="/RAG/chroma"
-+ persist_dir="RAG/chroma"` },
-                  {
-                    type: "text",
-                    text: "이를 통해 로컬과 배포 환경에서 동일한 경로 기준으로 동작하도록 수정하였다.",
-                  },
-                  { type: "sub", text: "2. Vector DB 캐시 복원" },
-                  {
-                    type: "text",
-                    text: "불필요한 초기화를 제거하여 최초 한 번만 Vector DB를 생성하고 이후에는 메모리에 저장된 객체를 재사용하도록 수정하였다.",
-                  },
-                  { type: "code", code: `- _vectordb = None
-+ # _vectordb = None` },
-                  { type: "code", code: `if _vectordb:
-    return _vectordb` },
-                  { type: "sub", text: "3. 예외 처리 추가" },
-                  {
-                    type: "text",
-                    text: "배포 과정에서 원인을 빠르게 파악할 수 있도록 방어 로직도 함께 추가하였다.",
-                  },
-                  { type: "code", code: `if not os.path.exists(source_folder):
-    raise FileNotFoundError(...)
-
-if len(raw_documents) == 0:
-    raise ValueError("문서가 비어 있습니다.")` },
-                  {
-                    type: "text",
-                    text: "모든 예외는 로그로 출력한 뒤 다시 발생시키도록 구현하여 문제 원인을 즉시 확인할 수 있도록 개선하였다.",
-                  },
-                ],
-              },
-              {
-                heading: "적용 결과",
-                blocks: [
-                  {
-                    type: "list",
-                    items: [
-                      "프로젝트 기준 상대경로를 사용하여 로컬과 배포 환경 모두 동일한 방식으로 동작하도록 개선",
-                      "Vector DB 캐시가 정상적으로 동작하여 첫 로딩 이후에는 DB를 다시 생성하거나 로드하지 않도록 개선",
-                      "문서 경로 오류 및 빈 문서와 같은 예외를 사전에 검증하여 문제 원인을 빠르게 파악할 수 있는 구조를 구축",
-                    ],
-                  },
-                ],
-              },
-              {
-                heading: "배운 점",
-                blocks: [
-                  {
-                    type: "text",
-                    text: "이번 경험을 통해 배포 환경에서는 파일 경로와 권한까지 고려한 설계가 필요하다는 점을 배웠다.",
-                  },
-                  {
-                    type: "text",
-                    text: "또한 캐시는 단순히 구현하는 것이 아니라 실제로 캐시가 동작하는지 검증하는 과정이 중요하다는 것을 경험했다. _vectordb = None 한 줄 때문에 캐시가 완전히 무력화되어 있었고, 성능 문제의 원인은 새로운 기능이 아니라 기존 로직을 정확히 분석하는 과정에서 발견할 수 있었다.",
-                  },
-                ],
-              },
-            ],
-          },
-          {
             title: "질문 라우팅 아키텍처 재설계를 통한 응답 품질 개선",
             stars: 5,
             problem:
@@ -547,104 +418,6 @@ result = chain.invoke({
                   {
                     type: "text",
                     text: "또한 LLM 기반 라우팅에서는 분류 정확도뿐 아니라 예상하지 못한 출력에 대한 방어 로직까지 함께 설계해야 안정적인 서비스를 구축할 수 있다는 점을 경험했다.",
-                  },
-                ],
-              },
-            ],
-          },
-          {
-            title: "RAG 검색 실패 시 응답 전략 — 프롬프트냐 노드냐",
-            stars: 5,
-            problem:
-              "사내 문서를 검색해 답하는 RAG에서, 문서에 관련 내용이 없는 no-hit 케이스가 설계에 없어 빈 context가 그대로 프롬프트에 들어가 부실한 답이 나갔습니다.",
-            solution:
-              "'프롬프트 내부 처리 vs 노드 분기'를 응답 속도·유지보수·의도 제어로 비교했습니다. no-hit는 별도 노드로 분기할 만큼 복잡한 상태 전이가 아니라고 판단해, 프롬프트에 '자료가 없으면 알고 있는 지식으로 답하라'는 조건부 지시를 넣는 fallback을 택했습니다.",
-            effect:
-              "검색이 실패해도 응답이 비지 않고 지식 기반으로 이어집니다. no-hit용 노드를 추가하지 않아 그래프가 단순하게 유지됐습니다.",
-            tags: ["RAG", "Fallback", "의사결정"],
-            details: [
-              {
-                heading: "여러 해결 방법 비교",
-                blocks: [
-                  {
-                    type: "table",
-                    head: ["항목", "프롬프트 내부 처리", "LangGraph 노드 분기"],
-                    rows: [
-                      ["응답 속도", "빠름(한 번에 처리)", "느림(재분기 필요)"],
-                      ["유지보수", "쉬움", "복잡"],
-                      ["의도 제어", "\"없으면 지식으로 답\" 지시로 명확", "흐름 중첩 위험"],
-                      ["구현 난이도", "낮음", "높음(상태 추가 전달)"],
-                    ],
-                  },
-                ],
-              },
-              {
-                heading: "왜 프롬프트 처리인가",
-                blocks: [
-                  {
-                    type: "text",
-                    text: "no-hit는 별도 노드로 분기할 만큼 복잡한 상태 전이가 아니라, 프롬프트 한 곳에서 조건부 지시로 처리할 수 있는 케이스라고 판단했다. 노드를 늘리면 그래프만 복잡해질 뿐 얻는 게 없었다.",
-                  },
-                ],
-              },
-              {
-                heading: "핵심 코드",
-                blocks: [
-                  {
-                    type: "code",
-                    code: `context = context.strip() or "※ 참고할 문서가 없습니다."   # 빈 검색결과를 명시적 신호로
-
-# 프롬프트
-"""아래 참고 자료를 우선 사용하되,
-자료가 비었거나 답을 찾을 수 없으면 알고 있는 지식·상식으로 답해도 됩니다.
-[참고 자료]
-{context}"""`,
-                  },
-                ],
-              },
-              {
-                heading: "배운 점",
-                blocks: [
-                  {
-                    type: "text",
-                    text: "RAG의 완성도는 잘 찾을 때가 아니라 못 찾을 때의 동작에서 갈린다는 것, 그리고 모든 예외를 노드로 쪼갤 필요는 없고 처리 위치(프롬프트 vs 그래프)를 비용 대비로 고르는 게 설계라는 걸 배웠다.",
-                  },
-                ],
-              },
-            ],
-          },
-          {
-            title: "사용자별·채팅방별 세션 메모리 구조",
-            stars: 4,
-            problem:
-              "한 사용자가 여러 채팅방을 오가고 여러 사용자가 동시에 쓰는데, 메모리가 전역 단일이면 대화 맥락이 섞입니다. dict 저장은 LLM 이해·LangChain 호환 모두 불리했습니다.",
-            solution:
-              "(user_id, chat_id) 튜플을 키로 세션을 격리하고, .get(key, [])로 키가 없어도 KeyError 없이 빈 세션으로 시작했습니다. 저장 포맷은 dict 대신 '사용자: …', '소담이: …' 화자 접두 문자열 리스트로 두어, 이어붙이면 대화 스크립트 형태가 되게 했습니다.",
-            effect:
-              "유저·채팅방별 맥락이 격리되고, 대화 스크립트형 포맷 덕에 '그 소·아까 그거' 같은 후속 질문의 맥락이 프롬프트에 자연스럽게 이어집니다.",
-            tags: ["Memory", "멀티턴", "세션관리"],
-            details: [
-              {
-                heading: "핵심 코드",
-                blocks: [
-                  {
-                    type: "code",
-                    code: `chat_memory_store: Dict[Tuple[str, str], List[str]] = {}
-
-def append_chat_memory(user_id, chat_id, question, answer):
-    key = (user_id, chat_id)
-    memory = chat_memory_store.get(key, [])   # 없으면 빈 리스트
-    memory += [f"사용자: {question}", f"소담이: {answer}"]
-    chat_memory_store[key] = memory`,
-                  },
-                ],
-              },
-              {
-                heading: "배운 점",
-                blocks: [
-                  {
-                    type: "text",
-                    text: "메모리를 어떤 키와 자료구조로 들고 있느냐가 멀티턴 품질과 확장성을 좌우한다는 것, LLM에겐 dict보다 사람이 읽는 대화 텍스트가 더 잘 맞는다는 것.",
                   },
                 ],
               },
@@ -1116,6 +889,135 @@ return show_cow_list_node(state)      # 함수를 직접 호출`,
                   {
                     type: "text",
                     text: "가장 크게 남은 배움은 \"구조를 만드는 것\"과 \"구조가 의도대로 도는 것\"은 다른 문제라는 점이다. 다단계 대화를 전제로 State와 노드를 나눴지만, 실행 모델(단일 실행 완주)을 함께 설계하지 않아 awaiting_confirmation 같은 필드가 쓰이지 못한 채 남았다. 상태 기반 워크플로우에서는 상태를 어떻게 나눌지와 함께, 그 상태가 언제 저장되고 언제 재개되는지까지 같이 결정해야 한다는 것을 이번 감사 과정에서 확인했다.",
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            title:
+              "배포 환경과 실행 환경 차이로 인한 Vector DB 생성 및 캐시 무효화 문제 해결",
+            stars: 5,
+            problem:
+              "로컬에서는 정상 동작하던 RAG가 배포 환경에서 Chroma Vector DB 생성에 실패했고, 캐시가 있어도 Vector DB를 매 요청마다 다시 로드해 불필요한 파일 접근과 재임베딩이 반복됐습니다.",
+            solution:
+              "절대경로를 프로젝트 기준 상대경로로 변경해 환경 의존성을 제거하고, _vectordb = None 초기화를 제거해 인메모리 캐시를 복구했으며, 경로·빈 문서에 대한 예외 처리를 추가했습니다.",
+            effect:
+              "로컬과 배포 환경에서 동일하게 동작하는 구조를 구축하고, 첫 요청 이후에는 Vector DB를 재사용해 반복적인 로딩과 재임베딩을 제거했습니다.",
+            tags: ["배포환경", "벡터DB", "캐싱", "RAG"],
+            tech: ["LangGraph", "LangChain", "ChromaDB", "OpenAI Embedding", "Python"],
+            details: [
+              {
+                heading: "문제 상황",
+                blocks: [
+                  {
+                    type: "text",
+                    text: "소담이 챗봇은 낙농 문서를 임베딩하여 Chroma Vector DB에 저장한 뒤, 사용자 질문과 가장 유사한 문서를 검색하는 RAG 구조로 구현하였다.",
+                  },
+                  {
+                    type: "text",
+                    text: "로컬 환경에서는 정상적으로 동작했지만, 배포 서버에서는 Vector DB 생성 단계에서 실패하여 RAG가 동작하지 않았다. 또한 DB가 정상적으로 생성된 경우에도 질문이 들어올 때마다 Vector DB를 다시 로드하여 불필요한 I/O가 반복되는 문제가 있었다.",
+                  },
+                ],
+              },
+              {
+                heading: "원인 분석",
+                blocks: [
+                  { type: "sub", text: "1. 배포 환경에서 Vector DB 생성 실패" },
+                  {
+                    type: "text",
+                    text: "persist_dir의 기본 경로를 다음과 같이 설정해두었다.",
+                  },
+                  { type: "code", code: `persist_dir="/RAG/chroma"` },
+                  {
+                    type: "text",
+                    text: "앞의 / 때문에 프로젝트 내부가 아닌 파일 시스템 루트 경로를 의미하게 되었고, 배포 환경에서는 해당 위치에 디렉터리를 생성할 권한이 없어 Vector DB 생성이 실패했다.",
+                  },
+                  {
+                    type: "text",
+                    text: "즉, 로컬과 배포 환경의 파일 시스템 및 권한 차이를 고려하지 못한 것이 원인이었다.",
+                  },
+                  { type: "sub", text: "2. 캐시가 동작하지 않는 구조" },
+                  {
+                    type: "text",
+                    text: "Vector DB를 한 번만 생성하여 재사용하기 위해 전역 캐시(_vectordb)를 두었지만, 함수가 호출될 때마다 다음 코드가 실행되고 있었다.",
+                  },
+                  { type: "code", code: `global _vectordb
+_vectordb = None` },
+                  {
+                    type: "text",
+                    text: "이 때문에 아래 캐시 분기는 항상 실행되지 않았다.",
+                  },
+                  { type: "code", code: `if _vectordb:
+    return _vectordb` },
+                  {
+                    type: "text",
+                    text: "결과적으로 Vector DB는 매 요청마다 다시 로드되었고, 캐시를 구현했음에도 실제로는 전혀 활용되지 않는 구조였다.",
+                  },
+                ],
+              },
+              {
+                heading: "해결 과정",
+                blocks: [
+                  { type: "sub", text: "1. 저장 경로를 상대경로로 변경" },
+                  {
+                    type: "text",
+                    text: "절대경로 대신 프로젝트 기준 상대경로를 사용하도록 변경하였다.",
+                  },
+                  { type: "code", code: `- persist_dir="/RAG/chroma"
++ persist_dir="RAG/chroma"` },
+                  {
+                    type: "text",
+                    text: "이를 통해 로컬과 배포 환경에서 동일한 경로 기준으로 동작하도록 수정하였다.",
+                  },
+                  { type: "sub", text: "2. Vector DB 캐시 복원" },
+                  {
+                    type: "text",
+                    text: "불필요한 초기화를 제거하여 최초 한 번만 Vector DB를 생성하고 이후에는 메모리에 저장된 객체를 재사용하도록 수정하였다.",
+                  },
+                  { type: "code", code: `- _vectordb = None
++ # _vectordb = None` },
+                  { type: "code", code: `if _vectordb:
+    return _vectordb` },
+                  { type: "sub", text: "3. 예외 처리 추가" },
+                  {
+                    type: "text",
+                    text: "배포 과정에서 원인을 빠르게 파악할 수 있도록 방어 로직도 함께 추가하였다.",
+                  },
+                  { type: "code", code: `if not os.path.exists(source_folder):
+    raise FileNotFoundError(...)
+
+if len(raw_documents) == 0:
+    raise ValueError("문서가 비어 있습니다.")` },
+                  {
+                    type: "text",
+                    text: "모든 예외는 로그로 출력한 뒤 다시 발생시키도록 구현하여 문제 원인을 즉시 확인할 수 있도록 개선하였다.",
+                  },
+                ],
+              },
+              {
+                heading: "적용 결과",
+                blocks: [
+                  {
+                    type: "list",
+                    items: [
+                      "프로젝트 기준 상대경로를 사용하여 로컬과 배포 환경 모두 동일한 방식으로 동작하도록 개선",
+                      "Vector DB 캐시가 정상적으로 동작하여 첫 로딩 이후에는 DB를 다시 생성하거나 로드하지 않도록 개선",
+                      "문서 경로 오류 및 빈 문서와 같은 예외를 사전에 검증하여 문제 원인을 빠르게 파악할 수 있는 구조를 구축",
+                    ],
+                  },
+                ],
+              },
+              {
+                heading: "배운 점",
+                blocks: [
+                  {
+                    type: "text",
+                    text: "이번 경험을 통해 배포 환경에서는 파일 경로와 권한까지 고려한 설계가 필요하다는 점을 배웠다.",
+                  },
+                  {
+                    type: "text",
+                    text: "또한 캐시는 단순히 구현하는 것이 아니라 실제로 캐시가 동작하는지 검증하는 과정이 중요하다는 것을 경험했다. _vectordb = None 한 줄 때문에 캐시가 완전히 무력화되어 있었고, 성능 문제의 원인은 새로운 기능이 아니라 기존 로직을 정확히 분석하는 과정에서 발견할 수 있었다.",
                   },
                 ],
               },
