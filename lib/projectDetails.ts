@@ -146,6 +146,14 @@ export const lightProjects: LightProject[] = [
               "전문 지식·농장 데이터·일상 대화 등 상황별 응답 최적화",
             ],
           },
+          {
+            title: "모델 선택 (GPT-4o-mini)",
+            points: [
+              "RAG로 답변 근거를 검색된 문서에서 가져와 모델의 자체 지식 의존도가 낮아, 상위 모델 없이도 충분한 품질이라 판단",
+              "classifier 분류·노드 분기 등 다단계 호출을 거치는 구조라, 응답이 빠른 모델이 대화형 UX에 유리하다고 판단",
+              "여기에 비용 효율까지 더해 GPT-4o-mini 채택",
+            ],
+          },
         ],
         diagram: "rag",
         image: "/sodam/chatbot-demo.png",
