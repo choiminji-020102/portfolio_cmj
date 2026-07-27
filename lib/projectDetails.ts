@@ -17,15 +17,17 @@ export interface SolutionBlock {
   points: string[];
 }
 
-/* 풀버전 상세 — 아코디언에 펼쳐지는 심화 블록 */
+/* 풀버전 상세 — 문서 순서 그대로 섞이는 블록들 */
+export type TroubleBlock =
+  | { type: "sub"; text: string } // 굵은 소제목 (1. 2. 등)
+  | { type: "text"; text: string } // 문단
+  | { type: "code"; code: string } // 코드 블록
+  | { type: "list"; items: string[] } // 불릿 리스트
+  | { type: "table"; head: string[]; rows: string[][] }; // 표
+
 export interface TroubleDetail {
-  /** 소제목 + 문단 (원인 분석, 해결 방법 비교, 적용 후, 배운 점 등) */
-  heading: string;
-  paragraphs?: string[];
-  /** 표 (해결 방법 비교 등): 헤더 행 + 본문 행들 */
-  table?: { head: string[]; rows: string[][] };
-  /** 코드 블록 */
-  code?: string;
+  heading: string; // 큰 섹션 제목 (문제 상황 / 원인 분석 / 해결 과정 …)
+  blocks: TroubleBlock[];
 }
 
 /* 트러블슈팅·기술적 의사결정 — 슬림(문제→해결→효과) + 풀버전(details) */
@@ -163,52 +165,117 @@ export const lightProjects: LightProject[] = [
             tech: ["LangGraph", "LangChain", "ChromaDB", "OpenAI Embedding", "Python"],
             details: [
               {
-                heading: "원인 ① — 배포 환경에서 Vector DB 생성 실패",
-                paragraphs: [
-                  "persist_dir 기본 경로를 \"/RAG/chroma\"로 설정했는데, 앞의 / 때문에 프로젝트 내부가 아닌 파일 시스템 루트 경로를 의미하게 됐습니다. 배포 환경에서는 그 위치에 디렉터리를 생성할 권한이 없어 Vector DB 생성이 실패했습니다. 로컬과 배포 환경의 파일 시스템·권한 차이를 고려하지 못한 것이 원인이었습니다.",
+                heading: "문제 상황",
+                blocks: [
+                  {
+                    type: "text",
+                    text: "소담이 챗봇은 낙농 문서를 임베딩하여 Chroma Vector DB에 저장한 뒤, 사용자 질문과 가장 유사한 문서를 검색하는 RAG 구조로 구현하였다.",
+                  },
+                  {
+                    type: "text",
+                    text: "로컬 환경에서는 정상적으로 동작했지만, 배포 서버에서는 Vector DB 생성 단계에서 실패하여 RAG가 동작하지 않았다. 또한 DB가 정상적으로 생성된 경우에도 질문이 들어올 때마다 Vector DB를 다시 로드하여 불필요한 I/O가 반복되는 문제가 있었다.",
+                  },
                 ],
-                code: `persist_dir="/RAG/chroma"   # 앞의 / → 파일시스템 루트 경로`,
               },
               {
-                heading: "원인 ② — 캐시가 동작하지 않는 구조",
-                paragraphs: [
-                  "Vector DB를 한 번만 생성해 재사용하려고 전역 캐시(_vectordb)를 뒀지만, 함수가 호출될 때마다 _vectordb = None이 실행되고 있었습니다. 이 때문에 아래 캐시 분기가 항상 거짓이 되어 DB를 매 요청마다 다시 로드했습니다. 캐시를 구현했음에도 실제로는 전혀 활용되지 않는 구조였습니다.",
+                heading: "원인 분석",
+                blocks: [
+                  { type: "sub", text: "1. 배포 환경에서 Vector DB 생성 실패" },
+                  {
+                    type: "text",
+                    text: "persist_dir의 기본 경로를 다음과 같이 설정해두었다.",
+                  },
+                  { type: "code", code: `persist_dir="/RAG/chroma"` },
+                  {
+                    type: "text",
+                    text: "앞의 / 때문에 프로젝트 내부가 아닌 파일 시스템 루트 경로를 의미하게 되었고, 배포 환경에서는 해당 위치에 디렉터리를 생성할 권한이 없어 Vector DB 생성이 실패했다.",
+                  },
+                  {
+                    type: "text",
+                    text: "즉, 로컬과 배포 환경의 파일 시스템 및 권한 차이를 고려하지 못한 것이 원인이었다.",
+                  },
+                  { type: "sub", text: "2. 캐시가 동작하지 않는 구조" },
+                  {
+                    type: "text",
+                    text: "Vector DB를 한 번만 생성하여 재사용하기 위해 전역 캐시(_vectordb)를 두었지만, 함수가 호출될 때마다 다음 코드가 실행되고 있었다.",
+                  },
+                  { type: "code", code: `global _vectordb
+_vectordb = None` },
+                  {
+                    type: "text",
+                    text: "이 때문에 아래 캐시 분기는 항상 실행되지 않았다.",
+                  },
+                  { type: "code", code: `if _vectordb:
+    return _vectordb` },
+                  {
+                    type: "text",
+                    text: "결과적으로 Vector DB는 매 요청마다 다시 로드되었고, 캐시를 구현했음에도 실제로는 전혀 활용되지 않는 구조였다.",
+                  },
                 ],
-                code: `global _vectordb
-_vectordb = None            # 매 호출마다 캐시 초기화
-
-if _vectordb:               # → 항상 거짓이 되어 캐시 미사용
-    return _vectordb`,
               },
               {
-                heading: "해결 — 상대경로 · 캐시 복원 · 예외 처리",
-                code: `# 1) 저장 경로를 상대경로로
-- persist_dir="/RAG/chroma"
-+ persist_dir="RAG/chroma"
+                heading: "해결 과정",
+                blocks: [
+                  { type: "sub", text: "1. 저장 경로를 상대경로로 변경" },
+                  {
+                    type: "text",
+                    text: "절대경로 대신 프로젝트 기준 상대경로를 사용하도록 변경하였다.",
+                  },
+                  { type: "code", code: `- persist_dir="/RAG/chroma"
++ persist_dir="RAG/chroma"` },
+                  {
+                    type: "text",
+                    text: "이를 통해 로컬과 배포 환경에서 동일한 경로 기준으로 동작하도록 수정하였다.",
+                  },
+                  { type: "sub", text: "2. Vector DB 캐시 복원" },
+                  {
+                    type: "text",
+                    text: "불필요한 초기화를 제거하여 최초 한 번만 Vector DB를 생성하고 이후에는 메모리에 저장된 객체를 재사용하도록 수정하였다.",
+                  },
+                  { type: "code", code: `- _vectordb = None
++ # _vectordb = None` },
+                  { type: "code", code: `if _vectordb:
+    return _vectordb` },
+                  { type: "sub", text: "3. 예외 처리 추가" },
+                  {
+                    type: "text",
+                    text: "배포 과정에서 원인을 빠르게 파악할 수 있도록 방어 로직도 함께 추가하였다.",
+                  },
+                  { type: "code", code: `if not os.path.exists(source_folder):
+    raise FileNotFoundError(...)
 
-# 2) 불필요한 초기화 제거 → 최초 1회만 생성, 이후 메모리 재사용
-- _vectordb = None
-+ # _vectordb = None
-
-# 3) 예외 처리 추가 (로그 출력 후 재발생 → 원인 즉시 확인)
-+ if not os.path.exists(source_folder):
-+     raise FileNotFoundError(...)
-+ if len(raw_documents) == 0:
-+     raise ValueError("문서가 비어 있습니다.")`,
+if len(raw_documents) == 0:
+    raise ValueError("문서가 비어 있습니다.")` },
+                  {
+                    type: "text",
+                    text: "모든 예외는 로그로 출력한 뒤 다시 발생시키도록 구현하여 문제 원인을 즉시 확인할 수 있도록 개선하였다.",
+                  },
+                ],
               },
               {
                 heading: "적용 결과",
-                paragraphs: [
-                  "프로젝트 기준 상대경로를 사용해 로컬과 배포 환경 모두 동일한 방식으로 동작합니다.",
-                  "Vector DB 캐시가 정상 동작해 첫 로딩 이후에는 DB를 다시 생성하거나 로드하지 않습니다.",
-                  "문서 경로 오류·빈 문서 같은 예외를 사전 검증해 문제 원인을 빠르게 파악할 수 있는 구조를 만들었습니다.",
+                blocks: [
+                  {
+                    type: "list",
+                    items: [
+                      "프로젝트 기준 상대경로를 사용하여 로컬과 배포 환경 모두 동일한 방식으로 동작하도록 개선",
+                      "Vector DB 캐시가 정상적으로 동작하여 첫 로딩 이후에는 DB를 다시 생성하거나 로드하지 않도록 개선",
+                      "문서 경로 오류 및 빈 문서와 같은 예외를 사전에 검증하여 문제 원인을 빠르게 파악할 수 있는 구조를 구축",
+                    ],
+                  },
                 ],
               },
               {
                 heading: "배운 점",
-                paragraphs: [
-                  "배포 환경에서는 파일 경로와 권한까지 고려한 설계가 필요하다는 점을 배웠습니다.",
-                  "캐시는 단순히 구현하는 것이 아니라 실제로 동작하는지 검증하는 과정이 중요하다는 것 — _vectordb = None 한 줄 때문에 캐시가 완전히 무력화돼 있었고, 성능 문제의 원인은 새로운 기능이 아니라 기존 로직을 정확히 분석하는 과정에서 발견할 수 있었습니다.",
+                blocks: [
+                  {
+                    type: "text",
+                    text: "이번 경험을 통해 배포 환경에서는 파일 경로와 권한까지 고려한 설계가 필요하다는 점을 배웠다.",
+                  },
+                  {
+                    type: "text",
+                    text: "또한 캐시는 단순히 구현하는 것이 아니라 실제로 캐시가 동작하는지 검증하는 과정이 중요하다는 것을 경험했다. _vectordb = None 한 줄 때문에 캐시가 완전히 무력화되어 있었고, 성능 문제의 원인은 새로운 기능이 아니라 기존 로직을 정확히 분석하는 과정에서 발견할 수 있었다.",
+                  },
                 ],
               },
             ],
@@ -228,93 +295,259 @@ if _vectordb:               # → 항상 거짓이 되어 캐시 미사용
             details: [
               {
                 heading: "문제 상황",
-                paragraphs: [
-                  "소담이 챗봇은 하나의 서비스 안에서 성격이 서로 다른 질문 — 낙농 일반 지식, 사용자 농장의 특정 소 조회, 챗봇과의 자연스러운 대화 — 을 처리해야 했습니다. 초기에는 질문 유형을 구분하지 않고 하나의 응답 흐름에서 모두 처리했습니다.",
-                  "이로 인해 두 가지 문제가 생겼습니다. ① '103번 소 상태 알려줘'(특정 소 조회)와 '젖소 발정 주기는?'(일반 지식)처럼 필요한 데이터 소스가 다른 질문이 같은 경로에서 처리돼 답변 품질이 일정하지 않았습니다. ② '로또 번호 알려줘', '오늘 점심 뭐 먹지?'처럼 서비스와 무관한 질문에도 LLM이 그대로 응답하면서 낙농 전문 챗봇이라는 정체성이 흐려졌습니다.",
+                blocks: [
+                  {
+                    type: "text",
+                    text: "소담이 챗봇은 하나의 서비스 안에서 성격이 서로 다른 질문을 처리해야 했다.",
+                  },
+                  {
+                    type: "list",
+                    items: [
+                      "낙농 일반 지식",
+                      "사용자 농장의 특정 소 정보 조회",
+                      "챗봇과의 자연스러운 대화",
+                    ],
+                  },
+                  {
+                    type: "text",
+                    text: "초기에는 질문 유형을 구분하지 않고 하나의 응답 흐름에서 모든 질문을 처리했다.",
+                  },
+                  { type: "text", text: "이로 인해 두 가지 문제가 발생했다." },
+                  {
+                    type: "text",
+                    text: "1. \"103번 소 상태 알려줘.\"(사용자 농장의 특정 소 조회)와 \"젖소 발정 주기는?\"(일반 지식)처럼 필요한 데이터 소스가 서로 다른 질문이 같은 경로에서 처리되어 답변 품질이 일정하지 않았다.",
+                  },
+                  {
+                    type: "text",
+                    text: "2. \"로또 번호 알려줘.\", \"오늘 점심 뭐 먹지?\"처럼 서비스와 무관한 질문에도 일반 LLM이 그대로 응답하면서 낙농 전문 챗봇이라는 서비스 정체성이 흐려졌다.",
+                  },
                 ],
               },
               {
                 heading: "원인 분석",
-                paragraphs: [
-                  "근본 원인은 질문의 의도(Intent)를 먼저 판별하는 단계가 없었다는 것이었습니다. 질문마다 필요한 데이터 소스가 다른데, 구분 없이 하나의 응답 흐름으로 처리하니 적절한 소스를 고르지 못했습니다. 결국 의도보다 응답 생성이 먼저 이루어지는 구조 자체가 문제였습니다.",
+                blocks: [
+                  {
+                    type: "text",
+                    text: "문제의 원인은 질문의 의도(Intent)를 먼저 판별하는 단계가 없었다는 것이었다.",
+                  },
+                  { type: "text", text: "질문마다 필요한 데이터 소스는 서로 달랐다." },
+                  {
+                    type: "table",
+                    head: ["질문 유형", "필요한 데이터"],
+                    rows: [
+                      ["낙농 일반 지식", "RAG 문서 검색"],
+                      ["특정 소 조회", "농장 DB"],
+                      ["자연스러운 대화", "대화 Context"],
+                    ],
+                  },
+                  {
+                    type: "text",
+                    text: "하지만 질문을 구분하지 않고 하나의 응답 흐름으로 처리하면서 적절한 데이터 소스를 선택하지 못했다.",
+                  },
+                  {
+                    type: "text",
+                    text: "결국 질문의 의도보다 응답 생성이 먼저 이루어지는 구조 자체가 문제였다.",
+                  },
                 ],
-                table: {
-                  head: ["질문 유형", "필요한 데이터"],
-                  rows: [
-                    ["낙농 일반 지식", "RAG 문서 검색"],
-                    ["특정 소 조회", "농장 DB"],
-                    ["자연스러운 대화", "대화 Context"],
-                  ],
-                },
               },
               {
-                heading: "해결 1 — 질문 분류(Classifier)를 독립 노드로 분리",
-                paragraphs: [
-                  "응답 생성 이전에 의도를 분류하는 classify_question_route 노드를 그래프 시작 단계에 뒀습니다. 분류는 창의성보다 항상 같은 결과를 내는 일관성이 중요하다고 판단해 temperature=0으로 설정했고, rag·cow_info·general·irrelevant 4종 중 하나만 반환하게 했습니다.",
-                ],
-                code: `llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+                heading: "해결 과정",
+                blocks: [
+                  { type: "sub", text: "1. 질문 분류(Classifier)를 독립 노드로 분리" },
+                  {
+                    type: "text",
+                    text: "먼저 응답 생성 이전에 질문의 의도를 분류하는 classify_question_route 노드를 LangGraph 그래프의 시작 단계에 추가하였다.",
+                  },
+                  {
+                    type: "text",
+                    text: "질문 분류는 창의성보다 항상 동일한 결과를 반환하는 일관성이 중요하다고 판단하여 temperature=0으로 설정하였다.",
+                  },
+                  { type: "code", code: `llm = ChatOpenAI(
+    model="gpt-4o-mini",
+    temperature=0
+)
+
 chain = prompt | llm | StrOutputParser()
-result = chain.invoke({"question": state["current_question"]})`,
-              },
-              {
-                heading: "해결 2 — 유형별 전용 노드로 라우팅",
-                paragraphs: [
-                  "분류 결과에 따라 add_conditional_edges()로 질문을 서로 다른 처리 노드에 연결했습니다. 각 노드가 하나의 책임(RAG 검색 / 농장 DB 조회 / UX 대화 / 무관 차단)만 수행하도록 설계했습니다.",
+
+result = chain.invoke({
+    "question": state["current_question"]
+})` },
+                  {
+                    type: "text",
+                    text: "분류 결과는 다음 네 가지 중 하나만 반환하도록 설계하였다.",
+                  },
+                  {
+                    type: "list",
+                    items: ["rag", "cow_info", "general", "irrelevant"],
+                  },
+                  { type: "sub", text: "2. 질문 유형별로 전용 노드에 라우팅" },
+                  {
+                    type: "text",
+                    text: "분류 결과에 따라 LangGraph의 add_conditional_edges()를 이용하여 질문을 서로 다른 처리 노드로 연결하였다.",
+                  },
+                  { type: "code", code: `builder.add_conditional_edges(
+    "classifier",
+    route_by_answer_type,
+    {
+        "rag": "rag_response",
+        "cow_info": "cow_info_graph",
+        "general": "general_response",
+        "irrelevant": "irrelevant_response",
+    }
+)` },
+                  { type: "text", text: "각 노드는 하나의 책임만 수행하도록 설계하였다." },
+                  {
+                    type: "table",
+                    head: ["질문 유형", "처리 방식"],
+                    rows: [
+                      ["rag", "RAG 문서 검색"],
+                      ["cow_info", "농장 DB 조회"],
+                      ["general", "UX 대화"],
+                      ["irrelevant", "서비스와 무관한 질문 차단"],
+                    ],
+                  },
+                  {
+                    type: "text",
+                    text: "이를 통해 질문의 의도를 먼저 분류한 뒤, 적절한 데이터 소스로 라우팅하는 구조를 만들 수 있었다.",
+                  },
+                  { type: "sub", text: "3. 새로운 문제 발생 : Over-blocking" },
+                  {
+                    type: "text",
+                    text: "하지만 실제 테스트 과정에서 예상하지 못한 문제가 발생했다.",
+                  },
+                  {
+                    type: "text",
+                    text: "서비스와 무관한 질문만 차단하려고 추가했던 irrelevant가",
+                  },
+                  {
+                    type: "list",
+                    items: ["\"고마워.\"", "\"너 누구야?\"", "\"내가 아까 뭐 물어봤지?\""],
+                  },
+                  {
+                    type: "text",
+                    text: "같은 챗봇으로서 자연스럽게 응답해야 하는 UX 대화까지 모두 차단하고 있었다.",
+                  },
+                  {
+                    type: "text",
+                    text: "결과적으로 \"낙농 관련 질문에만 답변할 수 있습니다.\"라는 응답이 반환되면서 사용자 경험이 오히려 저하되었다.",
+                  },
+                  {
+                    type: "text",
+                    text: "즉, 무관한 질문만 차단하려 했지만 정상적인 UX 대화까지 함께 차단하는 Over-blocking 문제가 발생한 것이다.",
+                  },
+                  { type: "sub", text: "4. 해결 방법 검토" },
+                  {
+                    type: "text",
+                    text: "처음에는 UX 대화를 처리하는 새로운 노드를 추가하는 방법도 고려하였다.",
+                  },
+                  {
+                    type: "text",
+                    text: "그러나 문제를 분석해 보니 처리 노드가 부족한 것이 아니라 질문 유형의 경계가 잘못 정의되어 있다는 점이 원인이었다.",
+                  },
+                  {
+                    type: "text",
+                    text: "노드를 계속 추가하면 그래프만 복잡해지고 역할이 중복될 수 있었다.",
+                  },
+                  {
+                    type: "text",
+                    text: "따라서 새로운 노드를 만드는 대신 기존 노드의 책임을 다시 정의하는 방향을 선택하였다.",
+                  },
+                  { type: "sub", text: "5. General 노드의 역할 재정의 (핵심)" },
+                  {
+                    type: "text",
+                    text: "기존에는 general 노드를 단순한 일반 대화 정도로 정의하고 있었다.",
+                  },
+                  {
+                    type: "text",
+                    text: "이를 \"낙농 질문은 아니지만 챗봇으로서 반드시 응답해야 하는 UX 대화 전담 노드\"로 역할을 재정의하였다.",
+                  },
+                  {
+                    type: "text",
+                    text: "최종적으로 질문 유형의 경계를 다음과 같이 다시 설계하였다.",
+                  },
+                  {
+                    type: "list",
+                    items: [
+                      "낙농 관련 질문 → rag",
+                      "사용자 농장의 특정 소 조회 → cow_info",
+                      "기억, 감사, 인사, 챗봇 소개 등 자연스러운 UX 대화 → general",
+                      "로또, 주식, 정치 등 서비스와 무관한 질문 → irrelevant",
+                    ],
+                  },
+                  {
+                    type: "text",
+                    text: "이를 통해 irrelevant는 진짜 무관한 질문만 처리하고, \"내가 아까 뭐 물어봤지?\", \"고마워.\"와 같은 질문은 general로 라우팅되어 정상적으로 응답할 수 있도록 경계를 명확하게 재설계하였다.",
+                  },
+                  { type: "sub", text: "6. Cow 정보 분류 기준 정밀화" },
+                  {
+                    type: "text",
+                    text: "멀티턴 대화에서 개체 조회가 자연스럽게 이어질 수 있도록 cow_info 분류 기준도 함께 개선하였다. (커밋 : 0de1fea, 37f642e)",
+                  },
+                  { type: "text", text: "기존에는 \"103번 소\" 정도만 인식했지만, 다음과 같은 표현도 모두 cow_info로 분류하도록 확장하였다." },
+                  {
+                    type: "list",
+                    items: ["12자리 이표번호", "그 소", "그 아이"],
+                  },
+                  {
+                    type: "text",
+                    text: "이를 통해 \"103번 소 상태 알려줘.\" → \"그 소 어제 분만했어?\"와 같은 후속 질문도 동일한 개체 조회 흐름으로 정확하게 라우팅할 수 있도록 개선하였다.",
+                  },
+                  { type: "sub", text: "7. LLM 오출력 방어" },
+                  {
+                    type: "text",
+                    text: "질문 분류를 LLM이 수행하기 때문에 정의되지 않은 문자열이 반환될 가능성도 고려하였다.",
+                  },
+                  {
+                    type: "text",
+                    text: "따라서 정의된 네 가지 유형 외의 값이 반환되면 irrelevant로 처리하도록 방어 로직을 추가하였다.",
+                  },
+                  { type: "code", code: `if result not in {
+    "rag",
+    "cow_info",
+    "general",
+    "irrelevant"
+}:
+    result = "irrelevant"` },
+                  {
+                    type: "text",
+                    text: "이를 통해 예상하지 못한 출력에도 그래프가 안정적으로 동작하도록 구성하였다.",
+                  },
                 ],
-                code: `builder.add_conditional_edges("classifier", route_by_answer_type, {
-    "rag":        "rag_response",        # RAG 문서 검색
-    "cow_info":   "cow_info_graph",      # 농장 DB 조회
-    "general":    "general_response",    # UX 대화
-    "irrelevant": "irrelevant_response", # 무관 질문 차단
-})`,
-              },
-              {
-                heading: "해결 3 — 새 문제: Over-blocking",
-                paragraphs: [
-                  "실제 테스트에서 예상 못한 문제가 나왔습니다. 무관 질문만 차단하려던 irrelevant가 '고마워', '너 누구야?', '내가 아까 뭐 물어봤지?'처럼 챗봇으로서 자연스럽게 응답해야 할 UX 대화까지 모두 차단하고 있었습니다. '낙농 관련 질문에만 답변할 수 있습니다'가 반환되면서 오히려 사용자 경험이 저하됐습니다.",
-                ],
-              },
-              {
-                heading: "해결 4 — 해결 방법 검토",
-                paragraphs: [
-                  "처음엔 UX 대화용 새 노드를 추가할까 고려했습니다. 하지만 분석해 보니 처리 노드가 부족한 게 아니라 질문 유형의 경계가 잘못 정의된 것이 원인이었습니다. 노드를 계속 추가하면 그래프만 복잡해지고 역할이 중복될 수 있어, 새 노드 대신 기존 노드의 책임을 다시 정의하기로 했습니다.",
-                ],
-              },
-              {
-                heading: "해결 5 — General 노드 역할 재정의 (핵심)",
-                paragraphs: [
-                  "기존에 단순 일반 대화 정도로 뒀던 general을 '낙농 질문은 아니지만 챗봇으로서 반드시 응답해야 하는 UX 대화 전담 노드'로 재정의했습니다. 최종 경계는 — 낙농 관련→rag, 특정 소 조회→cow_info, 기억·감사·인사·소개 등 UX 대화→general, 로또·주식·정치 등 무관→irrelevant. 이로써 '내가 아까 뭐 물어봤지?', '고마워' 같은 질문이 general로 라우팅돼 정상 응답됩니다.",
-                ],
-              },
-              {
-                heading: "해결 6 — Cow 정보 분류 기준 정밀화",
-                paragraphs: [
-                  "멀티턴 대화에서 개체 조회가 자연스럽게 이어지도록 cow_info 분류 기준도 개선했습니다(커밋 0de1fea, 37f642e). 기존엔 '103번 소' 정도만 인식했지만, 12자리 이표번호·'그 소'·'그 아이'까지 cow_info로 분류하도록 확장해, '103번 소 상태 알려줘' → '그 소 어제 분만했어?' 같은 후속 질문도 같은 개체 조회 흐름으로 라우팅됩니다.",
-                ],
-              },
-              {
-                heading: "해결 7 — LLM 오출력 방어",
-                paragraphs: [
-                  "분류를 LLM이 수행하므로 정의되지 않은 문자열이 반환될 가능성도 고려해, 4종 외의 값이 오면 irrelevant로 처리하는 방어 로직을 넣었습니다.",
-                ],
-                code: `if result not in {"rag", "cow_info", "general", "irrelevant"}:
-    result = "irrelevant"`,
               },
               {
                 heading: "적용 결과",
-                paragraphs: [
-                  "질문을 응답 생성 이전에 먼저 분류하고, 결과에 따라 적절한 데이터 소스로 연결하는 라우팅 아키텍처를 구축했습니다.",
-                  "무관 질문을 사전 차단해 낙농 전문 챗봇이라는 서비스 정체성을 유지했습니다.",
-                  "general 노드 재정의로 Over-blocking을 해결하고 자연스러운 UX 대화를 유지했습니다.",
-                  "지시어와 12자리 이표번호까지 인식하도록 분류 기준을 확장해 멀티턴 대화 정확도를 높였습니다.",
-                  "질문 유형과 노드 책임을 명확히 분리해, 새 유형이 추가돼도 분류 규칙과 처리 노드만 확장하면 되는 구조를 갖췄습니다.",
+                blocks: [
+                  {
+                    type: "list",
+                    items: [
+                      "질문을 응답 생성 이전에 먼저 분류하고, 분류 결과에 따라 적절한 데이터 소스로 연결하는 라우팅 아키텍처를 구축하였다.",
+                      "서비스와 무관한 질문은 사전에 차단하여 낙농 전문 챗봇이라는 서비스 정체성을 유지할 수 있었다.",
+                      "general 노드의 역할을 재정의하여 Over-blocking 문제를 해결하고 자연스러운 UX 대화를 유지할 수 있었다.",
+                      "지시어와 12자리 이표번호까지 인식하도록 분류 기준을 확장하여 멀티턴 대화의 정확도를 향상시켰다.",
+                      "질문 유형과 처리 노드의 책임을 명확하게 분리하여 새로운 질문 유형이 추가되더라도 분류 규칙과 처리 노드만 확장하면 되는 구조를 갖추었다.",
+                    ],
+                  },
                 ],
               },
               {
                 heading: "배운 점",
-                paragraphs: [
-                  "가장 중요했던 것은 '4가지로 분류한 것' 자체가 아니라, 라우팅 구조를 설계하는 과정에서 생긴 문제를 다시 설계로 해결한 경험이었습니다. irrelevant를 추가하면 무관 질문이 해결될 줄 알았지만, 정상 UX 대화까지 차단되는 부작용을 확인했고, 원인이 노드 개수가 아니라 질문 경계와 각 노드의 책임 정의에 있다는 걸 발견했습니다.",
-                  "새 노드를 계속 추가하는 대신 기존 노드의 역할을 재정의해 그래프를 단순하게 유지하면서 사용자 경험과 확장성을 함께 확보했습니다. 또 LLM 기반 라우팅에서는 분류 정확도뿐 아니라 예상 못한 출력에 대한 방어까지 함께 설계해야 안정적이라는 걸 배웠습니다.",
+                blocks: [
+                  {
+                    type: "text",
+                    text: "이번 트러블슈팅에서 가장 중요했던 것은 질문을 4가지로 분류한 것 자체가 아니라, 라우팅 구조를 설계하는 과정에서 발생한 문제를 다시 설계로 해결한 경험이었다.",
+                  },
+                  {
+                    type: "text",
+                    text: "처음에는 irrelevant를 추가하면 서비스와 무관한 질문을 해결할 수 있을 것이라 생각했다. 하지만 실제 테스트 과정에서 정상적인 UX 대화까지 차단되는 부작용을 확인했고, 원인이 노드의 개수가 아니라 질문 유형의 경계와 각 노드의 책임 정의에 있다는 점을 발견했다.",
+                  },
+                  {
+                    type: "text",
+                    text: "이를 해결하기 위해 새로운 노드를 계속 추가하는 대신 기존 노드의 역할을 재정의하여 그래프 구조를 단순하게 유지하면서도 사용자 경험과 확장성을 함께 확보할 수 있었다.",
+                  },
+                  {
+                    type: "text",
+                    text: "또한 LLM 기반 라우팅에서는 분류 정확도뿐 아니라 예상하지 못한 출력에 대한 방어 로직까지 함께 설계해야 안정적인 서비스를 구축할 수 있다는 점을 경험했다.",
+                  },
                 ],
               },
             ],
@@ -331,37 +564,51 @@ result = chain.invoke({"question": state["current_question"]})`,
             tags: ["RAG", "Fallback", "의사결정"],
             details: [
               {
-                heading: "해결 방법 비교",
-                table: {
-                  head: ["항목", "프롬프트 내부 처리", "LangGraph 노드 분기"],
-                  rows: [
-                    ["응답 속도", "빠름 (한 번에 처리)", "느림 (재분기 필요)"],
-                    ["유지보수", "쉬움", "복잡"],
-                    ["의도 제어", "'없으면 지식으로' 지시로 명확", "흐름 중첩 위험"],
-                    ["구현 난이도", "낮음", "높음 (상태 추가 전달)"],
-                  ],
-                },
+                heading: "여러 해결 방법 비교",
+                blocks: [
+                  {
+                    type: "table",
+                    head: ["항목", "프롬프트 내부 처리", "LangGraph 노드 분기"],
+                    rows: [
+                      ["응답 속도", "빠름(한 번에 처리)", "느림(재분기 필요)"],
+                      ["유지보수", "쉬움", "복잡"],
+                      ["의도 제어", "\"없으면 지식으로 답\" 지시로 명확", "흐름 중첩 위험"],
+                      ["구현 난이도", "낮음", "높음(상태 추가 전달)"],
+                    ],
+                  },
+                ],
               },
               {
                 heading: "왜 프롬프트 처리인가",
-                paragraphs: [
-                  "no-hit는 별도 노드로 분기할 만큼 복잡한 상태 전이가 아니라, 프롬프트 한 곳에서 조건부 지시로 처리할 수 있는 케이스라고 판단했습니다. 노드를 늘리면 그래프만 복잡해질 뿐 얻는 게 없었습니다.",
+                blocks: [
+                  {
+                    type: "text",
+                    text: "no-hit는 별도 노드로 분기할 만큼 복잡한 상태 전이가 아니라, 프롬프트 한 곳에서 조건부 지시로 처리할 수 있는 케이스라고 판단했다. 노드를 늘리면 그래프만 복잡해질 뿐 얻는 게 없었다.",
+                  },
                 ],
               },
               {
                 heading: "핵심 코드",
-                code: `context = context.strip() or "※ 참고할 문서가 없습니다."   # 빈 검색결과를 명시적 신호로
+                blocks: [
+                  {
+                    type: "code",
+                    code: `context = context.strip() or "※ 참고할 문서가 없습니다."   # 빈 검색결과를 명시적 신호로
 
 # 프롬프트
 """아래 참고 자료를 우선 사용하되,
 자료가 비었거나 답을 찾을 수 없으면 알고 있는 지식·상식으로 답해도 됩니다.
 [참고 자료]
 {context}"""`,
+                  },
+                ],
               },
               {
                 heading: "배운 점",
-                paragraphs: [
-                  "RAG의 완성도는 잘 찾을 때가 아니라 못 찾을 때의 동작에서 갈린다는 것, 그리고 모든 예외를 노드로 쪼갤 필요는 없고 처리 위치(프롬프트 vs 그래프)를 비용 대비로 고르는 게 설계라는 걸 배웠습니다.",
+                blocks: [
+                  {
+                    type: "text",
+                    text: "RAG의 완성도는 잘 찾을 때가 아니라 못 찾을 때의 동작에서 갈린다는 것, 그리고 모든 예외를 노드로 쪼갤 필요는 없고 처리 위치(프롬프트 vs 그래프)를 비용 대비로 고르는 게 설계라는 걸 배웠다.",
+                  },
                 ],
               },
             ],
@@ -379,18 +626,26 @@ result = chain.invoke({"question": state["current_question"]})`,
             details: [
               {
                 heading: "핵심 코드",
-                code: `chat_memory_store: Dict[Tuple[str, str], List[str]] = {}
+                blocks: [
+                  {
+                    type: "code",
+                    code: `chat_memory_store: Dict[Tuple[str, str], List[str]] = {}
 
 def append_chat_memory(user_id, chat_id, question, answer):
     key = (user_id, chat_id)
     memory = chat_memory_store.get(key, [])   # 없으면 빈 리스트
     memory += [f"사용자: {question}", f"소담이: {answer}"]
     chat_memory_store[key] = memory`,
+                  },
+                ],
               },
               {
                 heading: "배운 점",
-                paragraphs: [
-                  "메모리를 어떤 키와 자료구조로 들고 있느냐가 멀티턴 품질과 확장성을 좌우한다는 것, LLM에겐 dict보다 사람이 읽는 대화 텍스트가 더 잘 맞는다는 것을 배웠습니다.",
+                blocks: [
+                  {
+                    type: "text",
+                    text: "메모리를 어떤 키와 자료구조로 들고 있느냐가 멀티턴 품질과 확장성을 좌우한다는 것, LLM에겐 dict보다 사람이 읽는 대화 텍스트가 더 잘 맞는다는 것.",
+                  },
                 ],
               },
             ],
@@ -408,21 +663,32 @@ def append_chat_memory(user_id, chat_id, question, answer):
             details: [
               {
                 heading: "핵심 코드",
-                code: `base_name = os.path.splitext(file_name)[0]   # 확장자 제거한 파일명만 metadata로
+                blocks: [
+                  {
+                    type: "code",
+                    code: `base_name = os.path.splitext(file_name)[0]   # 확장자 제거한 파일명만 metadata로
 documents.append(Document(page_content=chunk, metadata={"source": base_name}))
 
 # 출력 규칙: 중복 제거 · 기호 제거 · 질문 언어별 [출처]/[Source] 분기`,
+                  },
+                ],
               },
               {
                 heading: "반복 개선 과정",
-                paragraphs: [
-                  "한 번에 끝나지 않고 커밋 c2f4e1a → 5961f94 → 83f0337 → b945b5a → 5d29b8a로 이어진 관찰→수정의 반복이었습니다.",
+                blocks: [
+                  {
+                    type: "text",
+                    text: "한 번에 끝나지 않고 커밋 c2f4e1a → 5961f94 → 83f0337 → b945b5a → 5d29b8a로 이어진 관찰→수정의 반복이었다.",
+                  },
                 ],
               },
               {
                 heading: "배운 점",
-                paragraphs: [
-                  "근거를 '보여주는 것'과 '보기 좋게 보여주는 것'은 별개이며, 사용자에게 닿는 마지막 한 줄까지 다듬는 게 제품 완성도입니다. 여러 커밋에 걸쳐 관찰→수정을 반복한 과정 자체가 실무에 가까웠습니다.",
+                blocks: [
+                  {
+                    type: "text",
+                    text: "근거를 \"보여주는 것\"과 \"보기 좋게 보여주는 것\"은 별개이며, 사용자에게 닿는 마지막 한 줄까지 다듬는 게 제품 완성도다. 한 번에 끝나지 않고 여러 커밋에 걸쳐 관찰→수정을 반복한 과정 자체가 실무에 가깝다.",
+                  },
                 ],
               },
             ],

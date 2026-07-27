@@ -324,55 +324,91 @@ export default function LightProjectView({
                                       <p className="text-[0.85rem] font-semibold text-ink">
                                         {d.heading}
                                       </p>
-                                      {d.paragraphs?.map((para, pi) => (
-                                        <p
-                                          key={pi}
-                                          className="mt-1.5 text-[0.85rem] leading-relaxed text-muted"
-                                        >
-                                          {para}
-                                        </p>
-                                      ))}
-                                      {d.table && (
-                                        <div className="mt-2 overflow-x-auto">
-                                          <table className="w-full text-[0.8rem] border-collapse">
-                                            <thead>
-                                              <tr>
-                                                {d.table.head.map((h) => (
-                                                  <th
-                                                    key={h}
-                                                    className="border border-line bg-surface px-2.5 py-1.5 text-left font-semibold"
+                                      <div className="mt-1.5 space-y-2">
+                                        {d.blocks.map((blk, bi) => {
+                                          if (blk.type === "sub")
+                                            return (
+                                              <p
+                                                key={bi}
+                                                className="text-[0.84rem] font-semibold text-ink/90 pt-1"
+                                              >
+                                                {blk.text}
+                                              </p>
+                                            );
+                                          if (blk.type === "text")
+                                            return (
+                                              <p
+                                                key={bi}
+                                                className="text-[0.85rem] leading-relaxed text-muted"
+                                              >
+                                                {blk.text}
+                                              </p>
+                                            );
+                                          if (blk.type === "list")
+                                            return (
+                                              <ul key={bi} className="space-y-1">
+                                                {blk.items.map((it, ii) => (
+                                                  <li
+                                                    key={ii}
+                                                    className="relative pl-4 text-[0.85rem] leading-relaxed text-muted before:absolute before:left-0 before:top-[0.6em] before:h-1 before:w-1 before:rounded-full before:bg-tide"
                                                   >
-                                                    {h}
-                                                  </th>
+                                                    {it}
+                                                  </li>
                                                 ))}
-                                              </tr>
-                                            </thead>
-                                            <tbody>
-                                              {d.table.rows.map((row, ri) => (
-                                                <tr key={ri}>
-                                                  {row.map((cell, ci) => (
-                                                    <td
-                                                      key={ci}
-                                                      className={`border border-line px-2.5 py-1.5 align-top ${
-                                                        ci === 0
-                                                          ? "font-medium text-ink"
-                                                          : "text-muted"
-                                                      }`}
-                                                    >
-                                                      {cell}
-                                                    </td>
-                                                  ))}
-                                                </tr>
-                                              ))}
-                                            </tbody>
-                                          </table>
-                                        </div>
-                                      )}
-                                      {d.code && (
-                                        <pre className="mt-2 overflow-x-auto rounded-lg bg-ink text-[#e6e4ea] p-4 text-[0.78rem] leading-relaxed">
-                                          <code>{d.code}</code>
-                                        </pre>
-                                      )}
+                                              </ul>
+                                            );
+                                          if (blk.type === "code")
+                                            return (
+                                              <pre
+                                                key={bi}
+                                                className="overflow-x-auto rounded-lg bg-ink text-[#e6e4ea] p-4 text-[0.78rem] leading-relaxed"
+                                              >
+                                                <code>{blk.code}</code>
+                                              </pre>
+                                            );
+                                          if (blk.type === "table")
+                                            return (
+                                              <div
+                                                key={bi}
+                                                className="overflow-x-auto"
+                                              >
+                                                <table className="w-full text-[0.8rem] border-collapse">
+                                                  <thead>
+                                                    <tr>
+                                                      {blk.head.map((h) => (
+                                                        <th
+                                                          key={h}
+                                                          className="border border-line bg-surface px-2.5 py-1.5 text-left font-semibold"
+                                                        >
+                                                          {h}
+                                                        </th>
+                                                      ))}
+                                                    </tr>
+                                                  </thead>
+                                                  <tbody>
+                                                    {blk.rows.map((row, ri) => (
+                                                      <tr key={ri}>
+                                                        {row.map((cell, ci) => (
+                                                          <td
+                                                            key={ci}
+                                                            className={`border border-line px-2.5 py-1.5 align-top ${
+                                                              ci === 0
+                                                                ? "font-medium text-ink"
+                                                                : "text-muted"
+                                                            }`}
+                                                          >
+                                                            {cell}
+                                                          </td>
+                                                        ))}
+                                                      </tr>
+                                                    ))}
+                                                  </tbody>
+                                                </table>
+                                              </div>
+                                            );
+                                          return null;
+                                        })}
+                                      </div>
                                     </div>
                                   ))}
                                 </div>
