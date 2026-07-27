@@ -4,6 +4,7 @@ import type { LightProject } from "@/lib/projectDetails";
 import ProjectGallery from "./ProjectGallery";
 import GitHubIcon from "./GitHubIcon";
 import RagDiagram from "./RagDiagram";
+import RouteDiagram from "./RouteDiagram";
 
 export default function LightProjectView({
   project,
@@ -241,29 +242,64 @@ export default function LightProjectView({
                     </div>
                   )}
 
-                  {/* 트러블슈팅 · 기술적 의사결정 */}
+                  {/* 트러블슈팅 · 기술적 의사결정 — 구분선으로 나눈 세로 흐름 */}
                   {feature.troubles && feature.troubles.length > 0 && (
-                    <div className="mt-8">
-                      <p className="font-semibold text-deep mb-4">
+                    <div className="mt-10 border-t-2 border-tide/30 pt-6">
+                      <p className="font-semibold text-deep mb-1">
                         트러블슈팅 · 기술적 의사결정
                       </p>
-                      <div className="space-y-6">
+                      <div className="divide-y divide-line">
                         {feature.troubles.map((trouble, ti) => (
-                          <div
-                            key={trouble.title}
-                            className="rounded-xl bg-ground/60 border border-line p-5"
-                          >
-                            <h4 className="flex gap-2.5 font-semibold text-[0.95rem] leading-snug">
+                          <div key={trouble.title} className="py-6">
+                            <h4 className="flex flex-wrap gap-x-2.5 gap-y-1 items-baseline leading-snug">
                               <span className="rail text-tide shrink-0">
                                 {String(ti + 1).padStart(2, "0")}
                               </span>
-                              <span>{trouble.title}</span>
+                              <span className="font-semibold">
+                                {trouble.title}
+                              </span>
+                              {trouble.stars && (
+                                <span className="text-tide text-xs tracking-tight">
+                                  {"★".repeat(trouble.stars)}
+                                </span>
+                              )}
                             </h4>
-                            <div className="mt-3 space-y-2.5 pl-9 text-[0.9rem] leading-relaxed text-muted">
-                              {trouble.body.map((para, pi) => (
-                                <p key={pi}>{para}</p>
+
+                            <dl className="mt-3 pl-8 space-y-2 text-[0.9rem] leading-relaxed">
+                              {[
+                                ["문제", trouble.problem, "text-muted"],
+                                ["해결", trouble.solution, "text-deep"],
+                                ["효과", trouble.effect, "text-tide"],
+                              ].map(([label, text, color]) => (
+                                <div key={label} className="flex gap-2.5">
+                                  <dt
+                                    className={`rail shrink-0 w-8 font-semibold ${color}`}
+                                  >
+                                    {label}
+                                  </dt>
+                                  <dd className="text-ink/85">{text}</dd>
+                                </div>
                               ))}
-                            </div>
+                            </dl>
+
+                            {trouble.diagram === "route" && (
+                              <div className="mt-5 pl-8">
+                                <RouteDiagram />
+                              </div>
+                            )}
+
+                            {trouble.tags && trouble.tags.length > 0 && (
+                              <ul className="mt-3 pl-8 flex flex-wrap gap-1.5">
+                                {trouble.tags.map((tag) => (
+                                  <li
+                                    key={tag}
+                                    className="rail rounded-md bg-ground border border-line px-2 py-0.5 text-muted"
+                                  >
+                                    #{tag}
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
                           </div>
                         ))}
                       </div>
