@@ -150,7 +150,8 @@ export const lightProjects: LightProject[] = [
         video: "/sodam/videos/chatbot.mp4",
         troubles: [
           {
-            title: "배포·실행 환경 차이 — Vector DB 생성 & 캐시 무효화",
+            title:
+              "배포 환경과 실행 환경 차이로 인한 Vector DB 생성 및 캐시 무효화 문제 해결",
             stars: 5,
             problem:
               "로컬에서는 정상 동작하던 RAG가 배포 환경에서 Chroma Vector DB 생성에 실패했고, 캐시가 있어도 Vector DB를 매 요청마다 다시 로드해 불필요한 파일 접근과 재임베딩이 반복됐습니다.",
@@ -213,7 +214,7 @@ if _vectordb:               # → 항상 거짓이 되어 캐시 미사용
             ],
           },
           {
-            title: "질문 라우팅 아키텍처 재설계 — 응답 품질 & UX 개선",
+            title: "질문 라우팅 아키텍처 재설계를 통한 응답 품질 개선",
             stars: 5,
             problem:
               "모든 질문을 하나의 응답 흐름에서 처리해 데이터 소스가 혼재됐고, 무관 질문을 차단하는 과정에서는 정상적인 UX 대화까지 함께 차단되는 Over-blocking이 발생했습니다.",
