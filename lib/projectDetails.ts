@@ -149,7 +149,7 @@ export const lightProjects: LightProject[] = [
         video: "/sodam/videos/chatbot.mp4",
         troubles: [
           {
-            title: "배포 환경 벡터 DB 생성 실패 & 재로딩",
+            title: "배포·실행 환경 차이 — Vector DB 생성 & 캐시 무효화",
             stars: 5,
             problem:
               "로컬에선 되던 RAG가 배포 서버에서 Chroma DB 생성에 실패했고, 캐시가 있어도 질문마다 벡터 DB를 통째로 다시 로딩했습니다.",
@@ -160,26 +160,52 @@ export const lightProjects: LightProject[] = [
             tags: ["배포환경", "캐시", "RAG"],
             details: [
               {
-                heading: "원인 분석",
+                heading: "원인 ① — 배포 환경에서 Vector DB 생성 실패",
                 paragraphs: [
-                  "로그를 따라가 보니 두 가지가 겹쳐 있었습니다.",
-                  "① persist_dir 기본값이 \"/RAG/chroma\"였습니다. 앞에 /가 붙어 파일시스템 루트 기준 절대경로가 됐고, 로컬에서는 프로젝트 루트에서 실행돼 우연히 통했지만 배포 서버에서는 루트에 쓰기 권한이 없어 DB 생성이 실패했습니다.",
-                  "② 함수 진입부에서 _vectordb = None을 매번 실행하고 있었습니다. 바로 아래에 캐시 히트 분기(if _vectordb:)가 있는데도, 그 위에서 캐시를 매번 지워버려 분기가 항상 거짓이 됐습니다.",
+                  "persist_dir 기본 경로를 \"/RAG/chroma\"로 설정했는데, 앞의 / 때문에 프로젝트 내부가 아닌 파일 시스템 루트 경로를 의미하게 됐습니다. 배포 환경에서는 그 위치에 디렉터리를 생성할 권한이 없어 Vector DB 생성이 실패했습니다. 로컬과 배포 환경의 파일 시스템·권한 차이를 고려하지 못한 것이 원인이었습니다.",
                 ],
+                code: `persist_dir="/RAG/chroma"   # 앞의 / → 파일시스템 루트 경로`,
               },
               {
-                heading: "핵심 변경",
-                code: `# before → after
-persist_dir="/RAG/chroma"   →  persist_dir="RAG/chroma"   # 루트 절대경로 → 상대경로
-_vectordb = None            →  # _vectordb = None          # 매 호출 캐시 초기화 제거
+                heading: "원인 ② — 캐시가 동작하지 않는 구조",
+                paragraphs: [
+                  "Vector DB를 한 번만 생성해 재사용하려고 전역 캐시(_vectordb)를 뒀지만, 함수가 호출될 때마다 _vectordb = None이 실행되고 있었습니다. 이 때문에 아래 캐시 분기가 항상 거짓이 되어 DB를 매 요청마다 다시 로드했습니다. 캐시를 구현했음에도 실제로는 전혀 활용되지 않는 구조였습니다.",
+                ],
+                code: `global _vectordb
+_vectordb = None            # 매 호출마다 캐시 초기화
 
-# 추가: source_folder 존재 확인·빈 문서 방어·try/except 로
-#       실패 시 원인이 로그에 바로 드러나게 함`,
+if _vectordb:               # → 항상 거짓이 되어 캐시 미사용
+    return _vectordb`,
+              },
+              {
+                heading: "해결 — 상대경로 · 캐시 복원 · 예외 처리",
+                code: `# 1) 저장 경로를 상대경로로
+- persist_dir="/RAG/chroma"
++ persist_dir="RAG/chroma"
+
+# 2) 불필요한 초기화 제거 → 최초 1회만 생성, 이후 메모리 재사용
+- _vectordb = None
++ # _vectordb = None
+
+# 3) 예외 처리 추가 (로그 출력 후 재발생 → 원인 즉시 확인)
++ if not os.path.exists(source_folder):
++     raise FileNotFoundError(...)
++ if len(raw_documents) == 0:
++     raise ValueError("문서가 비어 있습니다.")`,
+              },
+              {
+                heading: "적용 결과",
+                paragraphs: [
+                  "프로젝트 기준 상대경로를 사용해 로컬과 배포 환경 모두 동일한 방식으로 동작합니다.",
+                  "Vector DB 캐시가 정상 동작해 첫 로딩 이후에는 DB를 다시 생성하거나 로드하지 않습니다.",
+                  "문서 경로 오류·빈 문서 같은 예외를 사전 검증해 문제 원인을 빠르게 파악할 수 있는 구조를 만들었습니다.",
+                ],
               },
               {
                 heading: "배운 점",
                 paragraphs: [
-                  "로컬에서 되던 코드가 배포에서 깨진 원인이 경로·권한 가정이었다는 것, 그리고 캐시 분기가 있어도 그 위에서 매번 초기화하면 무의미하다는 것 — '코드가 있다'와 '동작한다'는 다르다는 걸 확인했습니다.",
+                  "배포 환경에서는 파일 경로와 권한까지 고려한 설계가 필요하다는 점을 배웠습니다.",
+                  "캐시는 단순히 구현하는 것이 아니라 실제로 동작하는지 검증하는 과정이 중요하다는 것 — _vectordb = None 한 줄 때문에 캐시가 완전히 무력화돼 있었고, 성능 문제의 원인은 새로운 기능이 아니라 기존 로직을 정확히 분석하는 과정에서 발견할 수 있었습니다.",
                 ],
               },
             ],
