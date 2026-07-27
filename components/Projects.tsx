@@ -1,7 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { projectCards } from "@/lib/profile";
-import { Badge, CardHead, Section, Tags } from "./Section";
+import { CardHead, Section, Tags } from "./Section";
+import { AwardBadge } from "./AwardMark";
 import GitHubIcon from "./GitHubIcon";
 
 export default function Projects() {
@@ -43,7 +44,7 @@ export default function Projects() {
             <div className="flex flex-col flex-1 p-7">
               <CardHead
                 org={card.title}
-                badge={<Badge tone="accent">{card.badge}</Badge>}
+                badge={<AwardBadge badge={card.badge} />}
                 meta={
                   <>
                     {card.period}

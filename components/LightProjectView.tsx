@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { LightProject } from "@/lib/projectDetails";
 import ProjectGallery from "./ProjectGallery";
+import { AwardBadge } from "./AwardMark";
 import GitHubIcon from "./GitHubIcon";
 import RagDiagram from "./RagDiagram";
 import RouteDiagram from "./RouteDiagram";
@@ -39,9 +40,7 @@ export default function LightProjectView({
             <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
               {project.title}
             </h1>
-            <span className="rail rounded-full bg-tide/15 border border-tide/30 px-2.5 py-0.5">
-              {project.badge}
-            </span>
+            <AwardBadge badge={project.badge} />
           </div>
 
           {(project.github || project.homepage) && (

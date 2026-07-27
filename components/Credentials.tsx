@@ -17,7 +17,7 @@ export default function Credentials() {
             <li key={award.name}>
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                 <span className="rail rounded-full bg-tide/15 border border-tide/30 px-2.5 py-0.5">
-                  {award.result}
+                  👑 {award.result}
                 </span>
                 <h3 className="text-[0.95rem] font-semibold leading-snug">
                   {award.name}
