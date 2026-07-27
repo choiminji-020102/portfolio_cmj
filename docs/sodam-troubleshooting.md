@@ -372,20 +372,338 @@ def append_chat_memory(user_id, chat_id, question, answer):
 
 ---
 
-## ⑤ RAG 출처 표기 반복 개선 · ⭐⭐⭐⭐
+## ⑤ 이표번호를 모르면 대화가 끊기던 소 정보 조회 — 단일 노드에서 상태 기반 서브그래프로 · ⭐⭐⭐⭐⭐
 
-**문제** · 답변에 근거 문서 출처를 붙이기 시작하자 자잘한 오류가 이어졌다. 확장자가 그대로 노출(`무언가.pdf`)되고, 같은 문서가 중복 표기되고, `**` 같은 기호가 날것으로 나가고, 영어 질문에도 "출처:"가 한글로 붙었다.
+> **기술 스택** : LangGraph (Subgraph · Conditional Edge · State) · Firebase Firestore · Python
 
-**해결** · 문서 임베딩 시점부터 확장자를 뗀 파일명만 metadata에 저장하고, 출력은 중복 제거·기호 제거·질문 언어별 분기(`[출처]` / `[Source]`) 규칙으로 다듬었다. 커밋 `c2f4e1a → 5961f94 → 83f0337 → b945b5a → 5d29b8a`로 이어진 반복 개선이다.
+### 문제 상황
+
+소담이 챗봇의 소 정보 조회는 처음에 **단일 노드** 하나로 구현되어 있었다. 질문에서 12자리 이표번호를 추출해 Firestore에서 소를 찾고, 키워드(착유·발정·건강·백신·체중 등)로 사용자가 원하는 기록 유형을 추측해 최근 기록 1건을 반환하는 구조였다.
+
+이 구조는 두 지점에서 무너졌다.
+
+#### 1. 이표번호가 없으면 대화가 그 자리에서 끊겼다
 
 ```python
-base_name = os.path.splitext(file_name)[0]   # 확장자 제거한 파일명만 metadata로
-documents.append(Document(page_content=chunk, metadata={"source": base_name}))
+# ab1c23e — generate_farmdata_response (그래프 노드 라벨: generate_cow_info_answer)
+ear_tag_number = extract_ear_tag_number(question)
+if not ear_tag_number:
+    answer = "어떤 소에 대해 질문하시는지 12자리 이표번호(귀표번호)를 질문에 포함해 주세요."
+    return {**state, "current_answer": answer}   # ← 여기서 흐름 종료
 ```
 
-**적용 후** · 출처가 깔끔한 파일명으로, 중복·기호 없이, 질문 언어에 맞춰 표기된다.
+`"어제 분만한 소 누구야?"`, `"우리 농장 소 정보 알려줘"`처럼 개체를 특정하지 않은 질문은 전부 이 분기로 빠져 거부 메시지만 남기고 끝났다. 성공률을 측정할 필요도 없이 **코드 분기상 이표번호 없는 질문은 처리율 0%**였다. 사용자가 12자리 숫자를 외우고 있어야만 쓸 수 있는 챗봇이었다.
 
-**배운 점** · 근거를 "보여주는 것"과 "보기 좋게 보여주는 것"은 별개이며, 사용자에게 닿는 마지막 한 줄까지 다듬는 게 제품 완성도다. 한 번에 끝나지 않고 여러 커밋에 걸쳐 관찰→수정을 반복한 과정 자체가 실무에 가깝다.
+#### 2. 키워드 추측이 자주 빗나갔다
+
+정보 종류를 `if "착유" in question`, `elif "발정" in question` 식의 키워드 매칭으로 판단했다. 사용자가 쓰는 표현이 예상 키워드와 어긋나면 엉뚱한 기록을 반환했다. **조용히 틀린 답을 주는 쪽이, 못 찾았다고 말하는 것보다 나빴다.**
+
+### 원인 분석
+
+두 문제의 뿌리는 같았다. **여러 턴에 걸쳐야 할 조회 과정을 상태 없는 단일 모듈에 밀어 넣은 것**이다.
+
+실제 조회 흐름을 풀어보면 이렇다.
+
+```
+소 특정 → (실패 시) 후보 목록 제시 → 사용자 선택 → 정보 종류 선택 → 상세 응답
+```
+
+이 흐름은 본질적으로 **중간 상태**를 요구한다. 후보 목록이 무엇이었는지, 사용자가 어떤 소를 골랐는지를 다음 단계로 넘겨야 하는데, 단일 노드에는 이 상태를 담을 자리가 없었다.
+
+문제는 파일 크기에서도 드러났다. Firebase 실연동을 거치며 `cow_info_response.py`는 **99줄에서 344줄로 3.5배 비대해졌고**, 그 안에서 8개 함수가 이표번호 추출·DB 조회·카테고리 분류·응답 빌드를 모두 떠안고 있었다.
+
+주목할 점은 이 코드가 **깊게 중첩되어 있지는 않았다**는 것이다(최대 3단계). 문제는 복잡도의 깊이가 아니라 **넓이**였다. 한 모듈이 서로 다른 관심사 여러 개를 나란히 쥐고 있어서, "소를 못 찾으면 목록을 보여주고 고르게 하자"는 개선 하나를 넣으려 해도 조회·분류·응답 코드를 모두 헤집어야 했다.
+
+### 해결 방법 비교
+
+| 방법 | 장점 | 단점 |
+|---|---|---|
+| 단일 모듈에 조건 분기 추가 | 구현 비용 최소 | 관심사가 더 섞임, 분기 추가마다 전체 재검증 |
+| 메인 챗봇 그래프에 노드 5개 직접 추가 | 흐름은 분리됨 | 메인 그래프에 소 조회 전용 노드·엣지가 섞여 복잡도 급증 |
+| **전용 서브그래프로 분리** | 책임 분리, 전용 State 확보, 메인 그래프 불변 | 초기 설계 비용 |
+
+**전용 서브그래프**를 선택했다. 메인 그래프의 `classifier`는 "이 질문을 어느 기능으로 보낼 것인가"만 판단하고, 소 조회의 다단계 흐름은 서브그래프가 통째로 책임지는 구조다.
+
+### 해결 과정
+
+#### 1. 전용 State 분리
+
+메인 챗봇 상태(`DairyChatState`)와 별도로, 다단계 조회에 필요한 필드만 담은 State를 정의했다.
+
+```python
+# types.py
+class DairyChatState(TypedDict):          # 메인 챗봇 상태
+    user_id: str
+    chat_id: str
+    farm_id: str
+    current_question: str
+    current_answer: str
+    answer_route: Literal["rag", "cow_info", "general", "irrelevant"]
+
+
+class CowInfoState(TypedDict):            # 소 정보 조회 전용 상태
+    user_id: str
+    chat_id: str
+    farm_id: str
+    current_question: str
+    current_answer: str
+    selected_cow_info: Optional[Dict[str, Any]]   # 특정된 소의 기본 정보
+    awaiting_confirmation: bool
+    cow_list: Optional[List[Dict[str, Any]]]      # 후보 목록 (fallback용)
+```
+
+메인 상태가 `answer_route`(어디로 보낼지)만 든다면, `CowInfoState`는 `selected_cow_info`·`cow_list`(무엇을 조회 중인지)를 든다. **단일 노드 구조에서 담을 자리가 없었던 중간 상태**가 정확히 이 두 필드다.
+
+#### 2. 단일 노드 → 5개 노드 서브그래프 (커밋 `37f642e`)
+
+344줄짜리 단일 모듈을 관심사별 3개 파일(`graph` 40줄 / `nodes` 154줄 / `service` 193줄)로 쪼개고, 노드마다 책임을 하나씩만 지도록 나눴다.
+
+| 노드 | 책임 |
+|---|---|
+| `check_ear_tag_node` | 이표번호로 소 식별 (진입점) |
+| `show_cow_list_node` | 식별 실패 시 농장 소 목록 제시 (fallback) |
+| `select_cow_node` | 목록에서 사용자 선택 처리 |
+| `ask_info_detail_node` | 정보 카테고리 질의 |
+| `ask_info_detail_response_node` | 상세 조회 후 응답 생성 |
+
+```python
+# cow_info_graph.py
+def create_cow_info_graph():
+    graph = StateGraph(CowInfoState)
+
+    graph.add_node("check_ear_tag_node", RunnableLambda(check_ear_tag_node))
+    graph.add_node("show_cow_list_node", RunnableLambda(show_cow_list_node))
+    graph.add_node("select_cow_node", RunnableLambda(select_cow_node))
+    graph.add_node("ask_info_detail_node", RunnableLambda(ask_info_detail_node))
+    graph.add_node("ask_info_detail_response_node", RunnableLambda(ask_info_detail_response_node))
+
+    graph.set_entry_point("check_ear_tag_node")
+
+    graph.add_conditional_edges(
+        "check_ear_tag_node",
+        lambda s: "selected_cow_info" in s and s["selected_cow_info"] is not None,
+        {
+            True: "ask_info_detail_node",     # 소 특정 성공 → 목록 단계 스킵
+            False: "show_cow_list_node"       # 실패 → 목록 fallback
+        }
+    )
+    graph.add_edge("show_cow_list_node", "select_cow_node")
+    graph.add_edge("select_cow_node", "ask_info_detail_node")
+    graph.add_edge("ask_info_detail_node", "ask_info_detail_response_node")
+    graph.add_edge("ask_info_detail_response_node", END)
+
+    return graph.compile()
+```
+
+#### 3. 조건부 진입으로 지름길 확보
+
+위 `add_conditional_edges`가 이 설계의 핵심이다. `selected_cow_info` 필드 하나의 유무로 경로가 갈리므로, **이표번호를 아는 사용자는 리팩토링 전과 동일한 최단 경로**를 유지하면서 모르는 사용자에게만 목록 경로를 태울 수 있었다. fallback을 추가하되 기존 경험을 손해 보지 않는 것이 조건이었다.
+
+#### 4. 이중 식별 + 목록 fallback
+
+식별 실패가 곧 대화 종료가 되지 않도록 3단계로 완충했다.
+
+```python
+# 1차 — 정규식으로 12자리 이표번호 추출
+def extract_ear_tag_number(text: str) -> str | None:
+    match = re.search(r'(\d{12})', text)
+    return match.group(1) if match else None
+
+
+# 2차 — select_cow_node: 이표번호 완전일치 또는 이름 부분매칭
+ear_tag_number = extract_ear_tag_number(question)
+
+if ear_tag_number:
+    selected_cow = next(
+        (cow for cow in cow_list if cow["ear_tag_number"] == ear_tag_number), None
+    )
+else:
+    selected_cow = next(
+        (cow for cow in cow_list if cow["name"] in question), None   # 이름 부분매칭
+    )
+
+# 3차 — 실패 시 목록을 다시 제시해 흐름 유지
+if not selected_cow:
+    return show_cow_list_node(state)
+```
+
+목록은 이름·이표번호·출생일을 함께 노출하고 **최대 10마리로 제한**했다. 전체 노출은 목록 자체가 다시 정보 과부하가 되기 때문이다. 농장에 소가 한 마리도 없는 경우는 별도 안내로 분기했다.
+
+각 노드는 응답 생성 후 `append_chat_memory()`로 대화 기록을 남겨, 서브그래프 안에서 오간 내용도 전체 대화 맥락에 합류하도록 했다.
+
+> 초기 구조에서 거부당하던 `"어제 분만한 소 누구야?"` 같은 질문은, 이제 조건을 해석하지는 못하더라도 **목록 → 선택 경로로 흘러 조회가 이어진다.** 완전 해결이 아니라 실패 시의 착지점을 만든 것이 이 단계의 목표였다.
+
+#### 5. 키워드 추측 → 명시적 카테고리 선택
+
+추측을 없애고 사용자가 직접 고르게 바꿨다. 소 한 마리의 관리 정보는 수십 개 필드에 걸쳐 있어 전량 출력도 답이 아니었기에 **9개 카테고리**로 나눴다.
+
+`체형 / 산유 / 번식 / 건강 / 관리 / 혈통 / 사료 / 위치 / 행동`
+
+선택한 카테고리의 필드만 조회하고, 그중에서도 **값이 있는 필드만** 응답에 포함했다.
+
+```python
+def build_relevant_cow_info_by_category(category: str, basic: dict, detail: dict) -> dict:
+    if not basic or not detail:
+        return {"오류": "해당 소의 기본 정보 또는 상세 정보를 찾을 수 없습니다."}
+    if category not in fields_by_category:
+        return {"오류": f"카테고리 '{category}'는 지원하지 않습니다."}
+
+    category_data = detail.get(category, {})
+    for field in fields_by_category[category]:
+        value = category_data.get(field)
+        if value:                        # 빈 값 스킵 → 응답 간결화
+            info[field] = str(value)
+    return info
+```
+
+추측이 사라지면서 **틀린 답을 주는 경우 자체가 없어졌다.** 되묻기 한 번을 추가하는 대신 오답 위험을 제거한 트레이드오프다.
+
+#### 6. 실 데이터 불완전성 방어
+
+placeholder에서 실제 Firestore 연동으로 전환하자(`abbaed9`) 개발 중엔 보이지 않던 문제가 나왔다. 문서 누락, 스키마와 어긋난 enum 값, 빈 필드였다. 특히 enum 불일치는 `ValueError`로 요청 전체를 500으로 떨어뜨렸다.
+
+```python
+def get_basic_info_by_ear_tag_number(ear_tag_number: str):
+    try:
+        docs = db.collection('cows') \
+                 .where("ear_tag_number", "==", ear_tag_number) \
+                 .limit(1).stream()
+        cow_doc = next(docs, None)
+
+        if cow_doc is None or not cow_doc.exists:
+            print(f"[ERROR] 해당 이표번호로 문서를 찾지 못했습니다: {ear_tag_number}")
+            return None
+
+        cow_data = cow_doc.to_dict()
+
+        health_status = None
+        if cow_data.get("health_status"):
+            try:
+                health_status = HealthStatus(cow_data["health_status"])
+            except ValueError:
+                print(f"[WARNING] 잘못된 health_status 값: {cow_data['health_status']} "
+                      f"(젖소 ID: {cow_data['id']})")
+                health_status = HealthStatus.NORMAL   # 기본값 복구
+
+        breeding_status = None
+        if cow_data.get("breeding_status"):
+            try:
+                breeding_status = BreedingStatus(cow_data["breeding_status"])
+            except ValueError:
+                print(f"[WARNING] 잘못된 breeding_status 값: {cow_data['breeding_status']} "
+                      f"(젖소 ID: {cow_data['id']})")
+                breeding_status = None                # 폴백값 없이 비움
+
+        return { ... }   # 15개 필드
+
+    except Exception as e:
+        print(f"[ERROR] 특정 젖소 *기본 정보* 조회 전체 실패 "
+              f"(ear_tag_number: {ear_tag_number}): {str(e)}")
+        return None
+```
+
+폴백 전략을 필드마다 다르게 가져간 것은 의도적이다. `health_status`는 표시 자체가 목적이므로 `NORMAL`로 복구하고, `breeding_status`는 잘못된 값으로 번식 판단을 오도하느니 비우는 편이 안전하다고 봤다.
+
+모든 Firestore 조회를 `try/except`로 감싸 실패 시 `None`을 반환하고, 호출부에서 안내 메시지로 변환했다. **어떤 예외 경로로도 500이 나지 않는 것**을 기준으로 삼았다.
+
+| 예외 상황 | 처리 |
+|---|---|
+| 문서 없음 / 조회 실패 | `[ERROR]` 로그 + `None` 반환 → 안내 메시지 |
+| enum 값 불일치 | `[WARNING]` 로그 + `HealthStatus.NORMAL` / `breeding_status=None` |
+| 농장에 소 없음 | 등록 유도 메시지 |
+| 카테고리 오입력 | 9개 목록 재안내 |
+| 기본·상세 정보 한쪽 누락 | "정보를 찾을 수 없습니다" 안내 |
+
+#### 7. 서브그래프 통합 버그 (커밋 `2c83f8e`)
+
+서브그래프를 부모 그래프에 붙이며 `.as_runnable()`을 호출했는데, `compile()`이 이미 실행 가능한 그래프를 반환하므로 불필요한 호출이었다.
+
+```diff
+- cow_info_subgraph = create_cow_info_graph().as_runnable()
++ cow_info_subgraph = create_cow_info_graph()   # compile() 결과가 이미 Runnable
+```
+
+### 적용 결과
+
+**메인 그래프 노드 수는 5개 그대로 두고, cow_info 처리 노드만 1개 → 5개로 늘렸다.**
+
+| 구분 | 초기 (`ab1c23e`) | 현재 (HEAD) |
+|---|---|---|
+| 메인 그래프 노드 수 | 5 | **5 (변동 없음)** |
+| cow_info 처리 | 단일 노드 | `cow_info_graph` 서브그래프 |
+| cow_info 노드 수 | 1 | **5** |
+| cow_info 파일 구성 | 1파일 344줄 / 8함수 | 3파일 387줄 (graph·nodes·service) |
+
+메인 그래프는 `classifier / general_response / rag_response / cow_info_graph / irrelevant_response` 5개를 그대로 유지한다. 소 조회 로직이 5배로 세분화되는 동안 메인 그래프는 단 한 줄도 복잡해지지 않았다는 점이, 서브그래프 분리가 실제로 값을 한 지점이다.
+
+라인 수 자체는 344줄에서 387줄로 오히려 늘었다. 하지만 **8개 함수가 뒤섞여 있던 한 파일이 그래프 정의·노드 로직·DB 접근 3계층으로 갈렸고**, 이후 수정은 해당 계층 파일만 열면 되는 구조가 됐다.
+
+그 외 결과는 다음과 같다.
+
+- **이표번호를 몰라도 조회 경로가 생겼다.** 이표번호가 없으면 무조건 거부하고 종료하던 분기를 제거하고, 목록 → 선택 경로로 연결했다.
+- **조건부 진입**으로 이표번호가 명확한 경우의 경로 길이는 리팩토링 전과 동일하게 유지했다.
+- **키워드 추측 제거**로 오답 응답 가능성을 없앴다.
+- Firestore 예외 5종을 안내 메시지로 흡수해, DB 데이터가 깨져도 500이 아닌 대화로 처리된다.
+
+#### git 진화 타임라인
+
+```
+ab1c23e  단일 노드 (generate_farmdata_response, 99줄)
+   ↓
+abbaed9  실 DB 연동 → generate_cow_info_response로 개명, 344줄로 비대화
+   ↓
+0de1fea  질문 분류 · 이표번호 추출 로직 개선
+   ↓
+37f642e  5노드 서브그래프 분리 (graph / nodes / service 3파일 신규)
+   ↓
+2c83f8e  서브그래프 통합 버그 수정 (.as_runnable() 제거)
+```
+
+### 남은 과제
+
+문서화하며 코드를 다시 감사한 결과 확인한, 아직 해결되지 않은 지점들이다.
+
+#### 1. 다단계 설계와 단일 실행의 간극 (가장 근본적)
+
+서브그래프는 **다단계 대화**를 전제로 설계했지만, 현재 그래프는 진입부터 `END`까지 **한 번의 실행에서 완주**한다. 사용자 입력을 받기 위해 중간에 멈추는 지점이 없다.
+
+그 결과 두 가지가 어긋난다.
+
+- **`awaiting_confirmation`이 소비되지 않는다.** 레포 전역 grep 결과 세팅 3곳, 읽기 0곳이다. 턴을 넘겨 이 플래그를 검사할 지점 자체가 없기 때문이다.
+- **카테고리 검증이 같은 질문으로 수행된다.** `ask_info_detail_node`가 9개 목록을 안내한 직후 `ask_info_detail_response_node`가 `category = question.strip()`으로 검증하는데, 이 `question`은 사용자가 목록을 보기 전에 던진 원래 질문이다.
+
+해결하려면 LangGraph의 checkpointer와 `interrupt`를 도입해 노드 사이에서 실행을 중단·재개하고, 재진입 시 `awaiting_confirmation`을 검사하는 조건부 엣지를 추가해야 한다. 이것이 다음 작업의 1순위다.
+
+#### 2. 노드가 다른 노드를 직접 호출해 생기는 경로 오염
+
+fallback을 그래프 엣지가 아니라 **파이썬 함수 직접 호출**로 구현한 지점이 두 곳 있다.
+
+```python
+# check_ear_tag_node 마지막 줄
+return show_cow_list_node(state)      # 함수를 직접 호출
+```
+
+이 경우 `show_cow_list_node`가 실행되어 `selected_cow_info=None`이 담긴 상태가 반환되고, 그 직후 조건부 엣지가 다시 `False`로 평가되어 **같은 노드가 한 번 더 실행된다.** Firestore 조회와 `append_chat_memory`가 중복되는 구조다.
+
+`select_cow_node`도 실패 시 같은 방식으로 반환하는데, 이후 엣지는 조건 없이 `ask_info_detail_node`로 향한다. 그곳에서 `cow['name']`을 참조하므로 **`selected_cow_info`가 `None`이면 `TypeError`가 발생**한다.
+
+fallback을 함수 호출이 아니라 조건부 엣지로 옮기는 것이 옳은 수정이다.
+
+#### 3. 데이터 계층의 결함 3가지
+
+- **조회 방식 불일치** — 기본 정보는 필드 쿼리(`.where("ear_tag_number", ...)`), 상세 정보는 문서 ID 접근(`.document(ear_tag_number)`)이다. 문서 ID와 이표번호가 다른 데이터가 들어오면 기본 정보만 조회되고 상세 정보는 조용히 빈다.
+- **`behavioral_info`의 enum 폴백 누락** — `Temperament(...)` / `MilkingBehavior(...)` 변환에는 개별 `try/except`가 없다. 값이 깨져 있으면 바깥 `try`에 잡혀 상세 조회 전체가 `None`으로 실패한다. `health_status`와 동일한 개별 폴백이 필요하다.
+- **동기 DB 호출** — `show_cow_list_node`의 Firestore 호출이 동기라 이벤트 루프를 블로킹한다.
+
+### 배운 점
+
+이 구조는 처음부터 설계한 것이 아니라, **단일 노드가 한계에 부딪히면서 밀려서 도달한 결과**다.
+
+"이표번호가 없으면 대화가 끊긴다"는 실제 한계가 목록·선택 흐름을 요구했고, 그 흐름을 담으려니 중간 상태가 필요해졌고, 상태를 관리하려니 서브그래프로 갈 수밖에 없었다. 하나의 모듈에 여러 책임이 쌓이면 **분기를 하나 추가하는 일이 곧 구조의 한계선**이 되고, 그 시점이 상태를 가진 워크플로우로 분리할 타이밍이라는 것을 배웠다.
+
+또한 서브그래프 분리의 효과가 "그래프가 단순해졌다"가 아니라 **"복잡도를 한 곳에 가둬 메인 그래프를 안 건드리게 만들었다"**는 것도 노드 수를 직접 세어보고 나서야 정확히 이해했다. 메인 그래프 노드 수는 5개 그대로였고, 라인 수는 오히려 늘었다. 리팩토링의 성과를 "줄었다"로 말하려던 습관을 고치게 된 계기였다.
+
+가장 크게 남은 배움은 **"구조를 만드는 것"과 "구조가 의도대로 도는 것"은 다른 문제**라는 점이다. 다단계 대화를 전제로 State와 노드를 나눴지만, 실행 모델(단일 실행 완주)을 함께 설계하지 않아 `awaiting_confirmation` 같은 필드가 쓰이지 못한 채 남았다. 상태 기반 워크플로우에서는 **상태를 어떻게 나눌지와 함께, 그 상태가 언제 저장되고 언제 재개되는지까지 같이 결정해야 한다**는 것을 이번 감사 과정에서 확인했다.
 
 ---
 
@@ -415,8 +733,8 @@ documents.append(Document(page_content=chunk, metadata={"source": base_name}))
 - **효과** — 맥락 격리·KeyError 제거, 대화 스크립트형 포맷으로 멀티턴 맥락 연결
 - `#Memory` `#멀티턴` `#세션관리`
 
-## ⑤ RAG 출처 표기 반복 개선 · ⭐⭐⭐⭐
-- **문제** — 출처에 확장자·중복·기호 노출, 영어 질문에도 한글 "출처:"
-- **해결** — 임베딩 단계에서 확장자 제거 파일명만 metadata 저장, 중복·기호 제거 + 언어별 `[출처]`/`[Source]` (커밋 5건)
-- **효과** — 출처가 깔끔·정확·다국어로 표기됨
-- `#RAG` `#응답품질` `#다국어`
+## ⑤ 이표번호를 모르면 대화가 끊기던 소 정보 조회 — 단일 노드에서 상태 기반 서브그래프로 · ⭐⭐⭐⭐⭐
+- **문제** — 소 정보 조회가 단일 노드로 구현돼 있어, 질문에 12자리 이표번호가 없으면 안내 메시지만 남기고 대화가 종료됐다(코드 분기상 처리율 0%).
+- **해결** — LangGraph 서브그래프로 분리해 소 식별·목록 fallback·선택·카테고리 질의·상세 응답 5개 노드로 책임을 나누고, `selected_cow_info` 유무를 조건부 엣지로 평가해 이표번호를 아는 사용자는 목록 단계를 건너뛰게 했다.
+- **효과** — cow_info 처리 노드가 1개 → 5개로 늘어나는 동안 메인 그래프는 5개 그대로 유지됐고, 이표번호 없이도 목록 → 선택 경로가 생겼다(대신 코드량은 344줄 1파일 → 387줄 3파일로 늘고, 되묻기 한 턴이 추가됨).
+- `#서브그래프분리` `#상태관리` `#폴백설계` `#책임분리`
