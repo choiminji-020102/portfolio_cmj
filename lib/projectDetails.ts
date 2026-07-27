@@ -36,6 +36,7 @@ export interface TroubleItem {
   solution: string;
   effect: string;
   tags?: string[];
+  tech?: string[]; // 풀버전 상단 기술 스택
   diagram?: "route"; // 곁들일 다이어그램
   details?: TroubleDetail[]; // 아코디언 풀버전
 }
@@ -158,6 +159,7 @@ export const lightProjects: LightProject[] = [
             effect:
               "로컬과 배포 환경에서 동일하게 동작하는 구조를 구축하고, 첫 요청 이후에는 Vector DB를 재사용해 반복적인 로딩과 재임베딩을 제거했습니다.",
             tags: ["배포환경", "벡터DB", "캐싱", "RAG"],
+            tech: ["LangGraph", "LangChain", "ChromaDB", "OpenAI Embedding", "Python"],
             details: [
               {
                 heading: "원인 ① — 배포 환경에서 Vector DB 생성 실패",
@@ -220,6 +222,7 @@ if _vectordb:               # → 항상 거짓이 되어 캐시 미사용
             effect:
               "질문 유형별 데이터 소스가 명확히 분리돼 답변 품질이 안정화됐고, 서비스 정체성과 사용자 경험을 모두 유지하는 라우팅 구조를 구축했습니다.",
             tags: ["LangGraph", "라우팅설계", "의도분류", "RAG"],
+            tech: ["LangGraph", "LangChain", "OpenAI GPT-4o-mini", "Python"],
             diagram: "route",
             details: [
               {

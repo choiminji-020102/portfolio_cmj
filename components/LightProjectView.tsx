@@ -311,6 +311,14 @@ export default function LightProjectView({
                                   자세히 — 원인·비교·코드·배운 점
                                 </summary>
                                 <div className="mt-4 space-y-5 border-l-2 border-tide/30 pl-5">
+                                  {trouble.tech && trouble.tech.length > 0 && (
+                                    <p className="rail text-muted">
+                                      <span className="font-semibold text-ink">
+                                        기술 스택
+                                      </span>
+                                      &nbsp;&nbsp;{trouble.tech.join(" · ")}
+                                    </p>
+                                  )}
                                   {trouble.details.map((d) => (
                                     <div key={d.heading}>
                                       <p className="text-[0.85rem] font-semibold text-ink">
