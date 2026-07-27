@@ -300,6 +300,76 @@ export default function LightProjectView({
                                 ))}
                               </ul>
                             )}
+
+                            {/* 풀버전 — 클릭하면 펼쳐지는 아코디언 */}
+                            {trouble.details && trouble.details.length > 0 && (
+                              <details className="group mt-4 ml-8">
+                                <summary className="rail inline-flex cursor-pointer items-center gap-1.5 text-deep hover:underline underline-offset-4 list-none [&::-webkit-details-marker]:hidden">
+                                  <span className="transition-transform group-open:rotate-90">
+                                    ▸
+                                  </span>
+                                  자세히 — 원인·비교·코드·배운 점
+                                </summary>
+                                <div className="mt-4 space-y-5 border-l-2 border-tide/30 pl-5">
+                                  {trouble.details.map((d) => (
+                                    <div key={d.heading}>
+                                      <p className="text-[0.85rem] font-semibold text-ink">
+                                        {d.heading}
+                                      </p>
+                                      {d.paragraphs?.map((para, pi) => (
+                                        <p
+                                          key={pi}
+                                          className="mt-1.5 text-[0.85rem] leading-relaxed text-muted"
+                                        >
+                                          {para}
+                                        </p>
+                                      ))}
+                                      {d.table && (
+                                        <div className="mt-2 overflow-x-auto">
+                                          <table className="w-full text-[0.8rem] border-collapse">
+                                            <thead>
+                                              <tr>
+                                                {d.table.head.map((h) => (
+                                                  <th
+                                                    key={h}
+                                                    className="border border-line bg-surface px-2.5 py-1.5 text-left font-semibold"
+                                                  >
+                                                    {h}
+                                                  </th>
+                                                ))}
+                                              </tr>
+                                            </thead>
+                                            <tbody>
+                                              {d.table.rows.map((row, ri) => (
+                                                <tr key={ri}>
+                                                  {row.map((cell, ci) => (
+                                                    <td
+                                                      key={ci}
+                                                      className={`border border-line px-2.5 py-1.5 align-top ${
+                                                        ci === 0
+                                                          ? "font-medium text-ink"
+                                                          : "text-muted"
+                                                      }`}
+                                                    >
+                                                      {cell}
+                                                    </td>
+                                                  ))}
+                                                </tr>
+                                              ))}
+                                            </tbody>
+                                          </table>
+                                        </div>
+                                      )}
+                                      {d.code && (
+                                        <pre className="mt-2 overflow-x-auto rounded-lg bg-ink text-[#e6e4ea] p-4 text-[0.78rem] leading-relaxed">
+                                          <code>{d.code}</code>
+                                        </pre>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              </details>
+                            )}
                           </div>
                         ))}
                       </div>

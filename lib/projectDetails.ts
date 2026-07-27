@@ -17,7 +17,18 @@ export interface SolutionBlock {
   points: string[];
 }
 
-/* 트러블슈팅·기술적 의사결정 — 문제 → 해결 → 효과 + 태그 (슬림버전) */
+/* 풀버전 상세 — 아코디언에 펼쳐지는 심화 블록 */
+export interface TroubleDetail {
+  /** 소제목 + 문단 (원인 분석, 해결 방법 비교, 적용 후, 배운 점 등) */
+  heading: string;
+  paragraphs?: string[];
+  /** 표 (해결 방법 비교 등): 헤더 행 + 본문 행들 */
+  table?: { head: string[]; rows: string[][] };
+  /** 코드 블록 */
+  code?: string;
+}
+
+/* 트러블슈팅·기술적 의사결정 — 슬림(문제→해결→효과) + 풀버전(details) */
 export interface TroubleItem {
   title: string;
   stars?: number; // 중요도 (1~5)
@@ -26,6 +37,7 @@ export interface TroubleItem {
   effect: string;
   tags?: string[];
   diagram?: "route"; // 곁들일 다이어그램
+  details?: TroubleDetail[]; // 아코디언 풀버전
 }
 
 /* 핵심 AI 기능 — 문제 → 해결 → 수치 구조.
@@ -146,6 +158,31 @@ export const lightProjects: LightProject[] = [
             effect:
               "로컬·배포가 동일 경로로 동작하고, 첫 요청 이후에는 벡터 DB를 다시 로딩하지 않습니다(반복 파일 접근·재임베딩 제거).",
             tags: ["배포환경", "캐시", "RAG"],
+            details: [
+              {
+                heading: "원인 분석",
+                paragraphs: [
+                  "로그를 따라가 보니 두 가지가 겹쳐 있었습니다.",
+                  "① persist_dir 기본값이 \"/RAG/chroma\"였습니다. 앞에 /가 붙어 파일시스템 루트 기준 절대경로가 됐고, 로컬에서는 프로젝트 루트에서 실행돼 우연히 통했지만 배포 서버에서는 루트에 쓰기 권한이 없어 DB 생성이 실패했습니다.",
+                  "② 함수 진입부에서 _vectordb = None을 매번 실행하고 있었습니다. 바로 아래에 캐시 히트 분기(if _vectordb:)가 있는데도, 그 위에서 캐시를 매번 지워버려 분기가 항상 거짓이 됐습니다.",
+                ],
+              },
+              {
+                heading: "핵심 변경",
+                code: `# before → after
+persist_dir="/RAG/chroma"   →  persist_dir="RAG/chroma"   # 루트 절대경로 → 상대경로
+_vectordb = None            →  # _vectordb = None          # 매 호출 캐시 초기화 제거
+
+# 추가: source_folder 존재 확인·빈 문서 방어·try/except 로
+#       실패 시 원인이 로그에 바로 드러나게 함`,
+              },
+              {
+                heading: "배운 점",
+                paragraphs: [
+                  "로컬에서 되던 코드가 배포에서 깨진 원인이 경로·권한 가정이었다는 것, 그리고 캐시 분기가 있어도 그 위에서 매번 초기화하면 무의미하다는 것 — '코드가 있다'와 '동작한다'는 다르다는 걸 확인했습니다.",
+                ],
+              },
+            ],
           },
           {
             title: "질문 라우팅 아키텍처의 진화 (3분류 → 4분류 → 역할 재정의)",
@@ -158,6 +195,38 @@ export const lightProjects: LightProject[] = [
               "무관 질문은 LLM 호출 전에 종료되고, UX 대화 오차단이 해소되며, 의도별로 서로 다른 데이터 소스(문서·농장 DB·대화 맥락)에 연결됩니다.",
             tags: ["LangGraph", "아키텍처진화", "의도분류"],
             diagram: "route",
+            details: [
+              {
+                heading: "1차 대응 — irrelevant 추가",
+                paragraphs: [
+                  "무관 질문을 걸러내려고 네 번째 분류 irrelevant와 전용 노드 handle_irrelevant_question을 추가했습니다. 무관 질문이면 LLM 호출 없이 '낙농업 관련 질문에만 답할 수 있어요'로 종료시켰습니다.",
+                ],
+              },
+              {
+                heading: "관찰된 부작용 → 2차 대응",
+                paragraphs: [
+                  "실사용을 보니 irrelevant가 과하게 작동했습니다. '너 아까 뭐랬어?'처럼 낙농 질문은 아니지만 챗봇으로서 응대해야 할 UX 대화까지 무관 질문으로 잘려나갔습니다.",
+                  "노드를 더 만드는 대신 기존 노드의 책임을 다시 나눴습니다. rag는 낙농 지식으로 단일화(문서에 없으면 지식 fallback), general은 잡담용에서 UX 대화 전담으로 재정의, cow_info는 '그 소·그 아이' 지시어까지 개체 조회로 흡수, irrelevant는 로또·주식 등 완전 무관에만 한정했습니다.",
+                ],
+              },
+              {
+                heading: "핵심 코드",
+                code: `builder.add_conditional_edges("classifier", route_by_answer_type, {
+    "rag":        "rag_response",         # 낙농 지식 (문서 없으면 지식 fallback)
+    "cow_info":   "cow_info_graph",       # 특정 개체 조회 ("103번 소", "그 소")
+    "general":    "general_response",     # UX 대화 ("아까 뭐랬어?", "고마워")
+    "irrelevant": "irrelevant_response",  # 완전 무관 (로또·주식)
+})
+if result not in {"rag", "cow_info", "general", "irrelevant"}:  # LLM 오출력 방어
+    result = "irrelevant"`,
+              },
+              {
+                heading: "배운 점",
+                paragraphs: [
+                  "이 항목의 핵심은 '4분류를 만들었다'가 아니라 분류를 추가했다가 부작용을 관찰하고 노드의 책임을 다시 나눈 과정입니다. 새 문제마다 노드를 늘리기보다, 기존 노드의 역할을 재정의하는 게 더 나은 선택일 때가 있다는 걸 배웠습니다.",
+                ],
+              },
+            ],
           },
           {
             title: "RAG 검색 실패 시 응답 전략 — 프롬프트냐 노드냐",
@@ -169,6 +238,42 @@ export const lightProjects: LightProject[] = [
             effect:
               "검색이 실패해도 응답이 비지 않고 지식 기반으로 이어집니다. no-hit용 노드를 추가하지 않아 그래프가 단순하게 유지됐습니다.",
             tags: ["RAG", "Fallback", "의사결정"],
+            details: [
+              {
+                heading: "해결 방법 비교",
+                table: {
+                  head: ["항목", "프롬프트 내부 처리", "LangGraph 노드 분기"],
+                  rows: [
+                    ["응답 속도", "빠름 (한 번에 처리)", "느림 (재분기 필요)"],
+                    ["유지보수", "쉬움", "복잡"],
+                    ["의도 제어", "'없으면 지식으로' 지시로 명확", "흐름 중첩 위험"],
+                    ["구현 난이도", "낮음", "높음 (상태 추가 전달)"],
+                  ],
+                },
+              },
+              {
+                heading: "왜 프롬프트 처리인가",
+                paragraphs: [
+                  "no-hit는 별도 노드로 분기할 만큼 복잡한 상태 전이가 아니라, 프롬프트 한 곳에서 조건부 지시로 처리할 수 있는 케이스라고 판단했습니다. 노드를 늘리면 그래프만 복잡해질 뿐 얻는 게 없었습니다.",
+                ],
+              },
+              {
+                heading: "핵심 코드",
+                code: `context = context.strip() or "※ 참고할 문서가 없습니다."   # 빈 검색결과를 명시적 신호로
+
+# 프롬프트
+"""아래 참고 자료를 우선 사용하되,
+자료가 비었거나 답을 찾을 수 없으면 알고 있는 지식·상식으로 답해도 됩니다.
+[참고 자료]
+{context}"""`,
+              },
+              {
+                heading: "배운 점",
+                paragraphs: [
+                  "RAG의 완성도는 잘 찾을 때가 아니라 못 찾을 때의 동작에서 갈린다는 것, 그리고 모든 예외를 노드로 쪼갤 필요는 없고 처리 위치(프롬프트 vs 그래프)를 비용 대비로 고르는 게 설계라는 걸 배웠습니다.",
+                ],
+              },
+            ],
           },
           {
             title: "사용자별·채팅방별 세션 메모리 구조",
@@ -180,6 +285,24 @@ export const lightProjects: LightProject[] = [
             effect:
               "유저·채팅방별 맥락이 격리되고, 대화 스크립트형 포맷 덕에 '그 소·아까 그거' 같은 후속 질문의 맥락이 프롬프트에 자연스럽게 이어집니다.",
             tags: ["Memory", "멀티턴", "세션관리"],
+            details: [
+              {
+                heading: "핵심 코드",
+                code: `chat_memory_store: Dict[Tuple[str, str], List[str]] = {}
+
+def append_chat_memory(user_id, chat_id, question, answer):
+    key = (user_id, chat_id)
+    memory = chat_memory_store.get(key, [])   # 없으면 빈 리스트
+    memory += [f"사용자: {question}", f"소담이: {answer}"]
+    chat_memory_store[key] = memory`,
+              },
+              {
+                heading: "배운 점",
+                paragraphs: [
+                  "메모리를 어떤 키와 자료구조로 들고 있느냐가 멀티턴 품질과 확장성을 좌우한다는 것, LLM에겐 dict보다 사람이 읽는 대화 텍스트가 더 잘 맞는다는 것을 배웠습니다.",
+                ],
+              },
+            ],
           },
           {
             title: "RAG 출처 표기 반복 개선",
@@ -191,6 +314,27 @@ export const lightProjects: LightProject[] = [
             effect:
               "출처가 깔끔한 파일명으로, 중복·기호 없이, 질문 언어에 맞춰 표기됩니다.",
             tags: ["RAG", "응답품질", "다국어"],
+            details: [
+              {
+                heading: "핵심 코드",
+                code: `base_name = os.path.splitext(file_name)[0]   # 확장자 제거한 파일명만 metadata로
+documents.append(Document(page_content=chunk, metadata={"source": base_name}))
+
+# 출력 규칙: 중복 제거 · 기호 제거 · 질문 언어별 [출처]/[Source] 분기`,
+              },
+              {
+                heading: "반복 개선 과정",
+                paragraphs: [
+                  "한 번에 끝나지 않고 커밋 c2f4e1a → 5961f94 → 83f0337 → b945b5a → 5d29b8a로 이어진 관찰→수정의 반복이었습니다.",
+                ],
+              },
+              {
+                heading: "배운 점",
+                paragraphs: [
+                  "근거를 '보여주는 것'과 '보기 좋게 보여주는 것'은 별개이며, 사용자에게 닿는 마지막 한 줄까지 다듬는 게 제품 완성도입니다. 여러 커밋에 걸쳐 관찰→수정을 반복한 과정 자체가 실무에 가까웠습니다.",
+                ],
+              },
+            ],
           },
         ],
       },
