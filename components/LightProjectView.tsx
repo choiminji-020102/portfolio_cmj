@@ -6,12 +6,15 @@ import { AwardBadge } from "./AwardMark";
 import GitHubIcon from "./GitHubIcon";
 import RagDiagram from "./RagDiagram";
 import RouteDiagram from "./RouteDiagram";
+import TroubleDetails from "./TroubleDetails";
 
 export default function LightProjectView({
   project,
 }: {
   project: LightProject;
 }) {
+  // 제안 배경 막대그래프 세그먼트 색 (진→연)
+  const barTones = ["bg-deep", "bg-deep/55", "bg-deep/35", "bg-deep/20"];
   return (
     <div className="min-h-screen bg-ground">
       {/* 상단바 */}
@@ -96,9 +99,166 @@ export default function LightProjectView({
         {project.background && (
           <section className="mt-16">
             <h2 className="text-2xl font-bold tracking-tight">제안 배경</h2>
-            <p className="mt-6 text-[0.95rem] leading-relaxed text-muted">
-              {project.background}
-            </p>
+            {/* 좌(리드+규모별 그래프) / 우(두 원인 = 텍스트+그래픽) — 같은 높이 */}
+            <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_auto_1fr] lg:items-stretch lg:gap-8">
+              {/* 왼쪽 — 리드 → 규모별 그래프 (세로 중앙) */}
+              <div className="flex flex-col justify-center gap-6">
+                {/* 리드 — 위기 → 결과 */}
+                <div>
+                  <p className="text-base font-semibold leading-relaxed text-ink">
+                    {project.background}
+                  </p>
+                  {project.backgroundEffect && (
+                    <p className="mt-2 flex items-start gap-2 text-base font-semibold leading-relaxed text-ink">
+                      <span aria-hidden="true" className="text-tide">
+                        →
+                      </span>
+                      {project.backgroundEffect}
+                    </p>
+                  )}
+                </div>
+
+                {/* 규모별 폐업 그래프 */}
+                {project.backgroundChart && (
+                  <Image
+                    src={project.backgroundChart.src}
+                    alt={project.backgroundChart.alt}
+                    width={project.backgroundChart.width}
+                    height={project.backgroundChart.height}
+                    className="h-auto w-full rounded-lg"
+                    unoptimized
+                  />
+                )}
+              </div>
+
+              {/* 파생 화살표 — 데스크톱 →, 모바일 ↓ */}
+              <div
+                aria-hidden="true"
+                className="flex justify-center lg:self-center"
+              >
+                <svg
+                  viewBox="0 0 48 12"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.75"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-3 w-12 rotate-90 text-tide lg:rotate-0"
+                >
+                  <line x1="1" y1="6" x2="42" y2="6" />
+                  <polyline points="36,1.5 42,6 36,10.5" />
+                </svg>
+              </div>
+
+              {/* 오른쪽 — 두 원인: 각 원인 텍스트 아래에 해당 그래픽 */}
+              {project.backgroundCauses &&
+                project.backgroundCauses.length > 0 && (
+                  <div className="flex flex-col gap-7">
+                    {project.backgroundCauses.map((cause) => (
+                      <div key={cause.index}>
+                        <p className="text-[0.95rem] font-semibold leading-relaxed text-ink">
+                          <span className="mr-2 font-mono font-normal text-deep tabular-nums">
+                            원인 {cause.index})
+                          </span>
+                          {cause.title}
+                        </p>
+                        <p className="mt-1 text-[0.95rem] leading-relaxed text-muted">
+                          {cause.statLabel}{" "}
+                          <span className="font-mono text-deep tabular-nums">
+                            ({cause.stat})
+                          </span>
+                        </p>
+                        {cause.image && (
+                          <Image
+                            src={cause.image.src}
+                            alt={cause.image.alt}
+                            width={cause.image.width}
+                            height={cause.image.height}
+                            className={`mt-3 h-auto w-full rounded-lg ${
+                              cause.image.maxWidthClass ?? ""
+                            }`}
+                            unoptimized
+                          />
+                        )}
+                        {cause.barChart && (
+                          <div className="mt-3">
+                            <div className="flex h-9 w-full overflow-hidden rounded-md">
+                              {cause.barChart.segments.map((seg, i) => (
+                                <div
+                                  key={`seg-${i}`}
+                                  style={{ flexGrow: seg.value }}
+                                  className={`flex items-center justify-center text-xs font-semibold tabular-nums ${
+                                    barTones[i] ?? "bg-deep/20"
+                                  } ${i < 2 ? "text-white" : "text-ink/55"}`}
+                                >
+                                  {seg.value}%
+                                </div>
+                              ))}
+                            </div>
+                            <div className="mt-2.5 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-sm text-ink">
+                              {cause.barChart.segments.map((seg, i) =>
+                                seg.label ? (
+                                  <span
+                                    key={`leg-${i}`}
+                                    className="inline-flex items-center gap-2"
+                                  >
+                                    <span
+                                      className={`inline-block h-3 w-3 rounded-sm ${
+                                        barTones[i] ?? "bg-deep/20"
+                                      }`}
+                                    />
+                                    {seg.label}
+                                    <span className="font-mono text-deep tabular-nums">
+                                      {seg.value}%
+                                    </span>
+                                  </span>
+                                ) : null
+                              )}
+                            </div>
+                          </div>
+                        )}
+                        {cause.surveyCard && (
+                          <figure className="mt-3 w-full rounded-lg border border-line bg-surface p-4">
+                            <figcaption className="border-y-[3px] border-double border-ink/25 py-2 text-center text-[0.95rem] font-bold tracking-tight text-ink">
+                              {cause.surveyCard.title}
+                            </figcaption>
+                            <blockquote className="mt-3 text-[0.85rem] leading-relaxed text-ink/80">
+                              {cause.surveyCard.quote}
+                            </blockquote>
+                            {cause.surveyCard.source && (
+                              <p className="rail mt-3 text-right text-muted">
+                                {cause.surveyCard.source}
+                              </p>
+                            )}
+                          </figure>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+            </div>
+
+            {/* 계기 · 목표 — 박스 없이 2단 (하단 역할 박스와 중복 방지) */}
+            {(project.backgroundOrigin || project.backgroundGoal) && (
+              <div className="mt-10 grid gap-x-10 gap-y-6 border-t border-line pt-8 sm:grid-cols-2">
+                {project.backgroundOrigin && (
+                  <div>
+                    <p className="rail text-muted">계기</p>
+                    <p className="mt-2 text-[0.95rem] leading-relaxed text-ink">
+                      {project.backgroundOrigin}
+                    </p>
+                  </div>
+                )}
+                {project.backgroundGoal && (
+                  <div>
+                    <p className="rail text-muted">목표</p>
+                    <p className="mt-2 text-[0.95rem] font-medium leading-relaxed text-ink">
+                      {project.backgroundGoal}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
           </section>
         )}
 
@@ -106,9 +266,52 @@ export default function LightProjectView({
         {project.myRole && (
           <section className="mt-16">
             <h2 className="text-2xl font-bold tracking-tight">내가 맡은 역할</h2>
-            <div className="mt-6 rounded-xl border border-tide/40 bg-tide/8 p-5 sm:p-6">
-              <p className="text-[0.95rem] leading-relaxed">{project.myRole}</p>
-            </div>
+            <p className="mt-6 text-base font-medium leading-relaxed text-ink">
+              {project.myRole}
+            </p>
+
+            {/* 담당 축 — 3개 영역 */}
+            {project.myRoleAreas && project.myRoleAreas.length > 0 && (
+              <div className="mt-8">
+                <p className="rail text-muted">담당 영역</p>
+                <div className="mt-4 grid gap-6 sm:grid-cols-3">
+                  {project.myRoleAreas.map((area) => (
+                    <div
+                      key={area.title}
+                      className="border-t-2 border-tide/40 pt-3"
+                    >
+                      <p className="text-[0.95rem] font-semibold leading-snug text-ink">
+                        {area.title}
+                      </p>
+                      <p className="mt-1.5 text-sm leading-relaxed text-muted">
+                        {area.desc}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 작업 범위 — 순서 파이프라인 */}
+            {project.myRolePipeline && project.myRolePipeline.length > 0 && (
+              <div className="mt-8">
+                <p className="rail text-muted">작업 범위 · 전 과정</p>
+                <div className="mt-3 flex flex-wrap items-center gap-y-2 text-[0.95rem]">
+                  {project.myRolePipeline.map((step, i) => (
+                    <span key={step} className="inline-flex items-center">
+                      {i > 0 && (
+                        <span aria-hidden="true" className="mx-2 text-tide">
+                          →
+                        </span>
+                      )}
+                      <span className="rounded-md border border-line bg-surface px-3 py-1 text-ink">
+                        {step}
+                      </span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
           </section>
         )}
 
@@ -236,7 +439,7 @@ export default function LightProjectView({
 
                   {/* 구조 다이어그램 — 아래 풀폭 (챗봇) */}
                   {feature.diagram === "rag" && (
-                    <div className="mt-6 rounded-xl bg-ground/60 border border-line p-4 sm:p-6">
+                    <div className="mt-6 rounded-xl bg-ground/60 border border-line p-3 sm:p-4">
                       <RagDiagram />
                     </div>
                   )}
@@ -245,7 +448,7 @@ export default function LightProjectView({
                   {feature.troubles && feature.troubles.length > 0 && (
                     <div className="mt-10 border-t-2 border-tide/30 pt-6">
                       <p className="font-semibold text-deep mb-1">
-                        트러블슈팅 · 기술적 의사결정
+                        {feature.troublesLabel ?? "트러블슈팅 · 기술적 의사결정"}
                       </p>
                       <div className="divide-y divide-line">
                         {feature.troubles.map((trouble, ti) => (
@@ -257,11 +460,6 @@ export default function LightProjectView({
                               <span className="font-semibold">
                                 {trouble.title}
                               </span>
-                              {trouble.stars && (
-                                <span className="text-tide text-xs tracking-tight">
-                                  {"★".repeat(trouble.stars)}
-                                </span>
-                              )}
                             </h4>
 
                             <dl className="mt-3 pl-8 space-y-2 text-[0.9rem] leading-relaxed">
@@ -287,132 +485,34 @@ export default function LightProjectView({
                               </div>
                             )}
 
-                            {trouble.tags && trouble.tags.length > 0 && (
-                              <ul className="mt-3 pl-8 flex flex-wrap gap-1.5">
-                                {trouble.tags.map((tag) => (
-                                  <li
-                                    key={tag}
-                                    className="rail rounded-md bg-ground border border-line px-2 py-0.5 text-muted"
-                                  >
-                                    #{tag}
-                                  </li>
-                                ))}
-                              </ul>
-                            )}
-
-                            {/* 풀버전 — 클릭하면 펼쳐지는 아코디언 */}
-                            {trouble.details && trouble.details.length > 0 && (
-                              <details className="group mt-4 ml-8">
-                                <summary className="rail inline-flex cursor-pointer items-center gap-1.5 text-deep hover:underline underline-offset-4 list-none [&::-webkit-details-marker]:hidden">
-                                  <span className="transition-transform group-open:rotate-90">
-                                    ▸
-                                  </span>
-                                  자세히 — 원인·비교·코드·배운 점
-                                </summary>
-                                <div className="mt-4 space-y-5 border-l-2 border-tide/30 pl-5">
-                                  {trouble.tech && trouble.tech.length > 0 && (
-                                    <p className="rail text-muted">
-                                      <span className="font-semibold text-ink">
-                                        기술 스택
-                                      </span>
-                                      &nbsp;&nbsp;{trouble.tech.join(" · ")}
-                                    </p>
-                                  )}
-                                  {trouble.details.map((d) => (
-                                    <div key={d.heading}>
-                                      <p className="text-[0.85rem] font-semibold text-ink">
-                                        {d.heading}
-                                      </p>
-                                      <div className="mt-1.5 space-y-2">
-                                        {d.blocks.map((blk, bi) => {
-                                          if (blk.type === "sub")
-                                            return (
-                                              <p
-                                                key={bi}
-                                                className="text-[0.84rem] font-semibold text-ink/90 pt-1"
-                                              >
-                                                {blk.text}
-                                              </p>
-                                            );
-                                          if (blk.type === "text")
-                                            return (
-                                              <p
-                                                key={bi}
-                                                className="text-[0.85rem] leading-relaxed text-muted"
-                                              >
-                                                {blk.text}
-                                              </p>
-                                            );
-                                          if (blk.type === "list")
-                                            return (
-                                              <ul key={bi} className="space-y-1">
-                                                {blk.items.map((it, ii) => (
-                                                  <li
-                                                    key={ii}
-                                                    className="relative pl-4 text-[0.85rem] leading-relaxed text-muted before:absolute before:left-0 before:top-[0.6em] before:h-1 before:w-1 before:rounded-full before:bg-tide"
-                                                  >
-                                                    {it}
-                                                  </li>
-                                                ))}
-                                              </ul>
-                                            );
-                                          if (blk.type === "code")
-                                            return (
-                                              <pre
-                                                key={bi}
-                                                className="overflow-x-auto rounded-lg bg-ink text-[#e6e4ea] p-4 text-[0.78rem] leading-relaxed"
-                                              >
-                                                <code>{blk.code}</code>
-                                              </pre>
-                                            );
-                                          if (blk.type === "table")
-                                            return (
-                                              <div
-                                                key={bi}
-                                                className="overflow-x-auto"
-                                              >
-                                                <table className="w-full text-[0.8rem] border-collapse">
-                                                  <thead>
-                                                    <tr>
-                                                      {blk.head.map((h) => (
-                                                        <th
-                                                          key={h}
-                                                          className="border border-line bg-surface px-2.5 py-1.5 text-left font-semibold"
-                                                        >
-                                                          {h}
-                                                        </th>
-                                                      ))}
-                                                    </tr>
-                                                  </thead>
-                                                  <tbody>
-                                                    {blk.rows.map((row, ri) => (
-                                                      <tr key={ri}>
-                                                        {row.map((cell, ci) => (
-                                                          <td
-                                                            key={ci}
-                                                            className={`border border-line px-2.5 py-1.5 align-top ${
-                                                              ci === 0
-                                                                ? "font-medium text-ink"
-                                                                : "text-muted"
-                                                            }`}
-                                                          >
-                                                            {cell}
-                                                          </td>
-                                                        ))}
-                                                      </tr>
-                                                    ))}
-                                                  </tbody>
-                                                </table>
-                                              </div>
-                                            );
-                                          return null;
-                                        })}
-                                      </div>
-                                    </div>
+                            {/* 태그 + 상세 열기 — 한 줄에 좌우로 */}
+                            <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 pl-8">
+                              {trouble.tags && trouble.tags.length > 0 && (
+                                <ul className="flex flex-wrap gap-1.5">
+                                  {trouble.tags.map((tag) => (
+                                    <li
+                                      key={tag}
+                                      className="rail rounded-md bg-ground border border-line px-2 py-0.5 text-muted"
+                                    >
+                                      #{tag}
+                                    </li>
                                   ))}
-                                </div>
-                              </details>
-                            )}
+                                </ul>
+                              )}
+
+                              {trouble.details &&
+                                trouble.details.length > 0 && (
+                                  <TroubleDetails
+                                    title={trouble.title}
+                                    eyebrow={
+                                      feature.troublesLabel ??
+                                      "트러블슈팅 · 기술적 의사결정"
+                                    }
+                                    details={trouble.details}
+                                    tech={trouble.tech}
+                                  />
+                                )}
+                            </div>
                           </div>
                         ))}
                       </div>

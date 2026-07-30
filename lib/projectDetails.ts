@@ -23,7 +23,14 @@ export type TroubleBlock =
   | { type: "text"; text: string } // 문단
   | { type: "code"; code: string } // 코드 블록
   | { type: "list"; items: string[] } // 불릿 리스트
-  | { type: "table"; head: string[]; rows: string[][] }; // 표
+  | { type: "table"; head: string[]; rows: string[][] } // 표
+  | {
+      // 왼쪽 설명 + 오른쪽 작은 캡처 (학습 결과 그래프·리포트)
+      type: "split";
+      text: string;
+      images: { src: string; width: number; height: number; alt: string }[];
+      caption?: string;
+    };
 
 export interface TroubleDetail {
   heading: string; // 큰 섹션 제목 (문제 상황 / 원인 분석 / 해결 과정 …)
@@ -33,7 +40,6 @@ export interface TroubleDetail {
 /* 트러블슈팅·기술적 의사결정 — 슬림(문제→해결→효과) + 풀버전(details) */
 export interface TroubleItem {
   title: string;
-  stars?: number; // 중요도 (1~5)
   problem: string;
   solution: string;
   effect: string;
@@ -59,6 +65,8 @@ export interface AiFeature {
   video?: string; // 시연 영상
   diagram?: "rag"; // 구조 다이어그램 종류
   troubles?: TroubleItem[]; // 트러블슈팅·기술적 의사결정
+  /** troubles 섹션 라벨. 기본값 '트러블슈팅 · 기술적 의사결정' */
+  troublesLabel?: string;
 }
 
 export interface LightProject {
@@ -74,10 +82,47 @@ export interface LightProject {
   /** homepage 버튼 라벨. 기본값 '홈페이지' */
   homepageLabel?: string;
   screenshots: string[];
-  /** 왜 만들었나 — 문제 배경 */
+  /** 왜 만들었나 — 문제 배경, 리드 1줄(위기 진술) */
   background?: string;
-  /** 팀 프로젝트에서 본인이 담당한 역할 */
+  /** 제안 배경 — 리드 2줄(위기가 낳은 결과, 화살표로 연결) */
+  backgroundEffect?: string;
+  /** 제안 배경 — 시작점(폐업 양극화)을 보여주는 그래프 이미지 */
+  backgroundChart?: {
+    src: string;
+    width: number;
+    height: number;
+    alt: string;
+  };
+  /** 제안 배경 — 문제(폐업 가속)가 갈라지는 원인 갈래 */
+  backgroundCauses?: {
+    index: string;
+    title: string;
+    stat: string;
+    statLabel: string;
+    /** 해당 원인을 뒷받침하는 그래프·실태조사 이미지 (선택) */
+    image?: {
+      src: string;
+      width: number;
+      height: number;
+      alt: string;
+      /** 최대 폭 제한 Tailwind 클래스 (기본 w-full) */
+      maxWidthClass?: string;
+    };
+    /** 이미지 대신 HTML로 그리는 실태조사 인용 카드 (선택) */
+    surveyCard?: { title: string; quote: string; source?: string };
+    /** 이미지 대신 HTML로 그리는 가로 막대그래프 (선택) — label 있는 세그먼트만 범례로 표시 */
+    barChart?: { segments: { value: number; label?: string }[] };
+  }[];
+  /** 제안 배경 — 프로젝트의 개인적 출발점(계기) */
+  backgroundOrigin?: string;
+  /** 제안 배경 — 우리가 세운 목표 */
+  backgroundGoal?: string;
+  /** 팀 프로젝트에서 본인이 담당한 역할 (리드 문장) */
   myRole?: string;
+  /** 내가 맡은 역할 — 담당 축(영역) */
+  myRoleAreas?: { title: string; desc: string }[];
+  /** 내가 맡은 역할 — 작업 범위(순서) */
+  myRolePipeline?: string[];
   /** 핵심 AI 기능 상세 (문제→해결→수치) */
   aiFeatures?: AiFeature[];
   features: string[];
@@ -109,10 +154,68 @@ export const lightProjects: LightProject[] = [
     homepage: "https://blackcows-team.github.io/blackcows-privacy/index.html",
     homepageLabel: "소개 페이지",
     screenshots: ["/sodam/home.png"],
-    background:
-      "소규모 젖소농가(50두 미만)는 3년 새 15%가 폐업할 만큼 빠르게 사라지고 있습니다. 원인은 ICT 스마트팜의 높은 도입 장벽(설치비용 부담 35.6%)과 청년 후계자 부재였습니다. 팀원의 외삼촌이 운영하던 20두 소규모 젖소농장의 폐업 경험에서 출발해, 비싼 센서 장비 없이도 앱의 AI 분석만으로 소규모 농가가 기술 격차 없이 농장을 운영할 수 있게 만드는 것을 목표로 했습니다.",
+    background: "낙농업의 위기 — '소규모 농가가 버틸 수 없는 구조'",
+    backgroundEffect: "소규모 젖소농가 폐업 속도 가속화",
+    backgroundChart: {
+      src: "/sodam/background-farm-decline.png",
+      width: 1870,
+      height: 1269,
+      alt: "사육 규모별 젖소농가 수 변화 그래프 (2021년 대비 2024년)",
+    },
+    backgroundCauses: [
+      {
+        index: "1",
+        title: "ICT 스마트팜 도입의 높은 장벽",
+        stat: "35.6%",
+        statLabel: "도입 시 겪은 어려움 1위 — 설치비용 확보",
+        barChart: {
+          segments: [
+            { value: 35.6, label: "설치비용 확보" },
+            { value: 7.2, label: "낮은 기술 이해도" },
+            { value: 6.1 },
+            { value: 5 },
+          ],
+        },
+      },
+      {
+        index: "2",
+        title: "청년 후계자 부재 · 진입 어려움",
+        stat: "31.7%",
+        statLabel: "청년·후계농 초기 정착 어려움 1위 — 영농 기술 습득 부족",
+        surveyCard: {
+          title: "2024 낙농경영실태조사",
+          quote:
+            "중·소규모 경영일수록 '후계자도 없고 육성계획도 없다'는 응답 비율이 높았고, 후계자 없는 고령농가와 상당수 낙농가가 폐업을 강요받고 있다.",
+          source: "농림축산식품부 · 낙농가 2,040명 설문",
+        },
+      },
+    ],
+    backgroundOrigin:
+      "팀원의 외삼촌이 운영하던 20두 규모의 소규모 젖소농장이 문을 닫았습니다. 이 폐업 경험이 프로젝트의 출발점이 됐습니다.",
+    backgroundGoal:
+      "비싼 센서 장비 없이 앱의 AI 분석만으로, 소규모 농가가 비용·기술 격차 없이 농장을 운영할 수 있게 하는 것.",
     myRole:
-      "RAG 챗봇 '소담이'와 4종 AI 예측 모델(럼피스킨병·유방염·착유량·유성분)을 전담 — 데이터 수집·전처리부터 모델 학습, LangChain 기반 Query Routing 설계, 서비스 연동까지 AI 파트 전 과정을 담당했습니다.",
+      "소담소담의 AI 파트를 혼자 전담했습니다. 챗봇·이미지 진단·예측 모델 세 축을, 데이터 수집부터 서비스 연동까지 전 과정에 걸쳐 만들었습니다.",
+    myRoleAreas: [
+      {
+        title: "RAG 챗봇 '소담이'",
+        desc: "LangChain·LangGraph 기반 Query Routing 설계로 낙농 상담 챗봇 구현",
+      },
+      {
+        title: "럼피스킨병 이미지 진단",
+        desc: "피부 병변 이미지 기반 질병 진단 모델 (테스트 정확도 96.8%)",
+      },
+      {
+        title: "AI 예측 모델 6종",
+        desc: "유방염·착유량·유성분 등 생산성·질병 예측 모델 학습·비교",
+      },
+    ],
+    myRolePipeline: [
+      "데이터 수집·전처리",
+      "모델 학습·비교",
+      "Query Routing 설계",
+      "서비스 연동",
+    ],
     aiFeatures: [
       {
         name: "AI 챗봇 '소담이'",
@@ -161,7 +264,6 @@ export const lightProjects: LightProject[] = [
         troubles: [
           {
             title: "질문 라우팅 아키텍처 재설계를 통한 응답 품질 개선",
-            stars: 5,
             problem:
               "모든 질문을 하나의 응답 흐름에서 처리해 데이터 소스가 혼재됐고, 무관 질문을 차단하는 과정에서는 정상적인 UX 대화까지 함께 차단되는 Over-blocking이 발생했습니다.",
             solution:
@@ -434,7 +536,6 @@ result = chain.invoke({
           {
             title:
               "이표번호를 모르면 대화가 끊기던 소 정보 조회 — 단일 노드에서 상태 기반 서브그래프로",
-            stars: 5,
             problem:
               "소 정보 조회가 단일 노드로 구현돼 있어, 질문에 12자리 이표번호가 없으면 안내 메시지만 남기고 대화가 종료됐다(코드 분기상 처리율 0%).",
             solution:
@@ -905,7 +1006,6 @@ return show_cow_list_node(state)      # 함수를 직접 호출`,
           {
             title:
               "배포 환경과 실행 환경 차이로 인한 Vector DB 생성 및 캐시 무효화 문제 해결",
-            stars: 5,
             problem:
               "로컬에서는 정상 동작하던 RAG가 배포 환경에서 Chroma Vector DB 생성에 실패했고, 캐시가 있어도 Vector DB를 매 요청마다 다시 로드해 불필요한 파일 접근과 재임베딩이 반복됐습니다.",
             solution:
@@ -1082,21 +1182,406 @@ if len(raw_documents) == 0:
         solutionLabel: "소담소담 솔루션",
         solutionBlocks: [
           {
-            title: "공공데이터 활용",
-            points: ["스마트팜 빅데이터 API (농림수산식품교육문화정보원)"],
+            title: "왜 필요한가 — 데이터의 89.4% 공백",
+            points: [
+              "체세포수(SCC)는 유방 건강을 나타내는 표준 지표지만, 별도 검사를 거쳐야 얻을 수 있다",
+              "전체 착유 기록 732,660건 중 체세포수 측정값 보유는 77,372건(10.6%)뿐",
+              "나머지 89.4%의 공백을, 착유로봇이 자동 수집하는 5개 지표만으로 메우는 분류 모델을 설계",
+            ],
           },
           {
-            title: "AI 분류 모델 개발",
+            title: "서비스 로직 — 측정값이 있으면 예측하지 않는다",
             points: [
-              "데이터 분석: 착유량·전도율·유지방비율·유단백비율·산차수",
-              "체세포수 데이터 유무에 따라 2가지 분석 모드 제공",
-              "출력: 정상 / 주의 / 염증 가능성 판단 + 확신도 + 모델 정확도",
-              "정확도 83.9%",
+              "체세포수 값 있음 → 기준값 기반 규칙 분기 (확정 판정)",
+              "체세포수 값 없음 → 5개 지표 기반 ML 모델로 등급 예측 (추정 판정)",
+              "모델의 타겟 자체가 체세포수 등급이므로, 실측값이 있으면 추정할 이유가 없다",
+            ],
+          },
+          {
+            title: "최종 모델",
+            points: [
+              "Random Forest · 입력 5개 피처 — 착유량·전도율·유지방비율·유단백비율·산차수",
+              "Accuracy 0.839 · Weighted F1 0.827",
+              "타겟 등급 재설계와 피처 정제로 유방염 의심군 F1 0.41 → 0.49, macro F1 0.48 → 0.64 개선",
+              "확신도는 predict_proba의 최대 클래스 확률을 사용",
             ],
           },
         ],
         image: "/sodam/mastitis.png",
         video: "/sodam/videos/mastitis.mp4",
+        troublesLabel: "모델 개발 과정 · 성능 최적화",
+        troubles: [
+          {
+            title: "타겟 등급 재설계와 피처 정제",
+            problem:
+              "체세포수 4등급 분류 모델의 Accuracy는 0.833이었지만, 정작 잡아내야 할 '염증 가능성'의 Recall이 0.06, '유방염 의심'이 0.32였습니다. 전체 정확도가 다수 클래스(정상 79%)에 가려져 이상 개체를 사실상 탐지하지 못하는 상태였습니다.",
+            solution:
+              "문헌 기준을 살리되 실질적으로 동일한 조치가 필요한 2·3등급을 통합해 3등급으로 재설계하고, 변수 중요도 기반 Ablation Study로 피처를 10개에서 5개로 정제했습니다.",
+            effect:
+              "유방염 의심군 F1 0.41 → 0.49, macro F1 0.48 → 0.64로 개선했고, Weighted F1 손실 0.001로 변수를 절반으로 줄여 모델을 경량화했습니다.",
+            tags: ["클래스불균형", "타겟재설계", "AblationStudy", "모델비교"],
+            tech: [
+              "Python",
+              "pandas",
+              "scikit-learn",
+              "XGBoost",
+              "matplotlib",
+              "seaborn",
+            ],
+            details: [
+              {
+                heading: "문제 정의",
+                blocks: [
+                  {
+                    type: "text",
+                    text: "체세포수(SCC, Somatic Cell Count)는 유즙 내 면역세포 수로, 유방 건강 상태를 나타내는 표준 지표다. 문제는 별도 검사를 거쳐야 얻을 수 있다는 것이다.",
+                  },
+                  {
+                    type: "table",
+                    head: ["구분", "건수", "비중"],
+                    rows: [
+                      ["전체 착유 기록", "732,660", "100%"],
+                      ["체세포수 측정값 보유", "77,372", "10.6%"],
+                    ],
+                  },
+                  {
+                    type: "text",
+                    text: "즉, 농가는 대부분의 착유 시점에서 유방 상태를 알 수 없는 채로 운영된다.",
+                  },
+                  { type: "sub", text: "설계한 서비스 로직" },
+                  {
+                    type: "code",
+                    code: `착유 기록 입력
+  ├─ 체세포수 값 있음  → 기준값 기반 규칙 분기 (확정 판정)
+  └─ 체세포수 값 없음  → ML 모델로 등급 예측 (추정 판정)  ← 본 프로젝트`,
+                  },
+                  {
+                    type: "text",
+                    text: "측정값이 있으면 예측할 필요가 없다. 이 모델의 존재 이유는 측정값이 없는 89.4%를 커버하는 것이다.",
+                  },
+                ],
+              },
+              {
+                heading: "타겟(종속변수) — 4등급에서 3등급으로",
+                blocks: [
+                  { type: "sub", text: "1. 임계값의 근거" },
+                  {
+                    type: "text",
+                    text: "임의로 자르지 않고 낙농 문헌의 통용 기준을 따랐다.",
+                  },
+                  {
+                    type: "table",
+                    head: ["기준 (유즙 1mL당)", "해석"],
+                    rows: [
+                      ["≤ 1×10⁵ (10만)", "매우 건강"],
+                      ["≤ 3×10⁵ (30만)", "감염 없는 정상 범위"],
+                      ["≥ 5×10⁵ (50만)", "유방에 심한 자극 — 세균성 유방염 의심"],
+                    ],
+                  },
+                  { type: "sub", text: "2. 1차 시도 — 4등급 분류" },
+                  {
+                    type: "code",
+                    code: `def categorize_scc(value):
+    if value <= 100:   return 0  # 정상
+    elif value <= 300: return 1  # 주의
+    elif value <= 500: return 2  # 염증 가능성
+    else:              return 3  # 유방염 의심`,
+                  },
+                  {
+                    type: "table",
+                    head: ["등급", "건수", "비율"],
+                    rows: [
+                      ["0 정상", "61,184", "79.1%"],
+                      ["1 주의", "11,779", "15.2%"],
+                      ["2 염증 가능성", "1,783", "2.3%"],
+                      ["3 유방염 의심", "2,626", "3.4%"],
+                    ],
+                  },
+                  {
+                    type: "text",
+                    text: "Random Forest 클래스별 성능 (Accuracy 0.833)",
+                  },
+                  {
+                    type: "table",
+                    head: ["등급", "Precision", "Recall", "F1", "Support"],
+                    rows: [
+                      ["정상", "0.88", "0.95", "0.92", "12,237"],
+                      ["주의", "0.56", "0.43", "0.49", "2,356"],
+                      ["염증 가능성", "0.32", "0.06", "0.11", "357"],
+                      ["유방염 의심", "0.57", "0.32", "0.41", "525"],
+                      ["macro avg", "0.58", "0.44", "0.48", "15,475"],
+                      ["weighted avg", "0.81", "0.83", "0.81", "15,475"],
+                    ],
+                  },
+                  {
+                    type: "split",
+                    text: "Accuracy 83%는 겉보기 숫자였다. 데이터의 79%가 '정상'이라 모델이 다수 클래스에 쏠려 있을 뿐, 정작 잡아내야 할 유방염 의심군의 Recall은 0.32, 염증 가능성은 0.06으로 사실상 탐지에 실패한 상태였다. Confusion Matrix에서도 염증 가능성(23건)과 유방염 의심(167건)의 정답 예측이 극히 적고, 대부분이 '정상'과 '주의'로 흡수되고 있다.",
+                    images: [
+                      {
+                        src: "/sodam/mastitis/cm-4class.png",
+                        width: 581,
+                        height: 490,
+                        alt: "4등급 분류 Confusion Matrix",
+                      },
+                    ],
+                    caption: "4등급 분류 Confusion Matrix",
+                  },
+                  {
+                    type: "text",
+                    text: "이 괴리는 weighted avg F1 0.81 vs macro avg F1 0.48에서 그대로 드러난다. 클래스별 표본 수로 가중하면 좋아 보이지만, 모든 클래스를 동등하게 보면 절반도 안 되는 성능이다. 불균형 데이터에서 Accuracy와 weighted 지표만 보면 안 되는 이유다. 원인은 두 가지로 판단했다.",
+                  },
+                  {
+                    type: "list",
+                    items: [
+                      "클래스 불균형 — 정상:주의:염증:의심 ≈ 24:5:1:2",
+                      "중간 구간 경계의 모호성 — 주의(100~300)와 염증 가능성(300~500)은 센서 노이즈·개체 편차에 민감해 분리가 어려움",
+                    ],
+                  },
+                  { type: "sub", text: "3. 2차 설계 — 3등급으로 재분류" },
+                  {
+                    type: "text",
+                    text: "문헌의 5×10⁵ 기준을 살리되, 실질적으로 동일한 조치(수의사 확인)가 필요한 2·3등급을 통합했다.",
+                  },
+                  {
+                    type: "code",
+                    code: `def categorize_scc(value):
+    if value <= 100:   return 0  # 정상
+    elif value <= 300: return 1  # 주의
+    else:              return 2  # 유방염 의심 (염증 가능성 + 의심 통합)`,
+                  },
+                  {
+                    type: "table",
+                    head: ["등급", "건수"],
+                    rows: [
+                      ["0 정상", "61,184"],
+                      ["1 주의", "11,779"],
+                      ["2 유방염 의심", "4,409"],
+                    ],
+                  },
+                  { type: "text", text: "개선 결과 (Random Forest)" },
+                  {
+                    type: "table",
+                    head: ["등급", "Precision", "Recall", "F1", "Support"],
+                    rows: [
+                      ["정상", "0.88", "0.95", "0.92", "12,237"],
+                      ["주의", "0.59", "0.43", "0.49", "2,356"],
+                      ["유방염 의심", "0.67", "0.39", "0.49", "882"],
+                      ["macro avg", "0.71", "0.59", "0.64", "15,475"],
+                      ["weighted avg", "0.82", "0.84", "0.83", "15,475"],
+                    ],
+                  },
+                  {
+                    type: "split",
+                    text: "유방염 의심군 F1이 0.41 → 0.49, Precision이 0.57 → 0.67로 올랐고, macro F1은 0.48 → 0.64로 개선됐다. Confusion Matrix에서도 유방염 의심 정답 예측이 167건 → 346건으로 2배 이상 늘었다. 모델 파라미터가 아니라 등급 체계 자체를 문제로 보고 재설계한 판단이 유효했다.",
+                    images: [
+                      {
+                        src: "/sodam/mastitis/cm-3class.png",
+                        width: 581,
+                        height: 490,
+                        alt: "3등급 분류 Confusion Matrix",
+                      },
+                    ],
+                    caption: "3등급 재분류 후 Confusion Matrix",
+                  },
+                ],
+              },
+              {
+                heading: "성능 최적화 — 피처 선정",
+                blocks: [
+                  { type: "sub", text: "1. 제조사 필터링" },
+                  {
+                    type: "text",
+                    text: "전체 데이터의 제조사 분포는 이미 한쪽으로 크게 쏠려 있었다.",
+                  },
+                  {
+                    type: "table",
+                    head: ["제조사 ID", "count"],
+                    rows: [
+                      ["agrirobotech", "732,374"],
+                      ["delaval", "286"],
+                    ],
+                  },
+                  {
+                    type: "text",
+                    text: "체세포수 결측치를 제거하고 나니 delaval 데이터는 사실상 전부 사라져 제조사 ID가 한 종류만 남았다. 변수로서 정보량이 0이므로 학습에서 제외하고, 단일 기기(agrirobotech) 기준 모델로 범위를 한정했다.",
+                  },
+                  { type: "sub", text: "2. 변수 중요도 분석 — 1차 제거" },
+                  {
+                    type: "text",
+                    text: "1차 학습(전체 변수 10개)의 Random Forest 변수 중요도.",
+                  },
+                  {
+                    type: "table",
+                    head: ["변수", "중요도"],
+                    rows: [
+                      ["전도율", "0.265"],
+                      ["유지방비율", "0.239"],
+                      ["유단백비율", "0.194"],
+                      ["착유량", "0.182"],
+                      ["산차수", "0.096"],
+                      ["착유횟차", "0.011"],
+                      ["공기흐름값", "0.007"],
+                      ["온도", "0.005"],
+                      ["수집건수", "0.001"],
+                      ["혈액흐름여부_Y", "≈ 0.000"],
+                    ],
+                  },
+                  {
+                    type: "split",
+                    text: "상위 5개(전도율·유지방비율·유단백비율·착유량·산차수)가 전체 중요도의 97.6%를 차지했고, 반대로 수집건수와 혈액흐름여부_Y는 둘을 합쳐도 0.07%에 불과했다. 예측에 기여하지 않으면서 결측·수집 실패 리스크만 늘리는 변수로 판단해 이 둘을 1차로 제거했다.",
+                    images: [
+                      {
+                        src: "/sodam/mastitis/importance-base.png",
+                        width: 989,
+                        height: 590,
+                        alt: "1차 학습 Random Forest 변수 중요도",
+                      },
+                    ],
+                    caption: "1차 학습(전체 변수 10개) 변수 중요도",
+                  },
+                  { type: "sub", text: "3. Ablation Study — 단계별 성능 변화" },
+                  {
+                    type: "text",
+                    text: "변수를 단계적으로 제거하며 성능 변화를 측정했다. (Random Forest 기준)",
+                  },
+                  {
+                    type: "table",
+                    head: ["#", "실험 조건", "변수 수", "Accuracy", "Weighted F1"],
+                    rows: [
+                      ["1", "4등급 + 전체 변수", "10", "0.833", "0.814"],
+                      ["2", "수집건수·혈액흐름여부 제거", "8", "0.833", "0.815"],
+                      ["3", "3등급 재분류", "8", "0.842", "0.828"],
+                      ["4", "온도·공기흐름값·착유횟차 추가 제거", "5", "0.839", "0.827"],
+                    ],
+                  },
+                  {
+                    type: "split",
+                    text: "세 차례의 변수 중요도를 비교하면 전도율 > 유지방비율 > 유단백비율 > 착유량 순위가 조건에 관계없이 일정하게 유지된다. 상위 신호가 특정 실험 설정에 의존하지 않는다는 뜻으로, 피처 제거 판단의 근거가 됐다.",
+                    images: [
+                      {
+                        src: "/sodam/mastitis/importance-8f.png",
+                        width: 989,
+                        height: 590,
+                        alt: "실험 2 변수 중요도",
+                      },
+                      {
+                        src: "/sodam/mastitis/importance-3class.png",
+                        width: 989,
+                        height: 590,
+                        alt: "실험 3 변수 중요도",
+                      },
+                    ],
+                    caption:
+                      "좌: 실험 2(8개 변수) · 우: 실험 3(3등급 재분류). 상위 4개 변수의 순위와 크기가 거의 변하지 않는다.",
+                  },
+                  { type: "sub", text: "4. 최종 피처 5개 선정 — 2차 제거" },
+                  {
+                    type: "text",
+                    text: "실험 3까지 남아 있던 8개 중 온도(0.005)·공기흐름값(0.007)·착유횟차(0.011)는 중요도 합계가 2.3%에 그쳤다. 상위 5개만으로 이미 전체 중요도의 97.6%가 설명되므로, 이 셋을 빼도 정보 손실이 크지 않다고 보고 2차로 제거했다.",
+                  },
+                  {
+                    type: "table",
+                    head: ["최종 피처", "중요도"],
+                    rows: [
+                      ["전도율", "0.265"],
+                      ["유지방비율", "0.239"],
+                      ["유단백비율", "0.194"],
+                      ["착유량", "0.182"],
+                      ["산차수", "0.096"],
+                    ],
+                  },
+                  {
+                    type: "text",
+                    text: "결과적으로 실험 3 대비 Weighted F1은 0.828 → 0.827로 사실상 동일했다(-0.001). 성능을 거의 그대로 유지한 채 변수를 10개 → 5개로 줄여 모델 경량화와 해석 가능성을 확보했고, 실서비스에서는 입력 항목이 적을수록 센서 수집 실패 지점이 줄어드는 이점이 더 크다고 판단해 이 조합을 최종 채택했다.",
+                  },
+                  { type: "sub", text: "5. 도메인 해석" },
+                  {
+                    type: "text",
+                    text: "가장 중요한 변수가 전도율로 나온 것은 도메인 지식과 일치한다. 유방에 염증이 생기면 혈액 내 Na⁺·Cl⁻ 이온이 유즙으로 유입되어 전기전도율이 상승하기 때문이다. 모델이 통계적 우연이 아니라 생리학적으로 타당한 신호를 학습했다는 근거로 볼 수 있다.",
+                  },
+                ],
+              },
+              {
+                heading: "모델 비교 및 튜닝",
+                blocks: [
+                  {
+                    type: "text",
+                    text: "최종 피처 5개 기준, 4개 모델을 동일 조건에서 비교했다.",
+                  },
+                  {
+                    type: "table",
+                    head: ["모델", "Accuracy", "Precision", "Recall", "F1"],
+                    rows: [
+                      ["Logistic Regression", "0.790", "0.720", "0.790", "0.728"],
+                      ["Random Forest (최종 채택)", "0.839", "0.822", "0.839", "0.827"],
+                      ["XGBoost", "0.823", "0.795", "0.823", "0.787"],
+                      ["Tuned XGBoost (GridSearchCV)", "0.834", "0.816", "0.834", "0.822"],
+                    ],
+                  },
+                  { type: "sub", text: "GridSearchCV — 3-fold, 108개 조합 × 324 fits" },
+                  {
+                    type: "code",
+                    code: `Best Params: {
+  'n_estimators': 200, 'max_depth': 9, 'learning_rate': 0.2,
+  'subsample': 0.8, 'colsample_bytree': 1.0
+}`,
+                  },
+                  {
+                    type: "split",
+                    text: "XGBoost는 튜닝으로 F1이 0.787 → 0.822까지 올랐지만 기본 파라미터 Random Forest(0.827)를 끝내 넘지 못했다. 탐색 비용 대비 이득이 없다고 판단해 최종 모델은 Random Forest로 확정했다.",
+                    images: [
+                      {
+                        src: "/sodam/mastitis/gridsearch.png",
+                        width: 1313,
+                        height: 104,
+                        alt: "GridSearchCV 튜닝 결과",
+                      },
+                    ],
+                    caption: "GridSearchCV 튜닝 결과",
+                  },
+                  {
+                    type: "text",
+                    text: "선형 모델(LR)이 트리 계열 대비 약 5%p 낮은 것으로 보아, 변수와 체세포수 등급 사이에 비선형적 상호작용이 존재한다고 해석했다.",
+                  },
+                ],
+              },
+              {
+                heading: "한계와 다음 스텝",
+                blocks: [
+                  { type: "sub", text: "1. 체세포수 단위 기준 불명확" },
+                  {
+                    type: "text",
+                    text: "데이터셋에 체세포수의 측정 단위(유즙 몇 mL 기준인지)가 명시되어 있지 않다. 문헌 기준(1mL당)을 가정해 등급을 나눴으나, 실서비스 적용 전 데이터 제공처 확인이 필수다. 단위가 다르면 임계값 전체를 재조정해야 한다.",
+                  },
+                  { type: "sub", text: "2. 소수 클래스 Recall 0.39 — 아직 부족" },
+                  {
+                    type: "text",
+                    text: "유방염 의심 개체 10마리 중 4마리만 잡아낸다. 낙농 현장에서는 오탐(FP) 비용보다 미탐(FN) 비용이 크므로, Accuracy가 아니라 Recall을 우선 지표로 삼는 재튜닝이 필요하다.",
+                  },
+                  {
+                    type: "list",
+                    items: [
+                      "class_weight='balanced' / scale_pos_weight 적용",
+                      "SMOTE 등 오버샘플링으로 소수 클래스 보강",
+                      "예측 확률 임계값을 0.5에서 하향 조정",
+                      "평가지표를 Accuracy → macro F1 / PR-AUC로 전환",
+                    ],
+                  },
+                  { type: "sub", text: "3. 개체별 baseline 미반영" },
+                  {
+                    type: "text",
+                    text: "현재는 단일 착유 시점의 절대값만 사용한다. 소마다 정상 전도율·유지방비율이 다르므로, 개체별 평상시 값 대비 편차를 피처로 추가하면 개체 편차 노이즈를 상당 부분 제거할 수 있을 것으로 본다. (예: 최근 7회 이동평균 대비 z-score)",
+                  },
+                  { type: "sub", text: "4. 단일 기종 데이터 기반" },
+                  {
+                    type: "text",
+                    text: "체세포수 결측을 제거하고 나면 agrirobotech 한 기종만 남아, 학습 데이터가 사실상 단일 착유로봇 기준이다. 기종마다 센서 측정 방식과 값의 스케일이 다를 수 있으므로, 타 기종 적용 전에는 별도 검증이 필요하다.",
+                  },
+                ],
+              },
+            ],
+          },
+        ],
       },
       {
         name: "착유량 예측",
@@ -1116,8 +1601,10 @@ if len(raw_documents) == 0:
           {
             title: "AI 회귀 모델 개발",
             points: [
-              "데이터 분석: 착유 횟수·전도율·환경 온도·유지방비율·유단백비율·사료 섭취량·착유기 측정일자",
-              "출력: 예측 착유량 + AI 확신도 + 모델 설명력",
+              "모델: RandomForestRegressor (스케일러 적용)",
+              "입력 8개 피처 — 착유횟수·전도율·환경온도·유지방비율·유단백비율·농후사료섭취량·착유 측정월·착유 측정요일",
+              "출력: 예측 착유량(L) + AI 확신도 + 모델 설명력",
+              "확신도는 RandomForest 각 트리 예측값의 변동계수(표준편차÷평균)를 0~100%로 환산 — 회귀에는 predict_proba가 없어 앙상블의 예측 분산을 불확실성 지표로 활용",
               "모델 설명력 82.4% (MAE 3.41 · RMSE 4.94)",
             ],
           },
@@ -1127,7 +1614,7 @@ if len(raw_documents) == 0:
       },
     ],
     features: [
-      "센서 없는 AI 예측 6종 — 착유량·유방염·유성분 품질·사료 효율·분만·교배 타이밍을 앱 분석만으로 제공",
+      "센서 없는 AI 예측 6종 — 착유량·유방염·유성분 품질·사료 효율·분만·교배 타이밍. 이 중 착유량·유방염 2종은 공공데이터로 직접 학습해 서비스에 적용했고, 나머지 4종은 동일 파이프라인으로 입력 변수까지 설계",
       "홈 대시보드 — 소 상태 요약(정상·주의·이상)과 전체 소 현황을 한 눈에 확인",
       "이표번호로 젖소 등록 — 축산물이력제 공공데이터 연동으로 12자리 이표번호만 입력하면 자동 등록",
       "10가지 상세 기록 관리 — 건강검진·백신·체중·치료·발정·인공수정·임신감정·분만·착유·사료급여",
