@@ -37,17 +37,41 @@ export default function LightProjectView({
           track={project.stack[0] ?? "Project"}
         />
 
-        {/* 헤더 — 제목 + 배지 + 링크 */}
-        <div className="mt-10 flex flex-wrap items-start justify-between gap-4">
-          <div className="flex flex-wrap items-center gap-3">
+        {/* 헤더 — 메타 → 제목·배지 → 요약 → 태그 → 링크 (모두 왼쪽 축 정렬) */}
+        <header className="mt-10 border-b border-line pb-10">
+          {/* 기간·팀을 제목 위 라벨로 — 제목이 블록의 시각 앵커가 되도록 */}
+          <p className="rail text-muted">
+            {project.period}
+            <span className="mx-2 text-line">·</span>
+            {project.teamSize}
+          </p>
+
+          <div className="mt-2 flex flex-wrap items-center gap-3">
             <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
               {project.title}
             </h1>
             <AwardBadge badge={project.badge} />
           </div>
 
+          <p className="mt-4 max-w-2xl text-base leading-relaxed text-muted">
+            {project.summary}
+          </p>
+
+          {/* 태그 */}
+          <ul className="mt-7 flex flex-wrap gap-2">
+            {project.stack.map((item) => (
+              <li
+                key={item}
+                className="rail bg-surface border border-line rounded-md px-2.5 py-1 text-ink/75"
+              >
+                {item}
+              </li>
+            ))}
+          </ul>
+
+          {/* 외부 링크 — 헤더를 닫는 액션 줄 */}
           {(project.github || project.homepage) && (
-            <div className="flex gap-2.5">
+            <div className="mt-7 flex flex-wrap gap-2.5">
               {project.github && (
                 <a
                   href={project.github}
@@ -71,33 +95,11 @@ export default function LightProjectView({
               )}
             </div>
           )}
-        </div>
-
-        <p className="rail mt-3">
-          {project.period}
-          <span className="mx-2 text-line">·</span>
-          {project.teamSize}
-        </p>
-
-        <p className="mt-5 text-base leading-relaxed text-muted max-w-2xl">
-          {project.summary}
-        </p>
-
-        {/* 태그 */}
-        <ul className="mt-6 flex flex-wrap gap-2">
-          {project.stack.map((item) => (
-            <li
-              key={item}
-              className="rail bg-surface border border-line rounded-md px-2.5 py-1 text-ink/75"
-            >
-              {item}
-            </li>
-          ))}
-        </ul>
+        </header>
 
         {/* 제안 배경 */}
         {project.background && (
-          <section className="mt-16">
+          <section className="mt-12">
             <h2 className="text-2xl font-bold tracking-tight">제안 배경</h2>
             {/* 좌(리드+규모별 그래프) / 우(두 원인 = 텍스트+그래픽) — 같은 높이 */}
             <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_auto_1fr] lg:items-stretch lg:gap-8">

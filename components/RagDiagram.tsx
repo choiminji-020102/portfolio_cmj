@@ -53,7 +53,7 @@ export default function RagDiagram() {
   return (
     <div className="overflow-x-auto">
       <svg
-        viewBox="4 10 1202 424"
+        viewBox="4 10 1202 406"
         className="h-auto w-full min-w-[860px]"
         role="img"
         aria-label="소담이 챗봇의 RAG 및 Query Routing 파이프라인 구조도"
@@ -244,7 +244,7 @@ export default function RagDiagram() {
           x1="533"
           y1="68"
           x2="440"
-          y2="282"
+          y2="264"
           stroke="var(--ink)"
           strokeWidth="2"
           markerEnd="url(#rag-arrow)"
@@ -328,17 +328,17 @@ export default function RagDiagram() {
           x1="1048"
           y1="116"
           x2="745"
-          y2="142"
+          y2="124"
           stroke="var(--ink)"
           strokeWidth="2"
           markerEnd="url(#rag-arrow)"
         />
 
         {/* ───────── 가운데 — 라우팅 (축 707) ───────── */}
-        <Robot x={673} y={130} />
+        <Robot x={673} y={112} />
         <text
           x="697"
-          y="190"
+          y="172"
           textAnchor="middle"
           fill="var(--ink)"
           fontSize={FS}
@@ -349,7 +349,7 @@ export default function RagDiagram() {
 
         <text
           x="697"
-          y="230"
+          y="212"
           textAnchor="middle"
           fill="#e8453c"
           fontSize={FS}
@@ -361,17 +361,17 @@ export default function RagDiagram() {
         {/* 분기 바 */}
         <line
           x1="490"
-          y1="258"
+          y1="240"
           x2="904"
-          y2="258"
+          y2="240"
           stroke="var(--ink)"
           strokeWidth="2"
         />
         <line
           x1="697"
-          y1="238"
+          y1="220"
           x2="697"
-          y2="258"
+          y2="240"
           stroke="var(--ink)"
           strokeWidth="2"
         />
@@ -379,9 +379,9 @@ export default function RagDiagram() {
           <line
             key={r.x}
             x1={r.x}
-            y1="258"
+            y1="240"
             x2={r.x}
-            y2="282"
+            y2="264"
             stroke="var(--ink)"
             strokeWidth="2"
           />
@@ -390,7 +390,7 @@ export default function RagDiagram() {
           <text
             key={r.label}
             x={r.x}
-            y="306"
+            y="288"
             textAnchor="middle"
             fill="var(--ink)"
             fontSize={FS}
@@ -403,19 +403,19 @@ export default function RagDiagram() {
         {/* 분기 다음 단계 — 가운데에서 답변 생성으로 */}
         <line
           x1="697"
-          y1="322"
+          y1="304"
           x2="697"
-          y2="344"
+          y2="326"
           stroke="var(--ink)"
           strokeWidth="2"
           markerEnd="url(#rag-arrow)"
         />
 
         {/* 답변 생성 GPT */}
-        <Robot x={673} y={360} />
+        <Robot x={673} y={342} />
         <text
           x="697"
-          y="422"
+          y="404"
           textAnchor="middle"
           fill="var(--ink)"
           fontSize={FS}
@@ -426,7 +426,7 @@ export default function RagDiagram() {
 
         {/* 답변 GPT → Response */}
         <path
-          d="M745 381H1110V244"
+          d="M745 363H1110V240"
           fill="none"
           stroke="var(--ink)"
           strokeWidth="2"
