@@ -15,7 +15,7 @@ const FOCUS = ["PyTorch", "FastAPI", "React", "TypeScript"];
 export default function Hero() {
   return (
     <section id="hero" className="px-6 pt-36 pb-24 sm:pt-44 sm:pb-32">
-      <div className="max-w-4xl mx-auto grid md:grid-cols-[1fr_auto] gap-12 md:gap-16 items-start">
+      <div className="max-w-5xl mx-auto grid md:grid-cols-[1fr_auto] gap-12 md:gap-16 items-start">
         {/* 왼쪽 — 이름과 소개 */}
         <div>
           <p className="eyebrow mb-6">Portfolio / 2026</p>

@@ -1,12 +1,21 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { LightProject } from "@/lib/projectDetails";
-import ProjectGallery from "./ProjectGallery";
 import { AwardBadge } from "./AwardMark";
 import GitHubIcon from "./GitHubIcon";
 import RagDiagram from "./RagDiagram";
 import RouteDiagram from "./RouteDiagram";
 import TroubleDetails from "./TroubleDetails";
+
+// 외부 링크 버튼 — TroubleDetails의 강조 pill과 같은 tide 스타일을 쓴다
+const actionButton =
+  "rail inline-flex items-center gap-1.5 rounded-full border border-tide/50 bg-tide/8 px-4 py-2 font-semibold text-deep transition-colors hover:border-tide hover:bg-tide/15";
+
+/*
+  리드 문단 — 헤더 요약, 과제 배경, 내가 맡은 역할이 모두 이 하나를 쓴다.
+  섹션마다 굵기·색이 달라지면 위계가 아니라 잡음으로 읽힌다.
+*/
+const leadText = "text-base leading-relaxed text-ink";
 
 export default function LightProjectView({
   project,
@@ -15,6 +24,8 @@ export default function LightProjectView({
 }) {
   // 제안 배경 막대그래프 세그먼트 색 (진→연)
   const barTones = ["bg-deep", "bg-deep/55", "bg-deep/35", "bg-deep/20"];
+  // 원인 갈래가 없는 프로젝트는 배경을 1단으로 — 화살표와 빈 칸을 만들지 않는다
+  const hasCauses = (project.backgroundCauses?.length ?? 0) > 0;
   return (
     <div className="min-h-screen bg-ground">
       {/* 상단바 */}
@@ -30,15 +41,9 @@ export default function LightProjectView({
       </div>
 
       <main className="max-w-5xl mx-auto px-6 py-12 sm:py-14">
-        {/* 스크린샷 갤러리 */}
-        <ProjectGallery
-          screenshots={project.screenshots}
-          title={project.title}
-          track={project.stack[0] ?? "Project"}
-        />
-
-        {/* 헤더 — 메타 → 제목·배지 → 요약 → 태그 → 링크 (모두 왼쪽 축 정렬) */}
-        <header className="mt-10 border-b border-line pb-10">
+        {/* 헤더 — 메타 → 제목·배지 → 요약 → 태그 → 링크 (모두 왼쪽 축 정렬)
+            앱 스크린샷은 최상단 갤러리 대신 각 AI 기능 카드에서 보여준다 */}
+        <header className="border-b border-line pb-10">
           {/* 기간·팀을 제목 위 라벨로 — 제목이 블록의 시각 앵커가 되도록 */}
           <p className="rail text-muted">
             {project.period}
@@ -53,9 +58,7 @@ export default function LightProjectView({
             <AwardBadge badge={project.badge} />
           </div>
 
-          <p className="mt-4 max-w-2xl text-base leading-relaxed text-muted">
-            {project.summary}
-          </p>
+          <p className={`mt-4 ${leadText}`}>{project.summary}</p>
 
           {/* 태그 */}
           <ul className="mt-7 flex flex-wrap gap-2">
@@ -77,7 +80,7 @@ export default function LightProjectView({
                   href={project.github}
                   target="_blank"
                   rel="noreferrer"
-                  className="rail inline-flex items-center gap-1.5 rounded-full border border-line px-4 py-2 hover:bg-surface transition-colors"
+                  className={actionButton}
                 >
                   <GitHubIcon className="w-3.5 h-3.5" />
                   GitHub
@@ -88,7 +91,7 @@ export default function LightProjectView({
                   href={project.homepage}
                   target="_blank"
                   rel="noreferrer"
-                  className="rail inline-flex items-center gap-1.5 rounded-full border border-line px-4 py-2 hover:bg-surface transition-colors"
+                  className={actionButton}
                 >
                   {project.homepageLabel ?? "홈페이지"} ↗
                 </a>
@@ -100,18 +103,24 @@ export default function LightProjectView({
         {/* 제안 배경 */}
         {project.background && (
           <section className="mt-12">
-            <h2 className="text-2xl font-bold tracking-tight">제안 배경</h2>
+            <h2 className="text-2xl font-bold tracking-tight">
+              {project.backgroundLabel ?? "제안 배경"}
+            </h2>
             {/* 좌(리드+규모별 그래프) / 우(두 원인 = 텍스트+그래픽) — 같은 높이 */}
-            <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_auto_1fr] lg:items-stretch lg:gap-8">
-              {/* 왼쪽 — 리드 → 규모별 그래프 (세로 중앙) */}
-              <div className="flex flex-col justify-center gap-6">
+            <div
+              className={`mt-6 grid gap-6 ${
+                hasCauses
+                  ? "lg:grid-cols-[1fr_auto_1fr] lg:items-stretch lg:gap-8"
+                  : ""
+              }`}
+            >
+              {/* 왼쪽 — 리드는 맨 위, 그래프는 맨 아래. 오른쪽 컬럼과 상·하단선을 맞춘다 */}
+              <div className="flex flex-col justify-between gap-6">
                 {/* 리드 — 위기 → 결과 */}
                 <div>
-                  <p className="text-base font-semibold leading-relaxed text-ink">
-                    {project.background}
-                  </p>
+                  <p className={leadText}>{project.background}</p>
                   {project.backgroundEffect && (
-                    <p className="mt-2 flex items-start gap-2 text-base font-semibold leading-relaxed text-ink">
+                    <p className={`mt-0.5 flex items-start gap-2 ${leadText}`}>
                       <span aria-hidden="true" className="text-tide">
                         →
                       </span>
@@ -134,23 +143,25 @@ export default function LightProjectView({
               </div>
 
               {/* 파생 화살표 — 데스크톱 →, 모바일 ↓ */}
-              <div
-                aria-hidden="true"
-                className="flex justify-center lg:self-center"
-              >
-                <svg
-                  viewBox="0 0 48 12"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.75"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="h-3 w-12 rotate-90 text-tide lg:rotate-0"
+              {hasCauses && (
+                <div
+                  aria-hidden="true"
+                  className="flex justify-center lg:self-center"
                 >
-                  <line x1="1" y1="6" x2="42" y2="6" />
-                  <polyline points="36,1.5 42,6 36,10.5" />
-                </svg>
-              </div>
+                  <svg
+                    viewBox="0 0 48 12"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.75"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-3 w-12 rotate-90 text-tide lg:rotate-0"
+                  >
+                    <line x1="1" y1="6" x2="42" y2="6" />
+                    <polyline points="36,1.5 42,6 36,10.5" />
+                  </svg>
+                </div>
+              )}
 
               {/* 오른쪽 — 두 원인: 각 원인 텍스트 아래에 해당 그래픽 */}
               {project.backgroundCauses &&
@@ -254,7 +265,7 @@ export default function LightProjectView({
                 {project.backgroundGoal && (
                   <div>
                     <p className="rail text-muted">목표</p>
-                    <p className="mt-2 text-[0.95rem] font-medium leading-relaxed text-ink">
+                    <p className="mt-2 text-[0.95rem] leading-relaxed text-ink">
                       {project.backgroundGoal}
                     </p>
                   </div>
@@ -268,9 +279,7 @@ export default function LightProjectView({
         {project.myRole && (
           <section className="mt-16">
             <h2 className="text-2xl font-bold tracking-tight">내가 맡은 역할</h2>
-            <p className="mt-6 text-base font-medium leading-relaxed text-ink">
-              {project.myRole}
-            </p>
+            <p className={`mt-6 ${leadText}`}>{project.myRole}</p>
 
             {/* 담당 축 — 3개 영역 */}
             {project.myRoleAreas && project.myRoleAreas.length > 0 && (
@@ -320,7 +329,9 @@ export default function LightProjectView({
         {/* 핵심 AI 기능 — 문제 → 해결 → 수치 */}
         {project.aiFeatures && project.aiFeatures.length > 0 && (
           <section className="mt-16">
-            <h2 className="text-2xl font-bold tracking-tight">핵심 AI 기능</h2>
+            <h2 className="text-2xl font-bold tracking-tight">
+              {project.aiFeaturesLabel ?? "핵심 AI 기능"}
+            </h2>
             <div className="mt-8 space-y-6">
               {project.aiFeatures.map((feature) => (
                 <div
@@ -527,19 +538,23 @@ export default function LightProjectView({
         )}
 
         {/* 주요 기능 개발 */}
-        <section className="mt-16">
-          <h2 className="text-2xl font-bold tracking-tight">그 외 기능</h2>
-          <ul className="mt-6 space-y-3">
-            {project.features.map((feature) => (
-              <li
-                key={feature}
-                className="relative pl-5 text-[0.95rem] leading-relaxed before:absolute before:left-0 before:top-[0.6em] before:h-1.5 before:w-1.5 before:rounded-full before:bg-deep"
-              >
-                {feature}
-              </li>
-            ))}
-          </ul>
-        </section>
+        {project.features.length > 0 && (
+          <section className="mt-16">
+            <h2 className="text-2xl font-bold tracking-tight">
+              {project.featuresLabel ?? "그 외 기능"}
+            </h2>
+            <ul className="mt-6 space-y-3">
+              {project.features.map((feature) => (
+                <li
+                  key={feature}
+                  className="relative pl-5 text-[0.95rem] leading-relaxed before:absolute before:left-0 before:top-[0.6em] before:h-1.5 before:w-1.5 before:rounded-full before:bg-deep"
+                >
+                  {feature}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         {/* 차별성 */}
         {project.differentiators && project.differentiators.length > 0 && (

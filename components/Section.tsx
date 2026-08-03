@@ -19,7 +19,7 @@ export function Section({
 }) {
   return (
     <section id={id} className="px-6 py-20 sm:py-28">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-5xl mx-auto">
         <header className="text-center mb-14">
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
             {title}

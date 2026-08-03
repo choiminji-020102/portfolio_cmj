@@ -11,7 +11,7 @@ export default function Footer() {
       id="contact"
       className="px-6 py-20 sm:py-28 border-t border-line mt-auto"
     >
-      <div className="max-w-4xl mx-auto text-center">
+      <div className="max-w-5xl mx-auto text-center">
         <p className="eyebrow mb-3">Contact</p>
         <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
           같이 만들 사람을 찾고 계신가요?

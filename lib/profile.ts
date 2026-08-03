@@ -65,11 +65,12 @@ export const careers: Career[] = [
   },
   {
     org: "삼성메디슨",
-    employment: "인턴십",
+    employment: "인턴",
     role: "AI Vision 그룹 — 딥러닝 기반 초음파 영상 진단 기능 개발",
     period: "2024.03 — 2024.08",
     duration: "6개월 · 계약 기간 만료",
     track: "AI · 의료영상",
+    projectSlug: "samsung-medison",
     points: [
       {
         text: "초음파 영상 Segmentation 모델 성능 개선 — 논문 기반 모듈과 Augmentation 기법을 적용해 PyTorch로 연구 데이터에 최적화된 모델 구축",
@@ -120,7 +121,6 @@ export const educations: Education[] = [
     detail: "정보통신산업진흥원",
     status: "수료",
     period: "2024.10 — 2024.11",
-    projectSlug: "pm-violation-detection",
     points: [
       {
         text: "YOLOv3를 직접 구현해 킥보드 안전모 미착용·동승자 탑승을 탐지하는 시스템 개발",
@@ -234,10 +234,14 @@ export interface ProjectCard {
   stack: string[];
   slug?: string;
   draft?: boolean;
-  /** 카드 썸네일. 없으면 track 기반 플레이스홀더가 표시된다. */
+  /** 카드 커버 이미지 (2:1, 권장 1280×640). 없으면 track 플레이스홀더가 표시된다. */
   thumbnail?: string;
   /** GitHub 저장소. 있으면 카드에 GitHub 아이콘 링크가 뜬다. */
   github?: string;
+  /** 이 프로젝트에서 내가 맡은 범위 — 팀 작업에서 역할이 산문에 묻히지 않게 한다 */
+  role?: string;
+  /** 어디까지 갔는지 — 성능 지표나 도달점 */
+  outcome?: string;
 }
 
 export const projectCards: ProjectCard[] = [
@@ -251,40 +255,58 @@ export const projectCards: ProjectCard[] = [
     teamSize: "1인",
     stack: ["FastAPI", "SQLAlchemy", "MySQL", "React", "TypeScript"],
     slug: "magazine-manager",
-    thumbnail: "/magazine-manager/after.png",
+    role: "기획 · 개발 · 배포 단독",
+    outcome: "실서비스 운영 중",
   },
   {
     title: "다 맡케팅 — 소상공인 AI 마케팅 자동화",
     summary:
-      "홍보 쇼츠 자동 제작부터 SNS 게시글·성과 리포트까지 생성형 AI로 연결한 플랫폼. 장면 일관성 유지와 게시글 생성 파이프라인을 직접 설계했습니다.",
+      "홍보 쇼츠 자동 제작부터 SNS 게시글·성과 리포트까지 생성형 AI로 연결한 플랫폼. 장면 일관성 유지와 게시글 생성 파이프라인을 설계·구현했습니다.",
     badge: "KT AIVLE · 대상",
     track: "AI · 생성형",
     period: "2025.08 — 2025.09",
     teamSize: "팀 프로젝트",
     stack: ["LangGraph", "GPT-4o", "Flux.1 Kontext", "Seedance", "KoELECTRA", "FastAPI"],
+    slug: "damatketing",
+    role: "장면 일관성 · 게시글 생성 파이프라인 설계·구현",
+    outcome: "쇼츠 제작 → SNS 게시 → 성과 리포트 자동화",
   },
   {
     title: "소담소담 — AI 젖소 관리 앱",
     summary:
-      "센서 없이 앱의 AI 분석만으로 젖소를 관리하는 소규모 낙농가 전용 서비스. 비싼 스마트팜 장비를 공공데이터·AI로 대체하고, RAG 챗봇 '소담이'를 직접 설계했습니다.",
+      "센서 없이 앱의 AI 분석만으로 젖소를 관리하는 소규모 낙농가 전용 서비스. 스마트팜 장비를 갖추기 어려운 농가도 공공데이터와 AI 모델로 질병을 진단하고 생산성을 예측할 수 있게 했습니다.",
     badge: "창업경진대회 · 우수상",
     track: "AI · LLM",
     period: "2025.04 — 2025.06",
     teamSize: "팀 프로젝트",
-    stack: ["Flutter", "LangGraph", "YOLOv8", "FastAPI"],
+    // 상세 페이지(projectDetails.ts)의 stack과 같은 어휘를 쓴다
+    stack: [
+      "RAG",
+      "AI Agent",
+      "Query Routing",
+      "LangGraph",
+      "AI 예측 모델",
+      "이미지 분류 · 회귀",
+      "YOLOv8",
+      "Flutter",
+    ],
     slug: "sodam",
-    thumbnail: "/sodam/lumpy.png",
     github: "https://github.com/BlackCows-Team",
+    role: "AI 예측 모델 6종 · 럼피스킨 진단 · RAG 챗봇",
+    outcome: "럼피스킨 96.8% · 유방염 83.9%",
   },
   {
-    title: "킥보드 교통법규 위반 탐지",
+    title: "초음파 영상 AI 진단 기능",
     summary:
-      "안전모 미착용과 동승자 탑승을 탐지합니다. 라이선스 제약 없는 구조로 YOLOv3를 직접 구현하고 웹 서비스까지 연결했습니다.",
-    badge: "NIPA-Google",
-    track: "AI · 비전",
-    period: "2024.10 — 2024.11",
-    teamSize: "팀 프로젝트",
-    stack: ["PyTorch", "YOLOv3", "OpenCV", "FastAPI", "React"],
+      "삼성메디슨 AI Vision 그룹 인턴 과제. 임상의와 협업해 학습 데이터셋을 구축하고 Segmentation 모델 성능을 개선했으며, 난포 크기 측정 도구를 C++로 구현해 실제 초음파 장비에 적용했습니다.",
+    badge: "삼성메디슨 · 인턴",
+    track: "AI · 의료영상",
+    period: "2024.03 — 2024.08",
+    teamSize: "AI Vision 그룹",
+    stack: ["PyTorch", "Python", "C++", "OpenCV"],
+    slug: "samsung-medison",
+    role: "데이터셋 구축 · Segmentation 개선 · C++ 측정 도구",
+    outcome: "실제 초음파 장비에 적용",
   },
   {
     title: "KT AIVLE 미니프로젝트",

@@ -82,6 +82,8 @@ export interface LightProject {
   /** homepage 버튼 라벨. 기본값 '홈페이지' */
   homepageLabel?: string;
   screenshots: string[];
+  /** 배경 섹션 라벨. 기본값 '제안 배경' */
+  backgroundLabel?: string;
   /** 왜 만들었나 — 문제 배경, 리드 1줄(위기 진술) */
   background?: string;
   /** 제안 배경 — 리드 2줄(위기가 낳은 결과, 화살표로 연결) */
@@ -125,7 +127,11 @@ export interface LightProject {
   myRolePipeline?: string[];
   /** 핵심 AI 기능 상세 (문제→해결→수치) */
   aiFeatures?: AiFeature[];
+  /** aiFeatures 섹션 라벨. 기본값 '핵심 AI 기능' */
+  aiFeaturesLabel?: string;
   features: string[];
+  /** features 섹션 라벨. 기본값 '그 외 기능' */
+  featuresLabel?: string;
   /** 기존 서비스 대비 차별점 */
   differentiators?: string[];
   /** 활용한 공공데이터·외부 데이터 */
@@ -134,6 +140,60 @@ export interface LightProject {
 }
 
 export const lightProjects: LightProject[] = [
+  /*
+    다 맡케팅 상세 — 뼈대만 세운 상태.
+    아래 서술은 lib/profile.ts 카드(summary·role·outcome·stack)에서 확인된 범위로만 작성했다.
+    비워 둔 것: 스크린샷, 성능 지표, 트러블슈팅, 팀 규모·본인 파트의 정확한 경계,
+    Seedance·KoELECTRA를 어디에 썼는지. 자료가 오면 채운다.
+  */
+  {
+    slug: "damatketing",
+    title: "다 맡케팅",
+    badge: "KT AIVLE · 대상",
+    period: "2025.08 — 2025.09",
+    teamSize: "팀 프로젝트",
+    summary:
+      "소상공인의 홍보 쇼츠 제작부터 SNS 게시글 작성, 성과 리포트까지를 생성형 AI로 이어 붙인 마케팅 자동화 플랫폼입니다. 저는 장면이 흔들리지 않게 붙잡는 일관성 유지와 게시글 생성 파이프라인을 설계·구현했습니다.",
+    stack: [
+      "LangGraph",
+      "GPT-4o",
+      "Flux.1 Kontext",
+      "Seedance",
+      "KoELECTRA",
+      "FastAPI",
+    ],
+    screenshots: [],
+    backgroundLabel: "과제 배경",
+    background:
+      "소상공인에게 마케팅은 본업 밖의 일입니다 — 홍보 영상 제작, SNS 게시, 성과 확인이 저마다 다른 도구와 시간을 요구합니다.",
+    backgroundEffect:
+      "이 세 단계를 생성형 AI로 하나의 흐름에 묶는 것이 과제의 목표였습니다.",
+    myRole:
+      "생성형 AI 파이프라인 중 두 축을 맡아 설계부터 구현까지 진행했습니다. 여러 장면으로 나뉘는 쇼츠에서 인물·배경이 장면마다 달라지지 않게 붙잡는 일, 그리고 만들어진 콘텐츠를 SNS 게시글로 바꾸는 생성 파이프라인을 만드는 일입니다.",
+    myRoleAreas: [
+      {
+        title: "장면 일관성 유지",
+        desc: "쇼츠가 여러 장면으로 나뉘어도 인물·배경이 유지되도록 이미지 생성 단계를 설계·구현",
+      },
+      {
+        title: "게시글 생성 파이프라인",
+        desc: "제작된 홍보 콘텐츠를 SNS 게시글로 변환하는 생성 흐름을 LangGraph로 구현",
+      },
+    ],
+    myRolePipeline: [
+      "장면 분할·프롬프트 설계",
+      "참조 기반 이미지 생성",
+      "게시글 생성 체인 구성",
+      "파이프라인 연결",
+    ],
+    // 앞에 '핵심 AI 기능' 섹션이 없으므로 '그 외 기능' 기본 라벨을 쓰지 않는다
+    featuresLabel: "주요 기능",
+    features: [
+      "홍보 쇼츠 자동 제작",
+      "SNS 게시글 자동 생성",
+      "마케팅 성과 리포트",
+    ],
+  },
   {
     slug: "sodam",
     title: "소담소담",
@@ -142,18 +202,23 @@ export const lightProjects: LightProject[] = [
     teamSize: "팀 프로젝트 · AI 파트 담당",
     summary:
       "센서 없이, 앱의 AI 분석만으로 젖소를 관리하는 소규모 낙농가 전용 서비스입니다. 스마트팜 장비를 갖추기 어려운 농가도 공공데이터와 AI 모델만으로 질병을 진단하고 생산성을 예측할 수 있게 했고, 낙농 도메인에 특화한 RAG 챗봇 '소담이'를 설계·구현했습니다.",
+    // 담당한 일의 개념(RAG·Agent·예측)을 앞에, 구현 기술을 뒤에.
+    // 직접 만들지 않은 영역(DB 설계·인프라)은 싣지 않는다
     stack: [
-      "Flutter",
-      "LangChain",
+      "RAG",
+      "AI Agent",
+      "Query Routing",
       "LangGraph",
-      "FastAPI",
+      "AI 예측 모델",
+      "이미지 분류 · 회귀",
       "YOLOv8",
-      "OpenAI GPT",
+      "Flutter",
     ],
     github: "https://github.com/BlackCows-Team",
     homepage: "https://blackcows-team.github.io/blackcows-privacy/index.html",
     homepageLabel: "소개 페이지",
     screenshots: ["/sodam/home.png"],
+    backgroundLabel: "과제 배경",
     background: "낙농업의 위기 — '소규모 농가가 버틸 수 없는 구조'",
     backgroundEffect: "소규모 젖소농가 폐업 속도 가속화",
     backgroundChart: {
@@ -1630,6 +1695,126 @@ if len(raw_documents) == 0:
       "젖소 피부질병 오픈 이미지 (Kaggle) — 럼피스킨병 진단 모델 학습",
       "낙농 전문기관 공개 지식 — RAG 챗봇 지식 베이스",
     ],
+  },
+  /*
+    삼성메디슨 인턴 상세.
+    아래 문제·해결 서술은 lib/profile.ts 경력 불릿에서 확인된 범위로만 작성했다.
+    성능 지표(개선 전후 수치)·적용 논문명·모델 아키텍처·장비 제품군은 자료가 오면 채운다.
+    metric 칸은 수치가 확정되면 기법명 → 수치로 바꾼다.
+  */
+  {
+    slug: "samsung-medison",
+    title: "초음파 영상 AI 진단 기능",
+    badge: "삼성메디슨 · 인턴",
+    period: "2024.03 — 2024.08",
+    teamSize: "AI Vision 그룹 · 6개월",
+    summary:
+      "삼성메디슨 AI Vision 그룹에서 딥러닝 기반 초음파 영상 진단 기능을 개발했습니다. 임상의와 협업해 학습 데이터셋을 구축하고, 초음파 영상 Segmentation 모델의 성능을 개선했으며, 난포 크기 측정 도구 AddCaliper를 C++로 구현해 실제 초음파 장비에 적용했습니다.",
+    stack: [
+      "PyTorch",
+      "Python",
+      "C++",
+      "OpenCV",
+      "Segmentation",
+      "Augmentation",
+    ],
+    screenshots: [],
+    backgroundLabel: "과제 배경",
+    background:
+      "초음파 진단 기능의 정확도는 두 곳에서 갈립니다 — 모델이 학습한 데이터의 품질, 그리고 판독 화면에서 실제 측정을 수행하는 도구의 정밀도.",
+    backgroundEffect:
+      "인턴 기간 동안 이 두 축을 함께 담당했습니다. 데이터셋 구축·모델 성능 개선(딥러닝)과 장비에 탑재되는 측정 도구 개발(C++)입니다.",
+    myRole:
+      "AI Vision 그룹에서 초음파 영상 진단 기능 개발에 참여했습니다. 학습 데이터를 만드는 단계부터 모델 성능을 끌어올리는 단계, 그리고 그 결과가 실제 장비 화면에서 쓰이는 단계까지 담당했습니다.",
+    myRoleAreas: [
+      {
+        title: "학습 데이터셋 구축",
+        desc: "임상의와 협업해 레이블을 작성하고 기존 데이터를 보정해 데이터 품질을 개선",
+      },
+      {
+        title: "Segmentation 모델 성능 개선",
+        desc: "논문 기반 모듈과 Augmentation 기법을 적용해 PyTorch로 연구 데이터에 최적화된 모델 구축",
+      },
+      {
+        title: "AddCaliper 측정 도구 개발",
+        desc: "난포 크기 측정 도구를 C++로 구현해 실제 초음파 장비에 적용",
+      },
+    ],
+    myRolePipeline: [
+      "임상의 협업 레이블링",
+      "기존 데이터 보정",
+      "자동 레이블링 구현",
+      "모델 학습·성능 비교",
+      "측정 도구 구현·장비 적용",
+    ],
+    aiFeaturesLabel: "핵심 작업",
+    aiFeatures: [
+      {
+        name: "학습 데이터셋 구축",
+        tagline: "모델보다 먼저 손을 봐야 했던 것은 데이터였습니다.",
+        metric: "임상의 협업 · 자동 레이블링",
+        problemLabel: "데이터에서 막힌 지점",
+        problemList: [
+          "Segmentation 학습에는 픽셀 단위 정답 레이블이 필요하지만, 초음파 영상에서 경계를 판단하는 일은 임상 지식 없이는 불가능하다",
+          "이미 확보된 데이터에도 경계가 부정확한 레이블이 섞여 있어 그대로 학습에 쓰기 어려웠다",
+          "레이블을 전부 손으로 작성하면 확보 가능한 데이터 양이 투입 인력에 그대로 묶인다",
+        ],
+        solutionLabel: "해결 방식",
+        solutionBlocks: [
+          {
+            title: "임상의 협업 레이블링",
+            points: [
+              "임상의와 함께 경계 판단 기준을 맞추고 직접 레이블을 작성",
+              "기존 데이터의 부정확한 레이블을 보정해 학습 데이터 품질을 개선",
+            ],
+          },
+          {
+            title: "영상 처리 기반 자동 레이블링",
+            points: [
+              "영상 처리 알고리즘으로 레이블을 자동 생성해 수작업 부담을 줄임",
+              "데이터 부족과 품질 저하 문제를 함께 해소",
+            ],
+          },
+        ],
+      },
+      {
+        name: "Segmentation 모델 성능 개선",
+        tagline: "공개 데이터에서 잘 되는 구조가 아니라, 이 데이터에서 잘 되는 구조를 찾는 작업.",
+        metric: "PyTorch · 논문 모듈 + Augmentation",
+        problemLabel: "개선이 필요했던 지점",
+        problemList: [
+          "초음파 영상은 노이즈와 음영이 많아 병변·구조물의 경계가 흐릿하게 나타난다",
+          "확보된 연구 데이터의 양이 제한적이어서 모델이 학습할 수 있는 변형의 폭이 좁았다",
+        ],
+        solutionLabel: "적용한 개선",
+        solutionBlocks: [
+          {
+            title: "논문 기반 모듈 적용",
+            points: [
+              "Segmentation 성능 개선을 다룬 논문의 모듈을 모델에 결합해 경계 표현력을 보강",
+              "연구 데이터 기준으로 적용 전후 성능을 비교해 채택 여부를 판단",
+            ],
+          },
+          {
+            title: "Augmentation 기법 적용",
+            points: [
+              "제한된 데이터에서 학습 가능한 변형의 폭을 넓히기 위해 Augmentation 기법을 적용",
+              "PyTorch 학습 파이프라인에 반영해 연구 데이터에 최적화된 모델을 구축",
+            ],
+          },
+        ],
+      },
+      {
+        name: "AddCaliper — 난포 크기 측정 도구",
+        tagline: "모델 결과가 아니라, 판독 화면에서 사람이 직접 쓰는 도구를 만들었습니다.",
+        metric: "C++ · 실제 장비 적용",
+        problem:
+          "난포 크기는 진단 판단에 직접 쓰이는 수치입니다. 이를 초음파 화면에서 재려면 소수의 지정점만으로 난포 경계를 매끄럽게 재현해야 하고, 그렇지 않으면 측정값이 관찰자마다 흔들립니다.",
+        solution:
+          "Cubic Spline Interpolation으로 지정점 사이를 보간해 난포 경계를 연속 곡선으로 복원하고, 그 곡선을 기준으로 크기를 계산하는 AddCaliper를 C++로 구현했습니다. 이 도구는 실제 초음파 장비에 적용됐습니다.",
+      },
+    ],
+    features: [],
   },
 ];
 
