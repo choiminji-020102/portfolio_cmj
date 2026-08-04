@@ -623,6 +623,65 @@ export default function LightProjectView({
             </div>
           </section>
         )}
+
+        {/* 마무리 — 결과가 아니라 무엇이 남았는지.
+            첫 문단만 굵게 두어 결론을 앞세우고, 나머지는 본문 흐름으로 읽힌다 */}
+        {project.closing && project.closing.length > 0 && (
+          <section className="mt-16 border-t border-line pt-12">
+            <h2 className="text-2xl font-bold tracking-tight">
+              {project.closingLabel ?? "마무리"}
+            </h2>
+            <div className="mt-6 max-w-2xl space-y-4">
+              {project.closing.map((para, i) => (
+                <p
+                  key={para}
+                  className={
+                    i === 0
+                      ? "text-base font-semibold leading-relaxed text-deep"
+                      : leadText
+                  }
+                >
+                  {para}
+                </p>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* 작업 기록 — 본문에서 덜어낸 상세를 외부 글로 넘긴다 */}
+        {project.writeups && project.writeups.length > 0 && (
+          <section className="mt-16">
+            <h2 className="text-2xl font-bold tracking-tight">
+              {project.writeupsLabel ?? "작업 기록"}
+            </h2>
+            <p className="mt-3 text-[0.95rem] leading-relaxed text-muted">
+              작업 중 규명한 이슈는 그때그때 정리해 같은 실수를 반복하지 않도록
+              했습니다.
+            </p>
+            <ul className="mt-6 divide-y divide-line border-y border-line">
+              {project.writeups.map((post) => (
+                <li key={post.href}>
+                  <a
+                    href={post.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="group flex items-baseline gap-3 py-4 transition-colors hover:text-deep"
+                  >
+                    <span className="text-[0.95rem] leading-relaxed">
+                      {post.title}
+                    </span>
+                    <span
+                      aria-hidden="true"
+                      className="ml-auto shrink-0 text-tide transition-transform group-hover:translate-x-0.5"
+                    >
+                      ↗
+                    </span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
       </main>
     </div>
   );

@@ -71,24 +71,29 @@ export const careers: Career[] = [
     duration: "6개월 · 계약 기간 만료",
     track: "AI · 의료영상",
     projectSlug: "samsung-medison",
+    /*
+      인턴 기간 중 사수가 바뀌며 담당 과제가 둘로 나뉜다.
+      아래 ①~④는 파트 1(2024.03~04, 다중 구조물 검출) — 상세 페이지가 있다.
+      ⑤는 파트 2(2024.05~08, AddCaliper) — 상세는 자료가 오면 별도 slug 로 추가한다.
+    */
     points: [
       {
-        text: "초음파 영상 Segmentation 모델 성능 개선 — 논문 기반 모듈과 Augmentation 기법을 적용해 PyTorch로 연구 데이터에 최적화된 모델 구축",
-        pending: true,
+        text: "하복부 초음파 6종 구조물 검출 과제 단독 수행 — 데이터 처리부터 학습·검증·원인 규명까지",
       },
       {
-        text: "임상의와 협업해 학습 데이터셋 구축 — 레이블 작성과 기존 데이터 보정으로 품질 개선",
-        pending: true,
+        text: "CVAT 어노테이션을 학습 포맷으로 변환하는 GT 생성 함수와 영상→데이터셋 처리 파이프라인 구현",
       },
       {
-        text: "영상 처리 알고리즘 기반 자동 레이블링을 구현해 데이터 부족·품질 저하 문제 해소",
-        pending: true,
+        text: "배포 제약(추론 지연·다중 클래스 지원·라이선스)을 기준으로 Segmentation 모델을 비교 선정 — CPU ONNX 86ms vs TensorRT 1.2ms 실측",
+      },
+      {
+        text: "성능 정체 원인을 정답 레이블 품질로 규명 — 임상의 검증을 거쳐 데이터 재구축 선행을 보고",
       },
       {
         text: "난포 크기 측정 도구 AddCaliper 개발 (C++, Cubic Spline Interpolation) — 실제 초음파 장비에 적용",
       },
     ],
-    stack: ["PyTorch", "Python", "C++", "OpenCV"],
+    stack: ["PyTorch", "Python", "C++", "OpenCV", "YOLOv8", "TensorRT"],
   },
 ];
 
@@ -296,17 +301,24 @@ export const projectCards: ProjectCard[] = [
     outcome: "럼피스킨 96.8% · 유방염 83.9%",
   },
   {
-    title: "초음파 영상 AI 진단 기능",
+    title: "초음파 다중 구조물 검출",
     summary:
-      "삼성메디슨 AI Vision 그룹 인턴 과제. 임상의와 협업해 학습 데이터셋을 구축하고 Segmentation 모델 성능을 개선했으며, 난포 크기 측정 도구를 C++로 구현해 실제 초음파 장비에 적용했습니다.",
+      "삼성메디슨 AI Vision 그룹 인턴 과제. 학습에 필요한 도구를 직접 만들어가며 반복 학습을 수행했고, 성능이 정체되자 원인을 추적해 병목이 모델이 아니라 정답 데이터에 있음을 규명했습니다.",
     badge: "삼성메디슨 · 인턴",
     track: "AI · 의료영상",
-    period: "2024.03 — 2024.08",
-    teamSize: "AI Vision 그룹",
-    stack: ["PyTorch", "Python", "C++", "OpenCV"],
+    period: "2024.03 — 2024.04",
+    teamSize: "단독 수행",
+    stack: [
+      "Python",
+      "PyTorch",
+      "YOLOv8",
+      "Instance Segmentation",
+      "OpenCV",
+      "TensorRT",
+    ],
     slug: "samsung-medison",
-    role: "데이터셋 구축 · Segmentation 개선 · C++ 측정 도구",
-    outcome: "실제 초음파 장비에 적용",
+    role: "데이터 파이프라인 · 검증 도구 · 모델 선정",
+    outcome: "성능 병목을 정답 데이터로 규명",
   },
   {
     title: "KT AIVLE 미니프로젝트",
