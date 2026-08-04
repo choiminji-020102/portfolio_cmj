@@ -100,6 +100,61 @@ export default function LightProjectView({
           )}
         </header>
 
+        {/* 과제 개요 — 사실 항목(좌) + 작업 타임라인(우).
+            타임라인이 없으면 개요가 단독으로 폭을 다 쓴다 */}
+        {project.overview && project.overview.length > 0 && (
+          <section className="mt-12">
+            <h2 className="text-2xl font-bold tracking-tight">
+              {project.overviewLabel ?? "과제 개요"}
+            </h2>
+            <div
+              className={`mt-6 grid gap-8 ${
+                project.timeline?.length ? "lg:grid-cols-[1fr_auto]" : ""
+              }`}
+            >
+              <dl className="divide-y divide-line border-y border-line">
+                {project.overview.map((row) => (
+                  <div
+                    key={row.label}
+                    className="grid gap-1 py-3.5 sm:grid-cols-[7rem_1fr] sm:gap-4"
+                  >
+                    <dt className="rail pt-0.5 text-muted">{row.label}</dt>
+                    <dd className="text-[0.95rem] leading-relaxed text-ink">
+                      {row.value}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+
+              {project.timeline && project.timeline.length > 0 && (
+                <div className="lg:w-[19rem]">
+                  <p className="rail text-muted">작업 타임라인</p>
+                  <ol className="mt-3 space-y-0 border-l border-line pl-4">
+                    {project.timeline.map((row) => (
+                      <li key={row.when} className="relative py-1.5">
+                        <span
+                          aria-hidden="true"
+                          className="absolute -left-[1.3125rem] top-[0.85rem] h-1.5 w-1.5 rounded-full bg-tide"
+                        />
+                        <span className="rail mr-2 text-tide">{row.when}</span>
+                        <span className="text-[0.9rem] leading-relaxed">
+                          {row.what}
+                        </span>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              )}
+            </div>
+
+            {project.timelineNote && (
+              <p className="mt-6 border-l-2 border-tide/40 pl-4 text-[0.95rem] leading-relaxed text-muted">
+                {project.timelineNote}
+              </p>
+            )}
+          </section>
+        )}
+
         {/* 제안 배경 */}
         {project.background && (
           <section className="mt-12">
@@ -348,6 +403,9 @@ export default function LightProjectView({
                       </span>
                     )}
                   </div>
+                  {feature.when && (
+                    <p className="rail mt-2 text-tide">{feature.when}</p>
+                  )}
                   {feature.tagline && (
                     <p className="mt-1.5 text-sm text-muted">{feature.tagline}</p>
                   )}
