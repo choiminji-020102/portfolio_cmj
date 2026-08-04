@@ -68,6 +68,8 @@ export interface AiFeature {
   troubles?: TroubleItem[]; // 트러블슈팅·기술적 의사결정
   /** troubles 섹션 라벨. 기본값 '트러블슈팅 · 기술적 의사결정' */
   troublesLabel?: string;
+  /** 이 항목을 다룬 외부 글 — 하단 목록과 별개로, 읽는 자리에서 바로 넘어갈 수 있게 */
+  writeups?: { title: string; href: string }[];
 }
 
 export interface LightProject {
@@ -154,6 +156,8 @@ export interface LightProject {
   writeups?: { title: string; href: string }[];
   /** writeups 섹션 라벨. 기본값 '작업 기록' */
   writeupsLabel?: string;
+  /** writeups 목록 아래 붙는 단서 문장 */
+  writeupsNote?: string;
 }
 
 export const lightProjects: LightProject[] = [
@@ -1874,6 +1878,12 @@ Cy = nCy × IH        BH = nH × IH
             ],
           },
         ],
+        writeups: [
+          {
+            title: "[YOLOv8] .yaml 파일 클래스 구성 — 인덱스 매칭 오류",
+            href: "https://blog.naver.com/t3335150/223396924265",
+          },
+        ],
       },
       {
         name: "2. 반복 학습 및 조건 실험",
@@ -2143,6 +2153,12 @@ TensorRT  :  1.21 / 1.47 / 2.18 / 2.79 / 4.02    ms`,
             ],
           },
         ],
+        writeups: [
+          {
+            title: "YOLOv8-seg 세그멘테이션 학습",
+            href: "https://blog.naver.com/t3335150/223415861451",
+          },
+        ],
       },
       {
         name: "4. GT 레이블 데이터셋 생성",
@@ -2311,6 +2327,20 @@ class_1.txt ├→  merge_separate_annote  →  frame별 통합 label txt
             ],
           },
         ],
+        writeups: [
+          {
+            title: "XML 파일을 txt로 변환",
+            href: "https://blog.naver.com/t3335150/223416017978",
+          },
+          {
+            title: "Nerve 데이터셋",
+            href: "https://blog.naver.com/t3335150/223419636271",
+          },
+          {
+            title: "Appendix 단일 클래스 Segmentation 학습",
+            href: "https://blog.naver.com/t3335150/223426876321",
+          },
+        ],
       },
       {
         name: "5. 데이터 처리 파이프라인",
@@ -2383,6 +2413,12 @@ class_1.txt ├→  merge_separate_annote  →  frame별 통합 label txt
                 ],
               },
             ],
+          },
+        ],
+        writeups: [
+          {
+            title: "데이터 처리 파이프라인 — crop",
+            href: "https://blog.naver.com/t3335150/223427039001",
           },
         ],
       },
@@ -2475,6 +2511,8 @@ class_1.txt ├→  merge_separate_annote  →  frame별 통합 label txt
         href: "https://blog.naver.com/t3335150/223427039001",
       },
     ],
+    writeupsNote:
+      "이 외에 ultralytics 오류 해결, thresholding, mAP 개념 등을 정리했습니다.",
   },
 ];
 

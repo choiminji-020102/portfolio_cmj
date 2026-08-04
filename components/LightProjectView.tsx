@@ -589,6 +589,28 @@ export default function LightProjectView({
                       </div>
                     </div>
                   )}
+
+                  {/* 이 항목을 다룬 글 — 하단 목록과 중복되지만, 읽는 자리에서
+                      바로 넘어갈 수 있는 쪽이 실제로 눌린다 */}
+                  {feature.writeups && feature.writeups.length > 0 && (
+                    <div className="mt-6 flex flex-wrap items-baseline gap-x-3 gap-y-2 border-t border-line pt-4">
+                      <span className="rail shrink-0 text-muted">기록</span>
+                      {feature.writeups.map((post) => (
+                        <a
+                          key={post.href}
+                          href={post.href}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="rail inline-flex items-center gap-1 rounded-full border border-line px-3 py-1 text-deep transition-colors hover:border-tide hover:bg-tide/10"
+                        >
+                          {post.title}
+                          <span aria-hidden="true" className="text-tide">
+                            ↗
+                          </span>
+                        </a>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -738,6 +760,11 @@ export default function LightProjectView({
                 </li>
               ))}
             </ul>
+            {project.writeupsNote && (
+              <p className="mt-4 text-[0.95rem] leading-relaxed text-muted">
+                {project.writeupsNote}
+              </p>
+            )}
           </section>
         )}
       </main>
