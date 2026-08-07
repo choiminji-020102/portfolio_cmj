@@ -93,6 +93,19 @@ export interface LightProject {
   timeline?: { when: string; what: string }[];
   /** 타임라인 아래 붙는 단서 문장 */
   timelineNote?: string;
+  /** 과제 개요 아래 참고 이미지 — 검출 대상이 어떻게 생겼는지 보여준다 */
+  overviewFigures?: {
+    src: string;
+    width: number;
+    height: number;
+    alt: string;
+    /** 이미지에 라벨된 구조물 */
+    caption?: string;
+  }[];
+  /** overviewFigures 라벨. 기본값 '참고 이미지' */
+  overviewFiguresLabel?: string;
+  /** 참고 이미지의 성격을 밝히는 문장 — 프로젝트 데이터로 오해되지 않게 한다 */
+  overviewFiguresNote?: string;
   /** 배경 섹션 라벨. 기본값 '제안 배경' */
   backgroundLabel?: string;
   /** 왜 만들었나 — 문제 배경, 리드 1줄(위기 진술) */
@@ -1774,6 +1787,42 @@ if len(raw_documents) == 0:
     ],
     timelineNote:
       "위 작업과 병행해 기간 내내 조건을 바꿔가며 학습을 반복했습니다. 도구는 대부분 그 반복 과정에서 막힌 지점을 풀기 위해 만든 것입니다.",
+    overviewFiguresLabel: "검출 대상 구조물",
+    /*
+      아래 세 파일을 public/samsung-medison/ 에 저장하면 바로 뜬다.
+      파일이 없으면 빌드가 실패하므로 저장 전에는 주석을 풀지 말 것.
+        ref-appendix-iliac.png   — Appendix · Iliac artery · Iliac vein 라벨
+        ref-caecum-appendix.png  — Caecum · Appendix · Iliac vein 라벨
+        ref-cecum-ileum.png      — Cecum · Terminal ileum · Appendix 라벨
+      width/height 는 원본 픽셀 크기에 맞춰 고칠 것 (지금 값은 비율 추정치).
+    */
+    /*
+    overviewFigures: [
+      {
+        src: "/samsung-medison/ref-appendix-iliac.png",
+        width: 393,
+        height: 263,
+        alt: "하복부 초음파 영상에서 Appendix, Iliac artery, Iliac vein 이 라벨된 참고 이미지",
+        caption: "Appendix · Iliac artery · Iliac vein",
+      },
+      {
+        src: "/samsung-medison/ref-caecum-appendix.png",
+        width: 391,
+        height: 270,
+        alt: "하복부 초음파 영상에서 Caecum, Appendix, Iliac vein 이 라벨된 참고 이미지",
+        caption: "Caecum · Appendix · Iliac vein",
+      },
+      {
+        src: "/samsung-medison/ref-cecum-ileum.png",
+        width: 511,
+        height: 392,
+        alt: "하복부 초음파 영상에서 Cecum, Terminal ileum, Appendix 가 라벨된 참고 이미지",
+        caption: "Cecum · Terminal ileum · Appendix",
+      },
+    ],
+    */
+    overviewFiguresNote:
+      "구조물이 초음파 영상에서 어떻게 보이는지 나타낸 공개 참고 이미지입니다. 과제에 사용한 학습 데이터가 아닙니다.",
     aiFeaturesLabel: "수행 내용",
     aiFeatures: [
       {

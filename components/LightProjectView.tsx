@@ -152,6 +152,43 @@ export default function LightProjectView({
                 {project.timelineNote}
               </p>
             )}
+
+            {/* 참고 이미지 — 검출 대상이 실제로 어떻게 보이는지.
+                본인이 만든 산출물이 아니므로 성격을 반드시 밝힌다 */}
+            {project.overviewFigures &&
+              project.overviewFigures.length > 0 && (
+                <div className="mt-10">
+                  <p className="rail text-muted">
+                    {project.overviewFiguresLabel ?? "참고 이미지"}
+                  </p>
+                  <div className="mt-4 grid gap-4 sm:grid-cols-3">
+                    {project.overviewFigures.map((fig) => (
+                      <figure key={fig.src}>
+                        <div className="overflow-hidden rounded-xl border border-line bg-ink/90">
+                          <Image
+                            src={fig.src}
+                            alt={fig.alt}
+                            width={fig.width}
+                            height={fig.height}
+                            sizes="(max-width: 640px) 100vw, 300px"
+                            className="h-auto w-full"
+                          />
+                        </div>
+                        {fig.caption && (
+                          <figcaption className="rail mt-2 text-muted">
+                            {fig.caption}
+                          </figcaption>
+                        )}
+                      </figure>
+                    ))}
+                  </div>
+                  {project.overviewFiguresNote && (
+                    <p className="mt-3 text-sm leading-relaxed text-muted">
+                      {project.overviewFiguresNote}
+                    </p>
+                  )}
+                </div>
+              )}
           </section>
         )}
 
