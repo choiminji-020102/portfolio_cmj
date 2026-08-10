@@ -1833,9 +1833,8 @@ if len(raw_documents) == 0:
         metric: "오류 2건 규명",
         problemLabel: "확인할 수 없던 것",
         problemList: [
-          "정규화된 레이블 좌표가 실제 이미지 위 어디에 찍히는지 숫자만으로는 알 수 없다",
-          "예측이 어디서 틀렸는지 — 위치인지 클래스인지 — 지표 하나로는 구분되지 않는다",
-          "좌표계를 변환할 때마다 결과가 맞는지 검산할 방법이 없다",
+          "정규화된 레이블 좌표가 실제 이미지 위 어디에 찍히는지, 좌표 변환이 맞는지 숫자만으로는 알 수 없다",
+          "예측이 어디서 틀렸는지 지표 하나로는 구분되지 않는다",
         ],
         solutionLabel: "직접 만든 도구",
         solutionBlocks: [
@@ -1965,9 +1964,7 @@ Cy = nCy × IH        BH = nH × IH
           {
             title: "학습 하이퍼파라미터",
             points: [
-              "optimizer — Adam / AdamW / SGD / NAdam / RAdam / RMSProp",
-              "learning rate 0.001 / 0.005 / 0.01, freeze layer 1 / 3 / 10",
-              "augmentation — U-Net 논문 기준(shift · rotate · zoom · flip)과 YOLO-NAS 기준 gaussian noise",
+              "optimizer · learning rate · freeze layer · augmentation 을 조합을 바꿔가며 반복 학습 (조건 전체는 아래 상세에)",
             ],
           },
         ],
@@ -2111,27 +2108,14 @@ names:
           "실시간으로 판독되어야 하는 기능이라, 추론 지연이 정확도만큼 중요했다",
           "다중 구조물 과제이므로 개체를 하나로 뭉뚱그리는 모델은 정확도와 무관하게 쓸 수 없다",
         ],
-        solutionLabel: "후보별 판단",
+        solutionLabel: "판단 순서",
         solutionBlocks: [
           {
-            title: "도메인 적합성으로 1차 배제",
+            title: "도메인 → 태스크 요건 → 실측",
             points: [
-              "STU-Net / nnU-Net — CT 학습 모델. CT 는 영상이 clear 한 반면 초음파는 노이즈가 지배적이라, 같은 의료영상이어도 전이 이점이 없다고 판단해 배제",
-              "TU-Net (Transformer + U-Net, joint loss) — 초음파 segmentation 을 직접 다뤘으나 FPS·연산속도 미공개로 탑재 판단이 불가해 보류",
-            ],
-          },
-          {
-            title: "태스크 요건으로 2차 배제",
-            points: [
-              "FastSAM — 단일 GPU 83 FPS 로 실시간이 가능하나 단일 클래스만 지원(모든 개체를 하나로 인식)해 배제. MobileSAM 도 상동",
-              "YOLACT — real-time instance segmentation, FPS 확보로 후보에 유지",
-            ],
-          },
-          {
-            title: "YOLOv8-seg 채택",
-            points: [
-              "bbox 와 segmentation 을 동시에 지원하고, 기존 학습 환경을 그대로 재사용할 수 있다",
-              "논문 벤치마크가 아니라 실제 배포 조건에서 측정한 추론 속도를 기준으로 최종 판단",
+              "CT 학습 모델은 초음파로 전이 이점이 없다고 보고 배제, FPS 미공개 모델은 탑재 판단 자체가 불가해 보류",
+              "실시간이 가능해도 단일 클래스만 지원하는 모델은 다중 구조물 과제에 쓸 수 없어 배제",
+              "남은 후보를 실제 배포 조건에서 측정해 YOLOv8-seg 채택 — bbox·segmentation 동시 지원, 기존 학습 환경 재사용",
             ],
           },
         ],
@@ -2223,27 +2207,6 @@ TensorRT  :  1.21 / 1.47 / 2.18 / 2.79 / 4.02    ms`,
         ],
         solutionLabel: "해결 경로",
         solutionBlocks: [
-          {
-            title: "좌표계 정합 (4/16)",
-            points: [
-              "중앙 크롭을 가정해 계산했으나 실제 크롭은 가로가 비대칭(좌 200 / 우 180)이었다",
-              "크롭은 종횡비 변경이 아니라 여백 제거이므로, 스케일링이 아닌 shift 로 처리해야 한다는 점을 확인",
-            ],
-          },
-          {
-            title: "방식 A — XML 파싱 (4/15)",
-            points: [
-              "XML 트리를 파싱해 클래스별 폴리곤 좌표를 추출하고, 크롭 좌표계로 변환한 뒤 정규화해 기록",
-              "name 태그 패턴 치환, id 역참조 등 6건의 이슈를 규명해 대응했으나 프레임 밖 좌표는 XML 단계에서 선별하기 어려웠다",
-            ],
-          },
-          {
-            title: "방식 B — 클래스별 txt 병합 (4/18)",
-            points: [
-              "XML 파싱 자체를 포기하고, CVAT 가 클래스별로 개별 출력하는 annotation txt 를 병합하는 방식으로 전환",
-              "생성한 레이블은 mask 렌더링 함수로 확인한 뒤 학습에 투입",
-            ],
-          },
           {
             title: "단일 클래스 데이터셋 (4/24~25)",
             points: [
@@ -2396,33 +2359,16 @@ class_1.txt ├→  merge_separate_annote  →  frame별 통합 label txt
         when: "4/21",
         tagline: "원본 영상에서 학습 데이터까지의 처리를 하나로 묶었습니다.",
         metric: "AVI → image → crop → annotation → train",
-        problemLabel: "프레임별 크기 편차",
-        problemList: [
-          "1개 AVI 는 약 500 프레임이고, 앞뒤에는 학습에 쓸 수 없는 무효 구간이 있다",
-          "같은 영상 안에서도 프레임마다 유효 영상 영역의 크기가 달랐다",
-          "프레임별로 개별 크롭하면 데이터 크기가 제각각이 되고, 고정 크기로 자르면 일부 프레임의 유효 영역이 잘려나간다",
-        ],
+        problem:
+          "1개 AVI 약 500 프레임 중 20~300번 구간만 학습에 쓸 수 있었고, 같은 영상 안에서도 프레임마다 유효 영상 영역의 크기가 달랐습니다.",
         solutionLabel: "처리 방식",
         solutionBlocks: [
           {
-            title: "프레임 추출",
+            title: "프레임 추출 · 크롭 · 기록",
             points: [
-              "1개 AVI 약 500 프레임 중 20~300번 구간만 사용해 앞뒤 무효 구간을 제외",
-              "파일명을 000001~000XXX 형식으로 강제(0 최소 3개)해 문자열 정렬 오류를 방지",
-            ],
-          },
-          {
-            title: "영상 단위 대표 크롭",
-            points: [
-              "프레임마다 largest contour 의 사각형 좌표를 산출한 뒤, 그중 최빈값을 해당 AVI 의 대표 크롭 크기로 채택",
-              "영상 내부의 일관성은 유지하면서 영상 간 편차는 개별 대응할 수 있다",
-            ],
-          },
-          {
-            title: "기록",
-            points: [
-              "프레임별 rectangle contour 는 txt 로 listing",
-              "크롭 결과는 엑셀로 정리해 영상별 비교가 가능한 형태로 남김",
+              "앞뒤 무효 구간을 제외하고 파일명을 0 패딩 형식으로 강제해 문자열 정렬 오류를 방지",
+              "프레임마다 largest contour 의 사각형 좌표를 산출한 뒤 최빈값을 해당 AVI 의 대표 크롭 크기로 채택",
+              "프레임별 rectangle contour 는 txt 로 listing, 크롭 결과는 엑셀로 정리",
             ],
           },
         ],
@@ -2476,13 +2422,8 @@ class_1.txt ├→  merge_separate_annote  →  frame별 통합 label txt
         tagline:
           "지표가 오르지 않을 때 학습을 한 번 더 돌리는 대신, 어디가 막혔는지를 물었습니다.",
         metric: "조정과 결과 사이에 설명 가능한 상관이 없음",
-        problemLabel: "관측",
-        problemList: [
-          "여러 run 에서 전체 mAP 가 0.14~0.25 구간을 벗어나지 못함",
-          "클래스별 등락 방향이 run 마다 뒤바뀜 — Psoas ↑ ↔ Terminal Ileum ↓, 다음 run 에서 역전",
-          "Iliac Vein 은 여러 run 에서 0에 가까운 값",
-          "조정과 결과 사이에 설명 가능한 상관이 없음",
-        ],
+        problem:
+          "2번 항목의 학습 기록이 출발점입니다. 전체 mAP 는 좁은 구간을 벗어나지 못했고, 클래스별 등락 방향은 run 마다 뒤집혔습니다 — 조정과 결과 사이에 설명 가능한 상관이 없었습니다.",
         solutionLabel: "가설 → 검증 → 확인",
         solutionBlocks: [
           {
