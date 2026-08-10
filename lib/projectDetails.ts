@@ -1741,7 +1741,7 @@ if len(raw_documents) == 0:
   */
   {
     slug: "samsung-medison",
-    title: "초음파 다중 구조물 검출",
+    title: "초음파 다중 구조물 검출 — 학습 데이터 구축 및 검증 도구 개발",
     badge: "삼성메디슨 · 인턴",
     period: "2024.03 — 2024.04",
     teamSize: "AI Vision 그룹 · 2개월",
