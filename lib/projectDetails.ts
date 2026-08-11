@@ -15,6 +15,16 @@ export interface Trouble {
 export interface SolutionBlock {
   title: string;
   points: string[];
+  /* 제목 바로 아래 붙는 그림 — 원문에서 소제목 다음에 오던 자리를 그대로 지킨다 */
+  figure?: {
+    src: string;
+    width: number;
+    height: number;
+    alt: string;
+    caption?: string;
+  };
+  /* 그림과 불릿 사이에 끼는 계산 과정 */
+  code?: string;
 }
 
 /* 풀버전 상세 — 문서 순서 그대로 섞이는 블록들 */
@@ -40,12 +50,15 @@ export interface TroubleDetail {
 /* 트러블슈팅·기술적 의사결정 — 슬림(문제→해결→효과) + 풀버전(details) */
 export interface TroubleItem {
   title: string;
-  problem: string;
-  solution: string;
+  /* 표(table)가 문제와 원인을 다 담는 항목은 두 줄을 비운다 — 같은 말을 두 번 쓰지 않는다 */
+  problem?: string;
+  solution?: string;
   effect: string;
   tags?: string[];
   tech?: string[]; // 풀버전 상단 기술 스택
   diagram?: "route"; // 곁들일 다이어그램
+  /* 문제·해결 자리를 대신하는 표 — 서랍에 넣지 않고 본문에 펼쳐둔다 */
+  table?: { head: string[]; rows: string[][] };
   details?: TroubleDetail[]; // 아코디언 풀버전
 }
 
@@ -65,6 +78,23 @@ export interface AiFeature {
   image?: string; // 관련 앱 스크린샷 (영상 poster로도 사용)
   video?: string; // 시연 영상
   diagram?: "rag"; // 구조 다이어그램 종류
+  /* 항목 전체에 걸리는 표 (후보 비교 등) — 트러블에 억지로 끼우지 않고 본문에 펼친다.
+     note 는 표를 받아 닫는 문장 */
+  table?: {
+    label?: string;
+    head: string[];
+    rows: string[][];
+    note?: string;
+  };
+  /* 본문 아래 풀폭 설명 그림 — 글로 풀면 길어지는 좌표계·파이프라인 구조를 대신한다.
+     오른쪽 사이드에 붙는 image(240px)와 달리 본문 폭을 다 쓴다 */
+  figures?: {
+    src: string;
+    width: number;
+    height: number;
+    alt: string;
+    caption?: string;
+  }[];
   troubles?: TroubleItem[]; // 트러블슈팅·기술적 의사결정
   /** troubles 섹션 라벨. 기본값 '트러블슈팅 · 기술적 의사결정' */
   troublesLabel?: string;
@@ -79,6 +109,8 @@ export interface LightProject {
   period: string;
   teamSize: string;
   summary: string;
+  /** 요약이 여러 문단일 때 이어지는 나머지 — summary 는 메타 description 에도 쓰이므로 첫 문단만 담는다 */
+  summaryMore?: string[];
   stack: string[];
   github?: string;
   homepage?: string;
@@ -1736,8 +1768,9 @@ if len(raw_documents) == 0:
     파트 2 는 자료가 오면 별도 slug 로 추가하고, 그때 이 slug 를
     samsung-medison-detection 으로 정리한다.
 
-    아래 서술은 본인이 제공한 작업 기록 문서를 유일한 출처로 삼는다.
-    이력서 불릿에서 추정해 채운 내용은 넣지 않는다.
+    아래 서술은 본인이 제공한 경력기술 문서를 유일한 출처로 삼는다.
+    문서에 없는 것은 이전 판에 있었더라도 넣지 않는다 — 날짜별 작업 타임라인,
+    run 별 mAP 표, 추론 속도(ONNX/TensorRT) 실측치가 그렇게 빠졌다.
   */
   {
     slug: "samsung-medison",
@@ -1746,7 +1779,11 @@ if len(raw_documents) == 0:
     period: "2024.03 — 2024.04",
     teamSize: "AI Vision 그룹 · 2개월",
     summary:
-      "하복부 초음파 영상에서 6개 구조물을 검출하는 과제를 담당했습니다. 학습을 반복하며 필요한 도구를 직접 만들었습니다 — 결과를 눈으로 확인하는 시각화 도구, 어노테이션을 학습 포맷으로 변환하는 GT 생성 함수, 영상에서 데이터셋까지의 처리 파이프라인입니다. 두 달간 성능이 정체되자 원인을 추적해, 병목이 모델이 아니라 정답 데이터에 있음을 규명했습니다.",
+      "하복부 초음파 영상에서 6개 구조물을 검출하는 과제를 맡았습니다. 두 달간 조건을 바꿔가며 학습을 반복했지만 전체 mAP 는 좁은 구간을 벗어나지 못했고, 클래스별 등락 방향은 run 마다 뒤집혔습니다.",
+    summaryMore: [
+      "학습을 한 번 더 돌리는 대신, 조정과 결과 사이에 설명 가능한 상관이 없다는 점 자체를 문제로 봤습니다. 병목이 모델이 아니라 정답 데이터에 있다고 판단해 사내 임상의를 직접 찾아가 레이블을 함께 검토했고, GT 마스크가 실제 구조물 경계보다 과도하게 넓게 그려져 있으며 데이터 양도 부족해 현 상태로는 학습이 성립하지 않는다는 확인을 받았습니다. 같은 시기에 확인한 AGPL-3.0 라이선스 제약과 함께 보고했고, 해당 과제 라인은 중단됐습니다.",
+      "두 달간 실제로 한 일은 모델을 학습시킨 것이 아니라 학습이 가능한 상태를 만드는 일이었습니다.",
+    ],
     stack: [
       "Python",
       "PyTorch",
@@ -1769,24 +1806,13 @@ if len(raw_documents) == 0:
       {
         label: "데이터",
         value:
-          "초기 87개 폴더 (폴더 = 영상 1개, jpg 이미지와 동명 txt 레이블이 1:1 대응) → AVI 프레임 추출로 약 3만 장 규모로 확장 (900×600)",
+          "초기 87개 폴더 (폴더 = 영상 1개, jpg 와 동명 txt 레이블 1:1 대응) → AVI 프레임 추출로 약 3만 장 규모 확장 (900×600)",
       },
       { label: "태스크", value: "Object Detection → Instance Segmentation" },
       { label: "수행", value: "단독 수행 · 외국인 사수와 영어로 협업" },
     ],
-    timeline: [
-      { when: "3/29", what: "Bounding box drawing 함수" },
-      { when: "4/2", what: "GT / predict 비교 도구" },
-      { when: "4/8", what: "sharpen 전처리 함수" },
-      { when: "4/11~12", what: "Segmentation 모델 서베이" },
-      { when: "4/15", what: "XML → txt 변환 함수 · YOLOv8-seg 첫 학습" },
-      { when: "4/16", what: "Mask 렌더링 함수 · 좌표계 정합" },
-      { when: "4/18", what: "merge_separate_annote" },
-      { when: "4/21", what: "데이터 처리 파이프라인" },
-      { when: "4/24~25", what: "Appendix 단일 클래스 Segmentation 학습" },
-    ],
     timelineNote:
-      "위 작업과 병행해 기간 내내 조건을 바꿔가며 학습을 반복했습니다. 도구는 대부분 그 반복 과정에서 막힌 지점을 풀기 위해 만든 것입니다.",
+      "기간 내내 조건을 바꿔가며 학습을 반복했고, 아래 도구들은 대부분 그 반복 과정에서 막힌 지점을 풀기 위해 만든 것입니다.",
     overviewFiguresLabel: "검출 대상 구조물",
     /*
       아래 세 파일을 public/samsung-medison/ 에 저장하면 바로 뜬다.
@@ -1827,103 +1853,60 @@ if len(raw_documents) == 0:
     aiFeatures: [
       {
         name: "1. 검증 도구 구현",
-        when: "3/29 · 4/2 · 4/16",
         tagline:
           "학습을 돌려도 좌표 변환이 맞는지, 예측이 어디서 틀리는지 숫자만으로는 알 수 없었습니다. 확인할 수단부터 만들었습니다.",
         metric: "오류 2건 규명",
         problemLabel: "확인할 수 없던 것",
         problemList: [
-          "정규화된 레이블 좌표가 실제 이미지 위 어디에 찍히는지, 좌표 변환이 맞는지 숫자만으로는 알 수 없다",
-          "예측이 어디서 틀렸는지 지표 하나로는 구분되지 않는다",
+          "정규화된 레이블 좌표가 실제 이미지 위 어디에 찍히는지",
+          "예측이 어디서 틀렸는지 — 위치인지 클래스인지. 지표 하나로는 구분되지 않는다",
+          "좌표계를 변환할 때마다 결과가 맞는지 검산할 방법",
         ],
-        solutionLabel: "직접 만든 도구",
+        solutionLabel: "만든 도구",
         solutionBlocks: [
           {
-            title: "Bounding box drawing (3/29)",
+            title: "Bounding box drawing",
             points: [
               "정규화 레이블을 픽셀 좌표로 역산해 이미지 위에 렌더링",
               "폴더 경로만 입력하면 전체가 자동 처리되도록 구성",
             ],
           },
           {
-            title: "GT / predict 비교 도구 (4/2)",
+            title: "GT / predict 비교",
             points: [
-              "정답 박스를 그린 GT 이미지와 YOLOv8 예측 결과를 cv2.hconcat 으로 가로 병합해 나란히 비교",
+              "정답 박스를 그린 GT 이미지와 YOLOv8 예측 결과를 cv2.hconcat 으로 가로 병합해 나란히 배치",
               "bounding box · class name · 하단 파일명을 함께 표시해 어긋난 지점을 바로 짚을 수 있게 함",
             ],
           },
           {
-            title: "Mask 렌더링 (4/16)",
+            title: "Mask 렌더링",
             points: [
-              "Segmentation 전환 이후 cv2.polylines 로 폴리곤 좌표를 선으로 그려 표시",
+              "Segmentation 전환 이후 cv2.polylines 로 폴리곤 좌표를 선으로 표시",
               "변환된 레이블 txt 가 옳은 좌표를 따왔는지 검증하는 데도 같은 함수를 사용",
             ],
           },
         ],
-        troublesLabel: "이 도구들로 발견한 것",
+        troublesLabel: "이 도구들로 찾은 것 — 오류 2건",
         troubles: [
           {
-            title: "두 건의 오류 — 눈에 보이는 증상과 실제 원인이 달랐다",
-            problem:
-              "검출 위치는 정확한데 클래스 이름이 다르게 표시되고, 마스크 모양은 정확한데 색상이 다르게 렌더링됐다. 증상만 보고는 원인을 좁힐 수 없었다.",
-            solution:
-              "학습 산출물 labels.jpg 를 역추적해, 각각 어노테이션 파일과 설정 파일의 클래스 인덱스 정의 불일치, XML 의 id 가 실제 라벨링 순서와 다르게 기록된 문제임을 확인했다.",
+            title: "증상과 원인이 달랐던 두 건",
+            table: {
+              head: ["증상", "실제 원인"],
+              rows: [
+                [
+                  "검출 위치는 정확한데 클래스 이름이 다르게 표시",
+                  "어노테이션 파일과 설정 파일의 클래스 인덱스 정의 불일치",
+                ],
+                [
+                  "마스크 모양은 정확한데 색상이 다르게 렌더링",
+                  "XML 의 id 가 실제 라벨링 순서와 다르게 기록됨",
+                ],
+              ],
+            },
             effect:
-              "이후 각 단계의 결과를 시각적으로 확인한 뒤 다음으로 넘어가는 절차를 고정했다.",
+              "둘 다 학습 산출물 labels.jpg 를 역추적해서야 찾았다. 증상만 보고는 원인을 좁힐 수 없었고, 검증 도구가 없었다면 '학습 결과가 낮다'로 뭉뚱그려졌을 문제였다. 이후 각 단계의 결과를 시각적으로 확인한 뒤 다음으로 넘어가는 절차를 고정했다.",
             tags: ["클래스 인덱스", "디버깅"],
             tech: ["YOLOv8", "OpenCV", "CVAT"],
-            details: [
-              {
-                heading: "증상과 원인",
-                blocks: [
-                  {
-                    type: "table",
-                    head: ["증상", "실제 원인"],
-                    rows: [
-                      [
-                        "검출 위치는 정확한데 클래스 이름이 다르게 표시",
-                        "어노테이션 파일과 설정 파일의 클래스 인덱스 정의 불일치",
-                      ],
-                      [
-                        "마스크 모양은 정확한데 색상이 다르게 렌더링",
-                        "XML 의 id 가 실제 라벨링 순서와 다르게 기록됨",
-                      ],
-                    ],
-                  },
-                  {
-                    type: "text",
-                    text: "둘 다 학습 산출물 labels.jpg 를 역추적해서야 찾았습니다. 검증 도구가 없었다면 '학습 결과가 낮다'로 뭉뚱그려졌을 문제입니다.",
-                  },
-                ],
-              },
-              {
-                heading: "Bounding box 역산",
-                blocks: [
-                  {
-                    type: "text",
-                    text: "정규화 레이블을 이미지 위에 그리려면 픽셀 좌표로 되돌려야 합니다. 이 역산이 맞는지 확인하는 것이 첫 도구의 목적이었습니다.",
-                  },
-                  {
-                    type: "code",
-                    code: `Cx = nCx × IW        BW = nW × IW
-Cy = nCy × IH        BH = nH × IH
-
-좌상단 = (Cx − BW/2, Cy − BH/2)
-우하단 = 좌상단 + (BW, BH)`,
-                  },
-                ],
-              },
-              {
-                heading: "GT / predict 비교 출력 규격",
-                blocks: [
-                  {
-                    type: "code",
-                    code: `출력 크기 :  너비 = 이미지1 × 2,  높이 = 이미지1 동일
-표시 항목 :  bounding box, class name, 하단 파일명`,
-                  },
-                ],
-              },
-            ],
           },
         ],
         writeups: [
@@ -1935,20 +1918,19 @@ Cy = nCy × IH        BH = nH × IH
       },
       {
         name: "2. 반복 학습 및 조건 실험",
-        when: "기간 내내 · 4/8",
         tagline:
           "도구를 만드는 작업과 병행해, 기간 내내 조건을 바꿔가며 학습을 반복했습니다.",
-        metric: "전체 mAP 0.14~0.25 정체",
+        metric: "전체 mAP 0.14~0.25",
         problemLabel: "학습 환경 구축",
         problemList: [
-          "원격 서버에 CUDA · conda · 가상환경 · PyTorch 및 필요 패키지를 설치해 학습 환경을 직접 구축",
+          "원격 서버에 CUDA · conda · 가상환경 · PyTorch 및 필요 패키지를 직접 설치",
           "초기에 YOLOv9 로 시도했으나 s 모델이 미공개 상태(c, e 만 release)여서 YOLOv8 로 전환",
           "데이터셋 설정에서 names 를 리스트로 주면 실제 라벨링 인덱스와 어긋나 dict 형태로 명시",
         ],
         solutionLabel: "바꿔본 조건",
         solutionBlocks: [
           {
-            title: "전처리 (4/8)",
+            title: "전처리",
             points: [
               "초음파 영상은 노이즈와 음영으로 경계가 흐릿해, sharpen 함수를 구현하고 별도 데이터셋을 만들어 원본과 비교 학습",
               "Mean / Median / Gaussian filter 와 Thresholding 도 노이즈 저감·영역 분리 방향으로 검토",
@@ -1958,13 +1940,23 @@ Cy = nCy × IH        BH = nH × IH
             title: "모델 · 가중치",
             points: [
               "yolov8s.pt 와 yolov8n.pt 를 비교",
-              "백본 후보로 EfficientNet 도 별도로 학습해 비교",
+              "백본 후보로 EfficientNet 도 함께 검토",
             ],
           },
           {
-            title: "학습 하이퍼파라미터",
+            title: "하이퍼파라미터",
             points: [
-              "optimizer · learning rate · freeze layer · augmentation 을 조합을 바꿔가며 반복 학습 (조건 전체는 아래 상세에)",
+              "optimizer — Adam / AdamW / SGD / NAdam / RAdam / RMSProp",
+              "learning rate — 0.001 / 0.005 / 0.01, freeze layer — 1 / 3 / 10",
+              "augmentation — U-Net 논문 기준 shift · rotate · zoom · flip, YOLO-NAS 기준 gaussian noise",
+            ],
+          },
+          {
+            title: "클래스 구성",
+            points: [
+              "6개 구조물을 동시에 검출하는 것 자체가 문제인지 확인하기 위해, Appendix 만 분리한 단일 클래스 데이터셋을 별도로 구성해 학습",
+              "클래스 id 를 0으로 통일하고, 객체가 없는 이미지도 빈(0KB) txt 로 남겨야 배경 이미지로 학습이 성립하므로 레이블 파일을 지우지 않고 유지",
+              "데이터셋 경로가 바뀌므로 listing txt 도 함께 재생성",
             ],
           },
         ],
@@ -1973,219 +1965,70 @@ Cy = nCy × IH        BH = nH × IH
           {
             title: "수치는 움직이는데 방향이 없었다",
             problem:
-              "전체 mAP 는 여러 run 에 걸쳐 0.14~0.25 구간을 벗어나지 않았고, 클래스별 등락 방향은 run 마다 뒤집혔다. 같은 학습에서 Iliac Artery 가 0.127 → 0.439 로 급등하는 동안 Iliac Vein 은 0으로 붕괴했다.",
+              "전체 mAP 는 여러 run 에 걸쳐 0.14~0.25 구간을 벗어나지 않았고, 클래스별 등락 방향은 run 마다 뒤집혔다. 같은 학습에서 Iliac artery 가 0.127 → 0.439 로 급등하는 동안 Iliac vein 은 0으로 붕괴하는 식이었다.",
             solution:
-              "run 별·클래스별 지표를 정리해, 조건을 바꾸면 수치가 움직이기는 하지만 방향이 일정하지 않다는 것을 확인했다.",
+              "run 별·클래스별 지표를 정리해, 조건을 바꾸면 수치가 움직이기는 하지만 방향이 일정하지 않다는 것을 확인했다. 클래스를 Appendix 하나로 줄인 데이터셋에서도 결과는 나아지지 않았다.",
             effect:
               "'성능이 안 나온다'가 아니라 '조정이 일관되게 반영되지 않는다'로 문제를 다시 볼 근거가 됐다. 이 기록이 6번 항목의 출발점이다.",
             tags: ["실험 기록", "mAP"],
             tech: ["YOLOv8", "PyTorch"],
-            details: [
-              {
-                heading: "학습 조건",
-                blocks: [
-                  {
-                    type: "table",
-                    head: ["항목", "값"],
-                    rows: [
-                      ["가중치", "yolov8s.pt / yolov8n.pt 비교"],
-                      ["epoch / lr", "100 / 0.005 (initial = final)"],
-                      ["freeze layer", "1 / 3 / 10"],
-                      [
-                        "optimizer",
-                        "Adam, AdamW, SGD, NAdam, RAdam, RMSProp",
-                      ],
-                      ["learning rate", "0.001 / 0.005 / 0.01"],
-                      [
-                        "augmentation",
-                        "U-Net 논문 기준 — shift 0.05 / rotate 0.2° / zoom 0.05 / horizontal flip · YOLO-NAS(CardioLab) 기준 — gaussian noise",
-                      ],
-                    ],
-                  },
-                ],
-              },
-              {
-                heading: "run 별 전체 mAP50",
-                blocks: [
-                  {
-                    type: "table",
-                    head: ["run", "조건", "all"],
-                    rows: [
-                      ["01", "epoch 1", "0.245 (Appendix 0.265)"],
-                      ["02", "epoch 1/3 → 2/3 → 3/3", "0.167 → 0.146 → 0.14"],
-                      ["03", "epoch 1/3 → 2/3", "0.151 → 0.164"],
-                      ["04", "—", "0.149"],
-                    ],
-                  },
-                ],
-              },
-              {
-                heading: "클래스별 mAP50 (run 02 / 03 / 04)",
-                blocks: [
-                  {
-                    type: "table",
-                    head: ["클래스", "02", "03", "04"],
-                    rows: [
-                      ["all", "0.167", "0.164", "0.149"],
-                      ["Terminal Ileum", "0.235", "0.0701", "0.0858"],
-                      ["Psoas", "0.257", "0.453", "0.416"],
-                      ["Cecum", "0.303", "0.224", "0.26"],
-                      ["Iliac Artery", "0.137", "0.0243", "0.0148"],
-                      ["Iliac Vein", "0.0005", "0.0232", "0"],
-                      ["Appendix", "0.073", "0.192", "0.118"],
-                    ],
-                  },
-                  {
-                    type: "text",
-                    text: "클래스별 등락 방향이 run 마다 뒤집힙니다. Psoas 가 오르면 Terminal Ileum 이 떨어지고, 다음 run 에서 역전됩니다.",
-                  },
-                ],
-              },
-              {
-                heading: "별도 기록 (60 epoch, 04/02 → 04/03)",
-                blocks: [
-                  {
-                    type: "table",
-                    head: ["클래스", "04/02", "04/03"],
-                    rows: [
-                      ["all", "0.149", "0.205"],
-                      ["Iliac Artery", "0.127", "0.439"],
-                      ["Psoas", "0.284", "0.372"],
-                      ["Appendix", "0.187", "0.184"],
-                      ["Cecum", "0.221", "0.197"],
-                      ["Terminal Ileum", "0.0513", "0.0388"],
-                      ["Iliac Vein", "0.0228", "0"],
-                    ],
-                  },
-                  {
-                    type: "text",
-                    text: "같은 학습에서 한 클래스가 3배 이상 오르는 동안 다른 클래스는 0으로 떨어집니다. 조정과 결과 사이에 설명 가능한 상관이 없었습니다.",
-                  },
-                ],
-              },
-              {
-                heading: "데이터셋 설정에서 어긋나는 지점",
-                blocks: [
-                  {
-                    type: "code",
-                    code: `path:  .../appendix_dataset/
-train: appendix_train.txt
-val:   appendix_valid.txt
-test:  appendix_test.txt
-
-nc: 6
-names:
-  0: Terminal ileum
-  1: Psoas
-  2: cecum
-  3: Iliac artery
-  4: Iliac vein
-  5: Appendix`,
-                  },
-                  {
-                    type: "list",
-                    items: [
-                      "names 를 리스트로 주면 나열 순서대로 0부터 자동 매칭되어 실제 라벨링 인덱스와 어긋날 수 있다 — dict 형태로 명시",
-                      "인덱스는 반드시 0부터 시작해야 한다 (1부터 시작 시 nc 불일치 오류)",
-                      "json 어노테이션은 클래스 라벨이 1부터, txt 는 0부터라 변환 시 오프셋 보정이 필요했다",
-                    ],
-                  },
-                ],
-              },
-            ],
+          },
+        ],
+        writeups: [
+          {
+            title: "Appendix 단일 클래스 Segmentation 학습",
+            href: "https://blog.naver.com/t3335150/223426876321",
           },
         ],
       },
       {
-        name: "3. Segmentation 전환 — 배포 제약에서 역산한 모델 선정",
-        when: "4/11~12",
+        name: "3. Segmentation 전환 — 모델 서베이",
         tagline:
-          "선정 기준을 성능이 아니라 장비 탑재 가능성에 두었습니다.",
-        metric: "CPU ONNX 86ms vs TensorRT 1.2ms",
-        problemLabel: "성능만으로 고를 수 없던 이유",
+          "Object detection 에서 instance segmentation 으로 태스크가 바뀌면서 쓸 모델을 정해야 했습니다. 논문 벤치마크의 정확도는 저마다 다른 도메인·다른 하드웨어에서 측정된 값이라 순위대로 고를 수 없었고, 아예 공개하지 않은 모델도 있었습니다. 그래서 이 과제에서 쓸 수 없는 조건을 먼저 걸러내는 방식으로 후보를 좁혔습니다.",
+        metric: "YOLOv8-seg 채택",
+        problemLabel: "이 과제에서 쓸 수 없는 조건",
         problemList: [
-          "논문 벤치마크의 정확도는 다른 도메인·다른 하드웨어에서 측정된 값이라 그대로 옮겨오지 않는다",
-          "실시간으로 판독되어야 하는 기능이라, 추론 지연이 정확도만큼 중요했다",
-          "다중 구조물 과제이므로 개체를 하나로 뭉뚱그리는 모델은 정확도와 무관하게 쓸 수 없다",
+          "학습 도메인이 다르면(CT ↔ 초음파) 벤치마크 수치와 무관하게 전이 이점을 기대하기 어렵다",
+          "클래스 구분 없이 마스크만 내는 모델은 6개 구조물을 각각 식별해야 하는 과제에 쓸 수 없다",
+          "실시간 판독 기능이므로, 연산 속도를 공개하지 않은 모델은 탑재 여부를 판단할 수 없다",
         ],
-        solutionLabel: "판단 순서",
-        solutionBlocks: [
-          {
-            title: "도메인 → 태스크 요건 → 실측",
-            points: [
-              "CT 학습 모델은 초음파로 전이 이점이 없다고 보고 배제, FPS 미공개 모델은 탑재 판단 자체가 불가해 보류",
-              "실시간이 가능해도 단일 클래스만 지원하는 모델은 다중 구조물 과제에 쓸 수 없어 배제",
-              "남은 후보를 실제 배포 조건에서 측정해 YOLOv8-seg 채택 — bbox·segmentation 동시 지원, 기존 학습 환경 재사용",
+        table: {
+          label: "후보 비교",
+          head: ["후보", "판단", "근거"],
+          rows: [
+            [
+              "STU-Net",
+              "배제",
+              "CT 기반 TotalSegmentator 로 사전학습된 모델. 초음파는 노이즈가 지배적이라 전이 이점을 기대하기 어렵다고 판단",
             ],
-          },
-        ],
-        troublesLabel: "판단 근거",
-        troubles: [
-          {
-            title: "논문에 적힌 FPS 하나로는 탑재 여부를 판단할 수 없었다",
-            problem:
-              "후보 모델의 성능 지표는 저마다 다른 하드웨어·다른 배치 조건에서 측정된 값이었고, 아예 공개하지 않은 모델도 있었다.",
-            solution:
-              "배포 환경별로 추론 속도를 직접 측정해 비교했다. CPU ONNX 와 TensorRT 를 같은 배치 구간에서 재고, 그 값을 채택 기준으로 삼았다.",
-            effect:
-              "같은 모델이 배포 환경에 따라 지연 시간이 수십 배 차이 났다. 실측값 없이는 탑재 가능 여부를 말할 수 없다는 것이 확인됐다.",
-            tags: ["ONNX", "TensorRT", "배포 제약"],
-            tech: ["ONNX", "TensorRT", "YOLOv8-seg"],
-            details: [
-              {
-                heading: "후보 모델 비교",
-                blocks: [
-                  {
-                    type: "table",
-                    head: ["후보", "판단", "근거"],
-                    rows: [
-                      [
-                        "STU-Net / nnU-Net",
-                        "배제",
-                        "CT 학습 모델. CT 는 영상이 clear 한 반면 초음파는 노이즈가 지배적 → 같은 의료영상이어도 전이 이점 없음",
-                      ],
-                      [
-                        "TU-Net (Transformer + U-Net, joint loss)",
-                        "보류",
-                        "초음파 segmentation 을 직접 다뤘으나 FPS·연산속도 미공개 → 탑재 판단 불가",
-                      ],
-                      [
-                        "FastSAM",
-                        "배제",
-                        "단일 GPU 83 FPS 로 실시간 가능하나 단일 클래스만 지원 (모든 개체를 하나로 인식)",
-                      ],
-                      ["MobileSAM", "배제", "상동"],
-                      [
-                        "YOLACT",
-                        "후보",
-                        "real-time instance segmentation, FPS 확보",
-                      ],
-                      [
-                        "YOLOv8-seg",
-                        "채택",
-                        "bbox + seg 동시 지원, 기존 학습 환경 재사용",
-                      ],
-                    ],
-                  },
-                ],
-              },
-              {
-                heading: "추론 속도 실측 (batch 8~10)",
-                blocks: [
-                  {
-                    type: "code",
-                    code: `CPU ONNX  :  86.1 / 155.7 / 317.0 / 572.4        ms
-TensorRT  :  1.21 / 1.47 / 2.18 / 2.79 / 4.02    ms`,
-                  },
-                  {
-                    type: "text",
-                    text: "논문 벤치마크가 아니라 실제 배포 조건에서의 측정값을 기준으로 판단했습니다. 배포 환경에 따라 지연 시간이 수십 배 차이 났습니다.",
-                  },
-                ],
-              },
+            [
+              "TU-Net (Transformer + U-Net)",
+              "보류",
+              "초음파 segmentation 을 직접 다뤘으나 FPS·연산속도 미공개 → 탑재 판단 불가",
             ],
-          },
-        ],
+            [
+              "FastSAM",
+              "배제",
+              "개체별 마스크는 생성하지만 클래스 라벨이 없는 class-agnostic 모델 → 구조물 종류를 구분할 수 없음",
+            ],
+            [
+              "MobileSAM",
+              "배제",
+              "단일 GPU 약 12ms(≈83 FPS)로 속도는 충분하나, 마찬가지로 클래스 라벨을 주지 않음",
+            ],
+            [
+              "YOLACT",
+              "후보",
+              "real-time instance segmentation (Titan Xp 33.5 fps / COCO 29.8 mAP)",
+            ],
+            [
+              "YOLOv8-seg",
+              "채택",
+              "bbox + seg 동시 지원, 기존 학습 환경 재사용 가능",
+            ],
+          ],
+          note: "남은 후보 중에서는 bbox 와 segmentation 을 동시에 지원하고 기존 학습 환경을 그대로 재사용할 수 있다는 점에서 YOLOv8-seg 를 택했습니다.",
+        },
         writeups: [
           {
             title: "YOLOv8-seg 세그멘테이션 학습",
@@ -2195,147 +2038,67 @@ TensorRT  :  1.21 / 1.47 / 2.18 / 2.79 / 4.02    ms`,
       },
       {
         name: "4. GT 레이블 데이터셋 생성",
-        when: "4/15 · 4/16 · 4/18 · 4/24~25",
         tagline:
           "Segmentation 학습에는 폴리곤 좌표 형태의 정답 레이블이 필요합니다. CVAT 어노테이션을 YOLO 학습 포맷으로 변환해 직접 생성했습니다.",
-        metric: "XML 파싱 → 클래스별 txt 병합 전환",
-        problemLabel: "변환에서 막힌 지점",
+        metric: "XML 파싱 → 클래스별 txt 병합",
+        problemLabel: "막힌 지점",
         problemList: [
           "제공받은 이미지는 이미 크롭된 상태(900×600)인데, 마스크 좌표는 원본(1280×720) 기준으로 기록되어 있었다",
-          "XML 의 name·id 태그가 지정 클래스명·실제 라벨링 인덱스와 다르게 기록되어 있었다",
-          "CVAT 가 미검출 구조물을 프레임 밖 좌표로 기록해, 정규화하면 유효 범위(0~1)를 벗어났다",
+          "XML 의 name · id 태그가 지정 클래스명·실제 라벨링 인덱스와 다르게 기록되어 있었다",
+          "outside 표시가 붙은 어노테이션도 좌표 필드가 채워져 있고 그 값이 이미지 범위를 벗어나, 정규화하면 유효 범위(0~1)를 넘었다",
         ],
-        solutionLabel: "해결 경로",
+        solutionLabel: "변환 방식",
         solutionBlocks: [
           {
-            title: "단일 클래스 데이터셋 (4/24~25)",
+            title: "좌표계 정합",
+            figure: {
+              src: "/samsung-medison/crop-coordinate-shift.svg",
+              width: 680,
+              height: 330,
+              alt: "1280×720 원본에서 좌 200, 우 180 이 비대칭으로 잘려 900×600 이미지가 되었고, 원본 기준 좌표를 그대로 쓰면 위치가 어긋난다",
+              caption: "원본 좌표와 크롭된 이미지의 어긋남",
+            },
+            code: `가정: 1280 / 2 = 640,  900 / 2 = 450  →  640 − 450 = 190
+      720 / 2 = 360,  600 / 2 = 300  →  360 − 300 =  60
+실제: 가로 제거량이 비대칭 (좌 200 / 우 180)`,
             points: [
-              "6개 클래스 중 Appendix 만 분리한 별도 데이터셋을 구성하고 클래스 id 를 0으로 통일",
-              "객체가 없는 이미지는 빈(0KB) txt 로 유지해야 학습이 성립하며, 경로가 바뀌므로 listing txt 도 함께 재생성",
-            ],
-          },
-        ],
-        troublesLabel: "상세",
-        troubles: [
-          {
-            title: "크롭된 이미지와 원본 기준 좌표가 어긋났다",
-            problem:
-              "제공받은 이미지는 이미 크롭된 상태(900×600)인데 마스크 좌표는 원본(1280×720) 기준이라, 그대로 렌더링하면 위치가 어긋났다.",
-            solution:
-              "중앙 크롭을 가정해 계산했으나 맞지 않았고, 실제로는 가로 제거량이 비대칭(좌 200 / 우 180)이었다. 픽셀 단위로 shift 한 뒤 크롭 해상도로 재정규화했다.",
-            effect:
-              "크롭은 종횡비를 바꾸는 조작이 아니라 여백을 잘라내는 조작이므로 스케일링이 아닌 shift 로 처리해야 한다는 점을 확인했다.",
-            tags: ["좌표계 정합"],
-            tech: ["Python", "OpenCV"],
-            details: [
-              {
-                heading: "중앙 크롭 가정 → 실패",
-                blocks: [
-                  {
-                    type: "code",
-                    code: `1280 / 2 = 640      900 / 2 = 450      640 − 450 = 190
- 720 / 2 = 360      600 / 2 = 300      360 − 300 =  60`,
-                  },
-                ],
-              },
-              {
-                heading: "실제 크롭 값 — 가로가 비대칭",
-                blocks: [
-                  {
-                    type: "code",
-                    code: `가로 제거량 380  →  좌 200 / 우 180
-세로 제거량 120  →  상  60 / 하  60`,
-                  },
-                ],
-              },
-              {
-                heading: "최종 처리",
-                blocks: [
-                  {
-                    type: "code",
-                    code: `픽셀 shift :  x' = x − 200        y' = y − 60
-정규화     :  nX = x' / 900       nY = y' / 600
-
-검산 : 원본 (689, 280) → 크롭 좌표 (489, 220)`,
-                  },
-                ],
-              },
+              "중앙 크롭을 가정하고 계산했으나 맞지 않았다",
+              "픽셀 단위로 shift 한 뒤 크롭 해상도로 재정규화했다",
+              "크롭은 종횡비를 바꾸는 조작이 아니라 여백을 잘라내는 조작이므로, 스케일링이 아닌 shift 로 처리해야 한다는 점을 이때 확인했다",
             ],
           },
           {
-            title: "XML 파싱으로는 GT 를 만들 수 없었다",
-            problem:
-              "정규화 결과가 1을 초과하는 케이스가 나왔다. CVAT 가 미검출 구조물을 프레임 밖 좌표(예: x = 1100)로 기록하고 outside 태그로만 표시하는데, 이를 XML 단계에서 선별하기 어려웠다.",
-            solution:
-              "XML 파싱 자체를 포기하고, CVAT 가 클래스별로 개별 출력하는 annotation txt 를 병합해 최종 레이블을 생성하는 merge_separate_annote 로 전환했다.",
-            effect:
-              "구조적으로 막히는 지점을 우회하는 대신 입력 자체를 바꿔 해결했다. 생성한 레이블은 mask 렌더링 함수로 확인한 뒤 학습에 투입했다.",
-            tags: ["GT 생성", "CVAT"],
-            tech: ["Python", "XML", "CVAT"],
-            details: [
-              {
-                heading: "방식 A — XML 파싱에서 규명한 이슈",
-                blocks: [
-                  {
-                    type: "code",
-                    code: `CVAT XML  →  [class, x1, y1, x2, y2, ... xn, yn]  형태의 txt`,
-                  },
-                  {
-                    type: "table",
-                    head: ["#", "이슈", "대응"],
-                    rows: [
-                      [
-                        "①",
-                        "좌표 기준 불일치 (원본 vs 크롭본)",
-                        "shift 후 재정규화",
-                      ],
-                      [
-                        "②",
-                        "정규화 기준",
-                        "X / image_width, Y / image_height",
-                      ],
-                      [
-                        "③",
-                        "XML name 태그가 지정 클래스명이 아닌 CVAT 작업물 명으로 기록",
-                        "re.sub 패턴 치환",
-                      ],
-                      [
-                        "④",
-                        "XML id 가 실제 라벨링 인덱스와 불일치",
-                        "label 태그 순서에서 인덱스를 역참조",
-                      ],
-                      ["⑤", "파일 쓰기 모드 a / w", "덮어쓰기로 통일"],
-                      ["⑥", "객체 구분 누락", "id 가 달라질 때마다 줄바꿈"],
-                    ],
-                  },
-                ],
-              },
-              {
-                heading: "드러난 구조적 한계",
-                blocks: [
-                  {
-                    type: "code",
-                    code: `(x − 200) / 900  →  결과가 1을 초과
-원인: CVAT 가 미검출 구조물을 프레임 밖 좌표(예: x = 1100)로 기록
-      XML 상 outside 태그 = 1  (interpolation 관련)`,
-                  },
-                ],
-              },
-              {
-                heading: "방식 B — 클래스별 txt 병합",
-                blocks: [
-                  {
-                    type: "code",
-                    code: `class_0.txt ┐
-class_1.txt ├→  merge_separate_annote  →  frame별 통합 label txt
-    ⋮       ┘`,
-                  },
-                  {
-                    type: "text",
-                    text: "이후 6개 클래스 중 Appendix 만 분리한 단일 클래스 데이터셋도 구성했습니다. 클래스 id 를 0으로 통일하고, 객체가 없는 이미지는 빈(0KB) txt 로 유지해야 학습이 성립합니다. 경로가 바뀌므로 listing txt 도 함께 재생성했습니다.",
-                  },
-                ],
-              },
+            title: "방식 A — XML 파싱",
+            points: [
+              "XML 트리를 파싱해 클래스별 폴리곤 좌표를 추출하고, 크롭 좌표계로 변환한 뒤 정규화해 기록",
+              "원본과 크롭본의 좌표 기준 차이 → shift 후 크롭 해상도로 재정규화",
+              "정규화 기준 → X / image_width, Y / image_height",
+              "name 태그가 지정 클래스명이 아닌 CVAT 작업물 명으로 기록됨 → re.sub 패턴 치환",
+              "id 가 실제 라벨링 순서와 불일치 → label 태그 순서에서 인덱스를 역참조",
+              "객체 단위 구분 → id 가 달라질 때마다 줄바꿈, 파일 쓰기 모드는 덮어쓰기로 통일",
+            ],
+          },
+          {
+            title: "드러난 구조적 한계",
+            figure: {
+              src: "/samsung-medison/cvat-outside-attribute.svg",
+              width: 680,
+              height: 360,
+              alt: "outside 가 1이어도 좌표 필드는 채워져 있고, 그 값이 이미지 범위를 벗어나 정규화하면 1을 초과한다",
+              caption: "outside 속성이 붙은 어노테이션의 좌표 문제",
+            },
+            points: [
+              "정규화 결과가 1을 초과하는 케이스가 남았다",
+              'track 방식으로 기록된 어노테이션에서 outside="1"(해당 프레임에 객체 없음)이 붙은 요소도 좌표 필드는 그대로 채워져 있었고, 그 값이 이미지 범위를 벗어나는 경우가 있었다 (예: x = 1100)',
+              "좌표만으로는 유효한 어노테이션과 구분할 수 없어, XML 단계에서 선별하기 어려웠다",
+            ],
+          },
+          {
+            title: "방식 B — 클래스별 txt 병합",
+            points: [
+              "XML 파싱 자체를 포기하고, CVAT 가 클래스별로 개별 출력하는 annotation txt 를 병합하는 방식(merge_separate_annote)으로 전환",
+              "구조적으로 막히는 지점을 우회하는 대신 입력 자체를 바꿔 해결",
+              "생성한 레이블은 mask 렌더링 함수로 확인한 뒤 학습에 투입",
             ],
           },
         ],
@@ -2348,66 +2111,50 @@ class_1.txt ├→  merge_separate_annote  →  frame별 통합 label txt
             title: "Nerve 데이터셋",
             href: "https://blog.naver.com/t3335150/223419636271",
           },
-          {
-            title: "Appendix 단일 클래스 Segmentation 학습",
-            href: "https://blog.naver.com/t3335150/223426876321",
-          },
         ],
       },
       {
         name: "5. 데이터 처리 파이프라인",
-        when: "4/21",
         tagline: "원본 영상에서 학습 데이터까지의 처리를 하나로 묶었습니다.",
         metric: "AVI → image → crop → annotation → train",
-        problem:
-          "1개 AVI 약 500 프레임 중 20~300번 구간만 학습에 쓸 수 있었고, 같은 영상 안에서도 프레임마다 유효 영상 영역의 크기가 달랐습니다.",
+        problemLabel: "프레임별 크기 편차",
+        problemList: [
+          "1개 AVI 는 약 500 프레임이고, 앞뒤에는 학습에 쓸 수 없는 무효 구간이 있다",
+          "같은 영상 안에서도 프레임마다 유효 영상 영역의 크기가 달랐다",
+          "프레임별로 개별 크롭하면 데이터 크기가 제각각이 되고, 고정 크기로 자르면 일부 프레임의 유효 영역이 잘려나간다",
+        ],
         solutionLabel: "처리 방식",
         solutionBlocks: [
           {
-            title: "프레임 추출 · 크롭 · 기록",
+            title: "프레임 추출",
             points: [
-              "앞뒤 무효 구간을 제외하고 파일명을 0 패딩 형식으로 강제해 문자열 정렬 오류를 방지",
-              "프레임마다 largest contour 의 사각형 좌표를 산출한 뒤 최빈값을 해당 AVI 의 대표 크롭 크기로 채택",
-              "프레임별 rectangle contour 는 txt 로 listing, 크롭 결과는 엑셀로 정리",
+              "약 500 프레임 중 20~300번 구간만 사용해 앞뒤 무효 구간을 제외",
+              "파일명을 000001~000XXX 형식으로 강제(0 최소 3개)해 문자열 정렬 오류를 방지",
+            ],
+          },
+          {
+            title: "영상 단위 대표 크롭",
+            points: [
+              "cv2.findContours 로 프레임마다 largest contour 를 찾고, boundingRect 로 사각형 좌표(startX, startY, boxW, boxH)를 산출",
+              "한 AVI 의 전 프레임에서 가장 많이 나온 좌표를 그 영상의 대표 크롭 값으로 채택해 모든 프레임에 동일하게 적용",
+              "크기뿐 아니라 위치까지 포함한 네 값을 묶어서 보므로, 프레임별 편차에는 흔들리지 않으면서 영상마다 다른 촬영 조건에는 각각 대응",
+            ],
+          },
+          {
+            title: "기록",
+            points: [
+              "프레임별 사각형 좌표는 frame num / startX / startY / boxW / boxH 형식으로 txt 에 listing",
+              "크롭 정보는 엑셀로 정리해 영상별 비교가 가능한 형태로 보관",
             ],
           },
         ],
-        troublesLabel: "상세",
-        troubles: [
+        figures: [
           {
-            title: "프레임별 크기 편차를 영상 단위 최빈값으로 흡수",
-            problem:
-              "프레임별로 개별 크롭하면 데이터 크기가 제각각이 되고, 고정 크기로 자르면 일부 프레임의 유효 영역이 잘려나간다.",
-            solution:
-              "contour 를 추출해 프레임마다 유효 영역의 사각형 좌표를 구한 뒤, 그중 최빈값을 그 영상의 대표 크롭 크기로 채택해 전 프레임에 동일하게 적용했다.",
-            effect:
-              "프레임별 노이즈에는 흔들리지 않으면서, 영상마다 다른 촬영 조건에는 각각 대응할 수 있게 됐다.",
-            tags: ["OpenCV", "데이터 파이프라인"],
-            tech: ["Python", "OpenCV"],
-            details: [
-              {
-                heading: "처리 흐름",
-                blocks: [
-                  {
-                    type: "code",
-                    code: `AVI  →  image  →  crop  →  annotation  →  train`,
-                  },
-                ],
-              },
-              {
-                heading: "대표 크롭 크기 산출",
-                blocks: [
-                  {
-                    type: "code",
-                    code: `1. cv2.findContours 로 contour 추출
-2. boundingRect 로 두 끝 지점 → (startX, startY, boxW, boxH)
-3. 모든 프레임의 largest contour 좌표 산출
-4. 그중 최빈값(highest occurrence) 채택
-5. 해당 AVI의 전 프레임을 동일 크기로 crop`,
-                  },
-                ],
-              },
-            ],
+            src: "/samsung-medison/pipeline-representative-crop.svg",
+            width: 680,
+            height: 356,
+            alt: "AVI 에서 프레임을 추출해 크롭, 어노테이션, 학습으로 이어지는 파이프라인과, 프레임별 유효 영역 좌표의 최빈값을 영상 전체의 대표 크롭 값으로 채택하는 방식",
+            caption: "데이터 처리 파이프라인과 영상 단위 대표 크롭",
           },
         ],
         writeups: [
@@ -2421,16 +2168,22 @@ class_1.txt ├→  merge_separate_annote  →  frame별 통합 label txt
         name: "6. 병목의 재정의 — 모델이 아니라 정답 데이터",
         tagline:
           "지표가 오르지 않을 때 학습을 한 번 더 돌리는 대신, 어디가 막혔는지를 물었습니다.",
-        metric: "조정과 결과 사이에 설명 가능한 상관이 없음",
-        problem:
-          "2번 항목의 학습 기록이 출발점입니다. 전체 mAP 는 좁은 구간을 벗어나지 못했고, 클래스별 등락 방향은 run 마다 뒤집혔습니다 — 조정과 결과 사이에 설명 가능한 상관이 없었습니다.",
-        solutionLabel: "가설 → 검증 → 확인",
+        metric: "조정과 결과 사이에 상관 없음",
+        problemLabel: "관측",
+        problemList: [
+          "여러 run 에서 전체 mAP 가 0.14~0.25 구간을 벗어나지 못함",
+          "클래스별 등락 방향이 run 마다 뒤바뀜 — Psoas ↑ ↔ Terminal ileum ↓, 다음 run 에서 역전",
+          "Iliac vein 은 여러 run 에서 0에 가까운 값",
+          "클래스를 Appendix 하나로 줄인 데이터셋에서도 개선되지 않음 — 클래스 수나 다중 구조물이라는 조건의 문제가 아님",
+          "조정과 결과 사이에 설명 가능한 상관이 없음",
+        ],
+        solutionLabel: "가설 → 검증 → 확인 → 결과",
         solutionBlocks: [
           {
             title: "가설 — 조정하는 쪽이 아니라 기준이 되는 쪽",
             points: [
-              "성능이 낮은 것보다, 조정이 일관된 방향으로 반영되지 않는다는 점이 문제였다",
-              "조정하는 쪽이 아니라 기준이 되는 쪽에 원인이 있을 가능성이 높다고 판단 — 문제가 모델이 아니라 정답 데이터에 있다",
+              "성능이 낮다는 것보다, 조정이 일관된 방향으로 반영되지 않는다는 점이 문제였다",
+              "조정하는 쪽(모델·하이퍼파라미터)이 아니라 기준이 되는 쪽(정답 데이터)에 원인이 있을 가능성이 높다고 판단",
             ],
           },
           {
@@ -2438,7 +2191,7 @@ class_1.txt ├→  merge_separate_annote  →  frame별 통합 label txt
             points: [
               "초음파 영상에서 구조물 경계가 올바르게 그려졌는지는 임상 지식 없이 판단할 수 없었다",
               "사내 상주 임상의를 직접 찾아가 원본 영상과 레이블링 결과를 함께 검토해달라고 요청",
-              "진행 중인 학습 방식과 결과를 설명하고 어디를 봐야 하는지 판단을 구함",
+              "진행 중인 학습 방식과 결과를 설명한 뒤 어디를 봐야 하는지 판단을 구함",
             ],
           },
           {
@@ -2446,27 +2199,28 @@ class_1.txt ├→  merge_separate_annote  →  frame별 통합 label txt
             points: [
               "GT 마스크가 실제 구조물 경계보다 과도하게 넓게 그려져 있었다",
               "외부 위탁 어노테이션이었으나 경계가 타이트하게 잡히지 않은 상태였다",
+              "데이터 양 자체도 이 과제를 학습시키기에는 부족하다는 판단이었다",
               "이 상태로는 모델을 어떻게 조정해도 학습이 성립하지 않는다는 판단을 받음",
             ],
           },
           {
             title: "결과 — 보고, 그리고 중단",
             points: [
-              "정답 데이터 사안과 아래 라이선스 제약 두 가지를 함께 정리해 보고",
+              "정답 데이터 사안과 라이선스 제약 두 가지를 함께 정리해 보고",
               "며칠 뒤 해당 과제 라인은 중단됐다 — 정답 데이터를 재구축하지 않는 한 진행 의미가 없다는 결론이었다",
             ],
           },
         ],
-        troublesLabel: "같은 시기에 확인된 제약",
+        troublesLabel: "같은 시기에 확인된 또 하나의 제약",
         troubles: [
           {
             title: "성능·속도를 통과해도 제품에 못 들어가는 조건이 있었다",
             problem:
-              "정확도와 추론 속도를 기준으로 YOLOv8-seg 를 채택해 학습까지 진행했는데, YOLOv8(Ultralytics)의 라이선스는 AGPL-3.0이었다.",
+              "도메인 적합성과 태스크 요건을 기준으로 YOLOv8-seg 를 채택해 학습까지 진행했는데, YOLOv8(Ultralytics)의 라이선스는 AGPL-3.0 이었다.",
             solution:
               "상용 의료기기 제품에 탑재하려면 소스 공개 의무가 발생하거나 별도의 상용 라이선스 취득이 필요하다는 점을 확인해, 성능·속도 요건과 무관하게 제품 탑재가 불가하다는 사실을 정답 데이터 사안과 함께 정리해 보고했다.",
             effect:
-              "속도와 정확도로 모델을 고르는 데까지는 갔지만, 제품에 들어가려면 라이선스처럼 기술 지표 바깥의 조건이 먼저 통과되어야 한다는 것을 이때 알게 됐다.",
+              "속도와 정확도로 모델을 고르는 데까지는 갔지만, 제품에 들어가려면 기술 지표 바깥의 조건이 먼저 통과되어야 한다는 것을 이때 알게 됐다.",
             tags: ["AGPL-3.0", "제품 제약"],
             tech: ["YOLOv8", "Ultralytics"],
           },
@@ -2492,7 +2246,8 @@ class_1.txt ├→  merge_separate_annote  →  frame별 통합 label txt
         href: "https://blog.naver.com/t3335150/223415861451",
       },
       {
-        title: "XML 파일을 txt로 변환 (4/15)",
+        title:
+          "XML 파일을 txt로 변환 (4/15) — CVAT 어노테이션 파싱에서 규명한 이슈들",
         href: "https://blog.naver.com/t3335150/223416017978",
       },
       {
@@ -2500,12 +2255,12 @@ class_1.txt ├→  merge_separate_annote  →  frame별 통합 label txt
         href: "https://blog.naver.com/t3335150/223419636271",
       },
       {
-        title: "Appendix 단일 클래스 Segmentation 학습 (4/24~25)",
-        href: "https://blog.naver.com/t3335150/223426876321",
-      },
-      {
         title: "데이터 처리 파이프라인 — crop (4/21)",
         href: "https://blog.naver.com/t3335150/223427039001",
+      },
+      {
+        title: "Appendix 단일 클래스 Segmentation 학습 (4/24~25)",
+        href: "https://blog.naver.com/t3335150/223426876321",
       },
     ],
     writeupsNote:

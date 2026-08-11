@@ -17,6 +17,45 @@ const actionButton =
 */
 const leadText = "text-base leading-relaxed text-ink";
 
+/* 본문 표 — 항목 단위 비교표와 트러블 근거표가 같은 모양을 쓴다.
+   서랍(TroubleDetails)에 넣지 않고 읽는 자리에 그대로 편다 */
+function DataTable({ head, rows }: { head: string[]; rows: string[][] }) {
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full border-collapse text-[0.85rem]">
+        <thead>
+          <tr>
+            {head.map((h) => (
+              <th
+                key={h}
+                className="border border-line bg-ground px-3 py-2 text-left font-semibold"
+              >
+                {h}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row, ri) => (
+            <tr key={ri}>
+              {row.map((cell, ci) => (
+                <td
+                  key={ci}
+                  className={`border border-line px-3 py-2 align-top leading-relaxed ${
+                    ci === 0 ? "text-ink" : "text-muted"
+                  }`}
+                >
+                  {cell}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 export default function LightProjectView({
   project,
 }: {
@@ -58,7 +97,14 @@ export default function LightProjectView({
             <AwardBadge badge={project.badge} />
           </div>
 
-          <p className={`mt-4 ${leadText}`}>{project.summary}</p>
+          <div className="mt-4 max-w-3xl space-y-3">
+            <p className={leadText}>{project.summary}</p>
+            {project.summaryMore?.map((para) => (
+              <p key={para} className={leadText}>
+                {para}
+              </p>
+            ))}
+          </div>
 
           {/* 태그 */}
           <ul className="mt-7 flex flex-wrap gap-2">
@@ -446,6 +492,32 @@ export default function LightProjectView({
                   {feature.tagline && (
                     <p className="mt-1.5 text-sm text-muted">{feature.tagline}</p>
                   )}
+
+                  {/* 설명 그림 — 좌표계·파이프라인처럼 글보다 그림이 빠른 것들.
+                      원본 폭보다 크게 늘리지 않고, 좁은 화면에서만 줄어든다 */}
+                  {feature.figures && feature.figures.length > 0 && (
+                    <div className="mt-5 space-y-5">
+                      {feature.figures.map((fig) => (
+                        <figure key={fig.src}>
+                          <Image
+                            src={fig.src}
+                            alt={fig.alt}
+                            width={fig.width}
+                            height={fig.height}
+                            style={{ maxWidth: fig.width }}
+                            className="h-auto w-full rounded-xl border border-line bg-ground/60 p-2 sm:p-3"
+                            unoptimized
+                          />
+                          {fig.caption && (
+                            <figcaption className="rail mt-2 text-muted">
+                              {fig.caption}
+                            </figcaption>
+                          )}
+                        </figure>
+                      ))}
+                    </div>
+                  )}
+
                   <div className="mt-5 grid lg:grid-cols-[1fr_auto] gap-6 lg:gap-10 items-start">
                     {/* 왼쪽 — 문제/해결 글 */}
                     <div className="space-y-6 text-[0.95rem] leading-relaxed">
@@ -490,6 +562,33 @@ export default function LightProjectView({
                               className="border-l-2 border-tide/40 pl-4"
                             >
                               <p className="font-semibold">{block.title}</p>
+
+                              {/* 그림 → 계산 → 불릿. 원문 소제목 아래 순서 그대로 */}
+                              {block.figure && (
+                                <figure className="mt-3">
+                                  <Image
+                                    src={block.figure.src}
+                                    alt={block.figure.alt}
+                                    width={block.figure.width}
+                                    height={block.figure.height}
+                                    style={{ maxWidth: block.figure.width }}
+                                    className="h-auto w-full rounded-xl border border-line bg-ground/60 p-2 sm:p-3"
+                                    unoptimized
+                                  />
+                                  {block.figure.caption && (
+                                    <figcaption className="rail mt-2 text-muted">
+                                      {block.figure.caption}
+                                    </figcaption>
+                                  )}
+                                </figure>
+                              )}
+
+                              {block.code && (
+                                <pre className="mt-3 overflow-x-auto rounded-lg bg-ink p-4 text-[0.78rem] leading-relaxed text-[#e6e4ea]">
+                                  <code>{block.code}</code>
+                                </pre>
+                              )}
+
                               <ul className="mt-1.5 space-y-1">
                                 {block.points.map((pt) => (
                                   <li
@@ -552,6 +651,27 @@ export default function LightProjectView({
                     </div>
                   )}
 
+                  {/* 항목 단위 비교표 — 후보 서베이처럼 표가 곧 본문인 경우 */}
+                  {feature.table && (
+                    <div className="mt-6">
+                      {feature.table.label && (
+                        <p className="rail mb-2 text-muted">
+                          {feature.table.label}
+                        </p>
+                      )}
+                      <DataTable
+                        head={feature.table.head}
+                        rows={feature.table.rows}
+                      />
+                      {feature.table.note && (
+                        <p className="mt-3 text-[0.95rem] leading-relaxed text-ink">
+                          {feature.table.note}
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+
                   {/* 트러블슈팅 · 기술적 의사결정 — 구분선으로 나눈 세로 흐름 */}
                   {feature.troubles && feature.troubles.length > 0 && (
                     <div className="mt-10 border-t-2 border-tide/30 pt-6">
@@ -570,21 +690,33 @@ export default function LightProjectView({
                               </span>
                             </h4>
 
+                            {/* 표 — 문제·해결 두 줄을 대신한다 */}
+                            {trouble.table && (
+                              <div className="mt-3 pl-8">
+                                <DataTable
+                                  head={trouble.table.head}
+                                  rows={trouble.table.rows}
+                                />
+                              </div>
+                            )}
+
                             <dl className="mt-3 pl-8 space-y-2 text-[0.9rem] leading-relaxed">
                               {[
                                 ["문제", trouble.problem, "text-muted"],
                                 ["해결", trouble.solution, "text-deep"],
                                 ["효과", trouble.effect, "text-tide"],
-                              ].map(([label, text, color]) => (
-                                <div key={label} className="flex gap-2.5">
-                                  <dt
-                                    className={`rail shrink-0 w-8 font-semibold ${color}`}
-                                  >
-                                    {label}
-                                  </dt>
-                                  <dd className="text-ink/85">{text}</dd>
-                                </div>
-                              ))}
+                              ]
+                                .filter(([, text]) => text)
+                                .map(([label, text, color]) => (
+                                  <div key={label} className="flex gap-2.5">
+                                    <dt
+                                      className={`rail shrink-0 w-8 font-semibold ${color}`}
+                                    >
+                                      {label}
+                                    </dt>
+                                    <dd className="text-ink/85">{text}</dd>
+                                  </div>
+                                ))}
                             </dl>
 
                             {trouble.diagram === "route" && (
@@ -748,7 +880,8 @@ export default function LightProjectView({
             <h2 className="text-2xl font-bold tracking-tight">
               {project.closingLabel ?? "마무리"}
             </h2>
-            <div className="mt-6 max-w-2xl space-y-4">
+            {/* 줄길이 제한은 헤더 요약과 같은 값을 쓴다 — 회고만 좁아 보이지 않게 */}
+            <div className="mt-6 max-w-3xl space-y-4">
               {project.closing.map((para, i) => (
                 <p
                   key={para}

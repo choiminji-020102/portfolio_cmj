@@ -1,0 +1,30 @@
+<svg width="680" height="330" viewBox="0 0 680 330" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif">
+  <title>원본 좌표와 크롭된 이미지의 어긋남</title>
+  <desc>1280x720 원본에서 좌 200, 우 180이 비대칭으로 잘려 900x600 이미지가 되었고, 원본 기준 좌표를 그대로 쓰면 위치가 어긋난다.</desc>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="#5f5668" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+
+  <text x="40" y="42" font-size="12" fill="#5f5668">원본 1280 × 720 — 라벨링은 여기서 했다</text>
+  <rect x="40" y="56" width="320" height="180" rx="4" fill="none" stroke="#cdc9d4" stroke-width="0.5" stroke-dasharray="4 4"/>
+  <rect x="90" y="56" width="225" height="180" fill="#e3f0f4" stroke="#3d7f97" stroke-width="0.5"/>
+  <rect x="40" y="56" width="50" height="180" fill="#f3f2f6" stroke="#cdc9d4" stroke-width="0.5"/>
+  <rect x="315" y="56" width="45" height="180" fill="#f3f2f6" stroke="#cdc9d4" stroke-width="0.5"/>
+  <text x="65" y="151" font-size="12" fill="#5f5668" text-anchor="middle">좌 200</text>
+  <text x="337" y="151" font-size="12" fill="#5f5668" text-anchor="middle">우 180</text>
+  <circle cx="200" cy="146" r="5" fill="#c2603a"/>
+  <text x="212" y="150" font-size="12" fill="#8f4522">정답 좌표</text>
+  <text x="40" y="264" font-size="12" fill="#5f5668">잘라낸 여백이 좌우 비대칭 (좌 200 ≠ 우 180)</text>
+
+  <line x1="392" y1="146" x2="432" y2="146" stroke="#5f5668" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <text x="466" y="42" font-size="12" fill="#5f5668">크롭본 900 × 600 — 학습은 여기서 한다</text>
+  <rect x="466" y="56" width="140" height="180" fill="#e3f0f4" stroke="#3d7f97" stroke-width="0.5"/>
+  <circle cx="527" cy="146" r="5" fill="#c2603a"/>
+  <circle cx="583" cy="146" r="5" fill="none" stroke="#c2603a" stroke-width="1" stroke-dasharray="3 3"/>
+  <text x="466" y="264" font-size="12" fill="#5f5668">좌표를 그대로 쓰면 점선 위치로 어긋난다</text>
+  <text x="466" y="286" font-size="12" fill="#5f5668">→ 스케일링이 아니라 shift로 보정</text>
+</svg>
