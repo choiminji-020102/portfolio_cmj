@@ -1,0 +1,223 @@
+/*
+  프로젝트 카드 커버 템플릿 — 공통 스타일.
+
+  결과물은 1280×640 (카드의 aspect-[2/1], 실제 렌더 폭 ~500px의 2x).
+  capture.sh 가 이 폴더의 *.html 을 2x로 캡처한 뒤 1280 폭으로 줄인다.
+
+  안전 영역 두 곳을 반드시 비운다 (components/Projects.tsx 참고).
+  - 우하단 110×110 — `→` 원형 배지가 상시 떠 있다
+  - 정중앙 460×110 — hover 시 "자세히 보기" 알약이 덮는다
+  .cover.guides 를 켜면 두 영역이 빨간 점선으로 보인다.
+
+  색은 app/globals.css 토큰을 그대로 쓴다. 배경만 프로젝트별로 바꾼다.
+*/
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&display=swap");
+
+:root {
+  --ink: #1a132f;
+  --muted: #5f5668;
+  --deep: #4d6d9f;
+  --tide: #61a4bc;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  /* 캡처 시 body 여백이 섞이지 않게 커버만 남긴다 */
+  display: flex;
+  background: #fff;
+}
+
+.cover {
+  position: relative;
+  width: 1280px;
+  height: 640px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  font-family: "IBM Plex Sans KR", -apple-system, "Apple SD Gothic Neo",
+    sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 목업이 왼쪽에 오는 배치 — 카드 4장이 좌우 교차하도록 번갈아 쓴다 */
+.cover.flip {
+  flex-direction: row-reverse;
+}
+
+/* ── 카피 ─────────────────────────────────────── */
+/*
+  카피와 무대를 반씩 나눈다. 목업을 무대 폭보다 넉넉히 작게 잡아야
+  좌우 여백이 생기고, 우하단 배지 자리도 자연히 비워진다.
+*/
+.copy {
+  flex: 0 0 50%;
+  padding: 0 56px;
+}
+
+/*
+  글자 크기는 1280 기준이 아니라 "카드에서 보이는 크기" 기준으로 잡는다.
+  커버는 카드에서 약 500px 폭으로 줄어드니 화면에 뜨는 값은 여기의 0.39배다.
+  desc 25px 는 카드에서 10px — 이보다 작으면 읽히지 않는다.
+*/
+.eyebrow {
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--deep);
+  margin-bottom: 22px;
+}
+
+.title {
+  font-size: 68px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+}
+
+/* 긴 제목이 카피 폭(528px)을 넘을 때 */
+.title.sm {
+  font-size: 58px;
+}
+
+.desc {
+  margin-top: 26px;
+  font-size: 32px;
+  font-weight: 400;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+/* 문장에서 한 군데만 — 여러 곳을 강조하면 강조가 아니게 된다 */
+.desc b {
+  font-weight: 600;
+  color: var(--deep);
+}
+
+/* ── 목업 무대 ─────────────────────────────────── */
+.stage {
+  flex: 1;
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/*
+  노트북 — 화면부(베젤+스크린)와 받침을 세로로 쌓는다.
+  받침을 화면보다 넓게 빼서 실제 힌지처럼 보이게 한다.
+*/
+.laptop {
+  filter: drop-shadow(0 34px 46px rgba(26, 19, 47, 0.22));
+}
+
+/*
+  화면 안 스크린샷 — 축소해 넣으면 UI 글씨가 뭉개진다.
+  원본을 폭에 맞춘 뒤 --zoom 만큼 확대해 일부만 크게 보여준다.
+  전체를 담는 것보다 "무슨 화면인지" 형태가 살아나는 쪽이 낫다.
+  --zoom, --focus(확대 기준점)는 각 커버에서 조정한다.
+*/
+.shot {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.shot img {
+  width: 100%;
+  display: block;
+  transform-origin: var(--focus, top center);
+  transform: scale(var(--zoom, 1));
+}
+
+.laptop .screen {
+  width: 600px;
+  aspect-ratio: 16 / 10;
+  padding: 14px;
+  border-radius: 17px 17px 4px 4px;
+  background: linear-gradient(160deg, #3c3b45, #23222a);
+  overflow: hidden;
+}
+
+.laptop .base {
+  width: 690px;
+  height: 16px;
+  margin-left: -45px;
+  border-radius: 0 0 11px 11px;
+  background: linear-gradient(#cfcfd6, #a8a8b2);
+}
+
+/* 받침 가운데 홈 */
+.laptop .base::after {
+  content: "";
+  display: block;
+  width: 100px;
+  height: 5px;
+  margin: 0 auto;
+  border-radius: 0 0 6px 6px;
+  background: rgba(26, 19, 47, 0.16);
+}
+
+/* 모니터 — 노트북보다 넓고 받침이 목처럼 좁다 */
+.monitor {
+  filter: drop-shadow(0 34px 46px rgba(26, 19, 47, 0.2));
+}
+
+.monitor .screen {
+  width: 620px;
+  aspect-ratio: 16 / 9.4;
+  padding: 16px 16px 38px;
+  border-radius: 15px;
+  background: linear-gradient(160deg, #3c3b45, #23222a);
+  overflow: hidden;
+}
+
+.monitor .neck {
+  width: 92px;
+  height: 40px;
+  margin: 0 auto;
+  background: linear-gradient(#c4c4cc, #aeaeb8);
+}
+
+.monitor .foot {
+  width: 250px;
+  height: 13px;
+  margin: 0 auto;
+  border-radius: 7px;
+  background: linear-gradient(#cfcfd6, #a5a5af);
+}
+
+/* ── 안전 영역 가이드 (.cover.guides 일 때만) ───────── */
+.cover.guides::before,
+.cover.guides::after {
+  content: "";
+  position: absolute;
+  border: 2px dashed rgba(220, 38, 38, 0.55);
+  pointer-events: none;
+  z-index: 9;
+}
+
+/* 우하단 — `→` 진입 배지 */
+.cover.guides::before {
+  right: 0;
+  bottom: 0;
+  width: 110px;
+  height: 110px;
+}
+
+/* 정중앙 — hover "자세히 보기" 알약 */
+.cover.guides::after {
+  top: 50%;
+  left: 50%;
+  width: 460px;
+  height: 110px;
+  transform: translate(-50%, -50%);
+}

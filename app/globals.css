@@ -65,6 +65,18 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+/*
+  코드 블록 — 진짜 고정폭.
+  --font-plex-mono 는 이름과 달리 라틴 라벨용 프로포셔널(IBM Plex Sans)이라
+  코드에 쓰면 들여쓰기와 칸 맞춘 주석이 어긋난다.
+*/
+.code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
+  font-variant-ligatures: none;
+  tab-size: 4;
+}
+
 /* 섹션 제목 위에 붙는 작은 라틴 라벨 */
 .eyebrow {
   font-family: var(--font-plex-mono), ui-monospace, monospace;

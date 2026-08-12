@@ -45,3 +45,6 @@ next-env.d.ts
 /*.JPG
 /*.jpg
 !/public/**
+# 위 예외가 .DS_Store 까지 되살리므로 다시 막는다
+/public/**/.DS_Store
+/public/.DS_Store

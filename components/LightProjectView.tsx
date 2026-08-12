@@ -2,10 +2,11 @@ import Image from "next/image";
 import Link from "next/link";
 import type { LightProject } from "@/lib/projectDetails";
 import { AwardBadge } from "./AwardMark";
+import DataTable from "./DataTable";
+import FeatureCard from "./FeatureCard";
 import GitHubIcon from "./GitHubIcon";
-import RagDiagram from "./RagDiagram";
-import RouteDiagram from "./RouteDiagram";
-import TroubleDetails from "./TroubleDetails";
+import MermaidDiagram from "./MermaidDiagram";
+import ShowcaseGallery from "./ShowcaseGallery";
 
 // 외부 링크 버튼 — TroubleDetails의 강조 pill과 같은 tide 스타일을 쓴다
 const actionButton =
@@ -16,45 +17,6 @@ const actionButton =
   섹션마다 굵기·색이 달라지면 위계가 아니라 잡음으로 읽힌다.
 */
 const leadText = "text-base leading-relaxed text-ink";
-
-/* 본문 표 — 항목 단위 비교표와 트러블 근거표가 같은 모양을 쓴다.
-   서랍(TroubleDetails)에 넣지 않고 읽는 자리에 그대로 편다 */
-function DataTable({ head, rows }: { head: string[]; rows: string[][] }) {
-  return (
-    <div className="overflow-x-auto">
-      <table className="w-full border-collapse text-[0.85rem]">
-        <thead>
-          <tr>
-            {head.map((h) => (
-              <th
-                key={h}
-                className="border border-line bg-ground px-3 py-2 text-left font-semibold"
-              >
-                {h}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row, ri) => (
-            <tr key={ri}>
-              {row.map((cell, ci) => (
-                <td
-                  key={ci}
-                  className={`border border-line px-3 py-2 align-top leading-relaxed ${
-                    ci === 0 ? "text-ink" : "text-muted"
-                  }`}
-                >
-                  {cell}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
 
 export default function LightProjectView({
   project,
@@ -97,6 +59,13 @@ export default function LightProjectView({
             <AwardBadge badge={project.badge} />
           </div>
 
+          {/* 한 줄 요약 — 스크롤하지 않고도 역할이 파악되도록 제목에 바로 붙인다 */}
+          {project.tagline && (
+            <p className="mt-3 max-w-3xl text-lg font-semibold leading-snug text-deep">
+              {project.tagline}
+            </p>
+          )}
+
           <div className="mt-4 max-w-3xl space-y-3">
             <p className={leadText}>{project.summary}</p>
             {project.summaryMore?.map((para) => (
@@ -118,8 +87,12 @@ export default function LightProjectView({
             ))}
           </ul>
 
-          {/* 외부 링크 — 헤더를 닫는 액션 줄 */}
-          {(project.github || project.homepage) && (
+          {/* 외부 링크 — 헤더를 닫는 액션 줄.
+              시연 영상을 GitHub 옆에 두어 상단에서 바로 결과물로 들어갈 수 있게 한다 */}
+          {(project.github ||
+            project.demo ||
+            project.slides ||
+            project.homepage) && (
             <div className="mt-7 flex flex-wrap gap-2.5">
               {project.github && (
                 <a
@@ -130,6 +103,29 @@ export default function LightProjectView({
                 >
                   <GitHubIcon className="w-3.5 h-3.5" />
                   GitHub
+                </a>
+              )}
+              {project.demo && (
+                <a
+                  href={project.demo}
+                  target="_blank"
+                  rel="noreferrer"
+                  className={`${actionButton} border-tide bg-tide/15`}
+                >
+                  <span aria-hidden="true">▶</span>
+                  {project.demoLabel ?? "시연 영상"}
+                </a>
+              )}
+              {project.slides && (
+                <a
+                  href={project.slides}
+                  target="_blank"
+                  rel="noreferrer"
+                  className={actionButton}
+                >
+                  <span aria-hidden="true">◱</span>
+                  {project.slidesLabel ?? "발표자료"}
+                  <span className="text-muted">PDF</span>
                 </a>
               )}
               {project.homepage && (
@@ -201,40 +197,39 @@ export default function LightProjectView({
 
             {/* 참고 이미지 — 검출 대상이 실제로 어떻게 보이는지.
                 본인이 만든 산출물이 아니므로 성격을 반드시 밝힌다 */}
-            {project.overviewFigures &&
-              project.overviewFigures.length > 0 && (
-                <div className="mt-10">
-                  <p className="rail text-muted">
-                    {project.overviewFiguresLabel ?? "참고 이미지"}
-                  </p>
-                  <div className="mt-4 grid gap-4 sm:grid-cols-3">
-                    {project.overviewFigures.map((fig) => (
-                      <figure key={fig.src}>
-                        <div className="overflow-hidden rounded-xl border border-line bg-ink/90">
-                          <Image
-                            src={fig.src}
-                            alt={fig.alt}
-                            width={fig.width}
-                            height={fig.height}
-                            sizes="(max-width: 640px) 100vw, 300px"
-                            className="h-auto w-full"
-                          />
-                        </div>
-                        {fig.caption && (
-                          <figcaption className="rail mt-2 text-muted">
-                            {fig.caption}
-                          </figcaption>
-                        )}
-                      </figure>
-                    ))}
-                  </div>
-                  {project.overviewFiguresNote && (
-                    <p className="mt-3 text-sm leading-relaxed text-muted">
-                      {project.overviewFiguresNote}
-                    </p>
-                  )}
+            {project.overviewFigures && project.overviewFigures.length > 0 && (
+              <div className="mt-10">
+                <p className="rail text-muted">
+                  {project.overviewFiguresLabel ?? "참고 이미지"}
+                </p>
+                <div className="mt-4 grid gap-4 sm:grid-cols-3">
+                  {project.overviewFigures.map((fig) => (
+                    <figure key={fig.src}>
+                      <div className="overflow-hidden rounded-xl border border-line bg-ink/90">
+                        <Image
+                          src={fig.src}
+                          alt={fig.alt}
+                          width={fig.width}
+                          height={fig.height}
+                          sizes="(max-width: 640px) 100vw, 300px"
+                          className="h-auto w-full"
+                        />
+                      </div>
+                      {fig.caption && (
+                        <figcaption className="rail mt-2 text-muted">
+                          {fig.caption}
+                        </figcaption>
+                      )}
+                    </figure>
+                  ))}
                 </div>
-              )}
+                {project.overviewFiguresNote && (
+                  <p className="mt-3 text-sm leading-relaxed text-muted">
+                    {project.overviewFiguresNote}
+                  </p>
+                )}
+              </div>
+            )}
           </section>
         )}
 
@@ -363,7 +358,7 @@ export default function LightProjectView({
                                       {seg.value}%
                                     </span>
                                   </span>
-                                ) : null
+                                ) : null,
                               )}
                             </div>
                           </div>
@@ -388,6 +383,67 @@ export default function LightProjectView({
                   </div>
                 )}
             </div>
+
+            {/* 기존 대안과 그 한계 — 배경의 근거가 표인 경우 */}
+            {project.backgroundTable && (
+              <div className="mt-6 max-w-3xl">
+                {project.backgroundTable.label && (
+                  <p className="rail mb-2 text-muted">
+                    {project.backgroundTable.label}
+                  </p>
+                )}
+                <DataTable
+                  head={project.backgroundTable.head}
+                  rows={project.backgroundTable.rows}
+                />
+              </div>
+            )}
+
+            {/* 표 아래로 이어지는 결론 */}
+            {project.backgroundClosing &&
+              project.backgroundClosing.length > 0 && (
+                <div className="mt-6 max-w-3xl space-y-3">
+                  {project.backgroundClosing.map((para) => (
+                    <p key={para} className={leadText}>
+                      {para}
+                    </p>
+                  ))}
+                </div>
+              )}
+
+            {/* 기능 축 — 나란히 놓아 셋을 한눈에, 담당한 축만 강조한다 */}
+            {project.backgroundScope && project.backgroundScope.length > 0 && (
+              <ol className="mt-6 grid max-w-3xl gap-3 sm:grid-cols-3">
+                {project.backgroundScope.map((item) => (
+                  <li
+                    key={item.label}
+                    className={`flex flex-col items-center justify-center rounded-xl border px-4 py-3 text-center ${
+                      item.mine
+                        ? "border-tide/50 bg-tide/8"
+                        : "border-line bg-surface"
+                    }`}
+                  >
+                    <span
+                      className={`rail font-mono ${
+                        item.mine ? "text-tide" : "text-muted"
+                      }`}
+                    >
+                      {item.label}
+                    </span>
+                    <span
+                      className={`mt-0.5 text-[0.95rem] leading-relaxed ${
+                        item.mine ? "font-semibold text-ink" : "text-muted"
+                      }`}
+                    >
+                      {item.text}
+                    </span>
+                    {item.mine && (
+                      <span className="rail mt-1.5 text-tide">담당 영역</span>
+                    )}
+                  </li>
+                ))}
+              </ol>
+            )}
 
             {/* 계기 · 목표 — 박스 없이 2단 (하단 역할 박스와 중복 방지) */}
             {(project.backgroundOrigin || project.backgroundGoal) && (
@@ -416,7 +472,9 @@ export default function LightProjectView({
         {/* 내가 맡은 역할 */}
         {project.myRole && (
           <section className="mt-16">
-            <h2 className="text-2xl font-bold tracking-tight">내가 맡은 역할</h2>
+            <h2 className="text-2xl font-bold tracking-tight">
+              {project.myRoleLabel ?? "내가 맡은 역할"}
+            </h2>
             <p className={`mt-6 ${leadText}`}>{project.myRole}</p>
 
             {/* 담당 축 — 3개 영역 */}
@@ -461,6 +519,61 @@ export default function LightProjectView({
                 </div>
               </div>
             )}
+
+            {/* 구조 · 흐름 다이어그램 — 담당 구간이 어디에 걸쳐 있는지 */}
+            {project.myRoleDiagrams && project.myRoleDiagrams.length > 0 && (
+              <div className="mt-8 space-y-6">
+                {project.myRoleDiagrams.map((d, i) => (
+                  <figure key={i}>
+                    {d.caption && (
+                      <figcaption className="rail mb-2 text-muted">
+                        {d.caption}
+                      </figcaption>
+                    )}
+                    <div className="rounded-xl border border-line bg-surface p-3 sm:p-4">
+                      <MermaidDiagram chart={d.chart} />
+                    </div>
+                  </figure>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* 사용 기술 — 담당 범위 바로 뒤.
+            읽는 사람은 스택을 초반에 확인하므로, 본문 끝이 아니라 여기서 한 번에 보여준다 */}
+        {project.techStack && project.techStack.length > 0 && (
+          <section className="mt-16">
+            <h2 className="text-2xl font-bold tracking-tight">
+              {project.techStackLabel ?? "사용 기술"}
+            </h2>
+            <div className="mt-6 max-w-3xl">
+              <DataTable
+                head={["구분", "기술"]}
+                rows={project.techStack.map((t) => [t.label, t.value])}
+              />
+            </div>
+          </section>
+        )}
+
+        {/* 결과물 — 기술 상세로 들어가기 전에 "무엇을 만들었나"를 화면으로 먼저 보여준다 */}
+        {project.showcase && project.showcase.shots.length > 0 && (
+          <section className="mt-16">
+            <h2 className="text-2xl font-bold tracking-tight">
+              {project.showcase.label}
+            </h2>
+            {project.showcase.intro && (
+              <p className={`mt-4 max-w-3xl ${leadText}`}>
+                {project.showcase.intro}
+              </p>
+            )}
+            {/* 캡처 격자 — 목록 배치와 클릭 확대는 클라이언트 쪽에서 (ShowcaseGallery) */}
+            <ShowcaseGallery shots={project.showcase.shots} />
+            {project.showcase.note && (
+              <p className="mt-8 border-l-2 border-tide/40 pl-4 text-[0.95rem] leading-relaxed text-muted">
+                {project.showcase.note}
+              </p>
+            )}
           </section>
         )}
 
@@ -472,318 +585,45 @@ export default function LightProjectView({
             </h2>
             <div className="mt-8 space-y-6">
               {project.aiFeatures.map((feature) => (
-                <div
-                  key={feature.name}
-                  className="rounded-2xl bg-surface border border-line p-6 sm:p-7"
-                >
-                  <div className="flex flex-wrap items-center gap-3">
-                    <h3 className="text-lg font-semibold tracking-tight">
-                      {feature.name}
-                    </h3>
-                    {feature.metric && (
-                      <span className="rail rounded-full bg-tide/15 border border-tide/30 px-2.5 py-0.5">
-                        {feature.metric}
-                      </span>
-                    )}
-                  </div>
-                  {feature.when && (
-                    <p className="rail mt-2 text-tide">{feature.when}</p>
-                  )}
-                  {feature.tagline && (
-                    <p className="mt-1.5 text-sm text-muted">{feature.tagline}</p>
-                  )}
-
-                  {/* 설명 그림 — 좌표계·파이프라인처럼 글보다 그림이 빠른 것들.
-                      원본 폭보다 크게 늘리지 않고, 좁은 화면에서만 줄어든다 */}
-                  {feature.figures && feature.figures.length > 0 && (
-                    <div className="mt-5 space-y-5">
-                      {feature.figures.map((fig) => (
-                        <figure key={fig.src}>
-                          <Image
-                            src={fig.src}
-                            alt={fig.alt}
-                            width={fig.width}
-                            height={fig.height}
-                            style={{ maxWidth: fig.width }}
-                            className="h-auto w-full rounded-xl border border-line bg-ground/60 p-2 sm:p-3"
-                            unoptimized
-                          />
-                          {fig.caption && (
-                            <figcaption className="rail mt-2 text-muted">
-                              {fig.caption}
-                            </figcaption>
-                          )}
-                        </figure>
-                      ))}
-                    </div>
-                  )}
-
-                  <div className="mt-5 grid lg:grid-cols-[1fr_auto] gap-6 lg:gap-10 items-start">
-                    {/* 왼쪽 — 문제/해결 글 */}
-                    <div className="space-y-6 text-[0.95rem] leading-relaxed">
-                    {/* 문제 */}
-                    {feature.problemList ? (
-                      <div>
-                        <p className="font-semibold text-muted mb-2">
-                          {feature.problemLabel ?? "문제"}
-                        </p>
-                        <ul className="space-y-1.5">
-                          {feature.problemList.map((p) => (
-                            <li
-                              key={p}
-                              className="relative pl-5 before:absolute before:left-0 before:top-[0.6em] before:h-1.5 before:w-1.5 before:rounded-full before:bg-muted/50"
-                            >
-                              {p}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    ) : (
-                      feature.problem && (
-                        <p>
-                          <span className="font-semibold text-muted">
-                            문제&nbsp;&nbsp;
-                          </span>
-                          {feature.problem}
-                        </p>
-                      )
-                    )}
-
-                    {/* 해결 */}
-                    {feature.solutionBlocks ? (
-                      <div>
-                        <p className="font-semibold text-deep mb-3">
-                          {feature.solutionLabel ?? "해결"}
-                        </p>
-                        <div className="space-y-4">
-                          {feature.solutionBlocks.map((block) => (
-                            <div
-                              key={block.title}
-                              className="border-l-2 border-tide/40 pl-4"
-                            >
-                              <p className="font-semibold">{block.title}</p>
-
-                              {/* 그림 → 계산 → 불릿. 원문 소제목 아래 순서 그대로 */}
-                              {block.figure && (
-                                <figure className="mt-3">
-                                  <Image
-                                    src={block.figure.src}
-                                    alt={block.figure.alt}
-                                    width={block.figure.width}
-                                    height={block.figure.height}
-                                    style={{ maxWidth: block.figure.width }}
-                                    className="h-auto w-full rounded-xl border border-line bg-ground/60 p-2 sm:p-3"
-                                    unoptimized
-                                  />
-                                  {block.figure.caption && (
-                                    <figcaption className="rail mt-2 text-muted">
-                                      {block.figure.caption}
-                                    </figcaption>
-                                  )}
-                                </figure>
-                              )}
-
-                              {block.code && (
-                                <pre className="mt-3 overflow-x-auto rounded-lg bg-ink p-4 text-[0.78rem] leading-relaxed text-[#e6e4ea]">
-                                  <code>{block.code}</code>
-                                </pre>
-                              )}
-
-                              <ul className="mt-1.5 space-y-1">
-                                {block.points.map((pt) => (
-                                  <li
-                                    key={pt}
-                                    className="relative pl-5 text-muted before:absolute before:left-0 before:top-[0.6em] before:h-1.5 before:w-1.5 before:rounded-full before:bg-tide"
-                                  >
-                                    {pt}
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ) : (
-                      feature.solution && (
-                        <p>
-                          <span className="font-semibold text-deep">
-                            해결&nbsp;&nbsp;
-                          </span>
-                          {feature.solution}
-                        </p>
-                      )
-                    )}
-                    </div>
-
-                    {/* 오른쪽 — 시연 영상 (없으면 사진). 박스를 영상 폭에 맞춤 */}
-                    {feature.video ? (
-                      <div className="mx-auto lg:ml-auto lg:mr-0 w-fit rounded-xl bg-ground/60 border border-line p-3">
-                        <video
-                          src={feature.video}
-                          poster={feature.image}
-                          muted
-                          loop
-                          autoPlay
-                          playsInline
-                          controls
-                          className="w-[240px] h-auto rounded-lg"
-                        />
-                      </div>
-                    ) : (
-                      feature.image && (
-                        <div className="mx-auto lg:ml-auto lg:mr-0 w-fit rounded-xl bg-ground/60 border border-line p-3">
-                          <Image
-                            src={feature.image}
-                            alt={`${feature.name} 화면`}
-                            width={480}
-                            height={506}
-                            className="w-[240px] h-auto"
-                          />
-                        </div>
-                      )
-                    )}
-                  </div>
-
-                  {/* 구조 다이어그램 — 아래 풀폭 (챗봇) */}
-                  {feature.diagram === "rag" && (
-                    <div className="mt-6 rounded-xl bg-ground/60 border border-line p-3 sm:p-4">
-                      <RagDiagram />
-                    </div>
-                  )}
-
-                  {/* 항목 단위 비교표 — 후보 서베이처럼 표가 곧 본문인 경우 */}
-                  {feature.table && (
-                    <div className="mt-6">
-                      {feature.table.label && (
-                        <p className="rail mb-2 text-muted">
-                          {feature.table.label}
-                        </p>
-                      )}
-                      <DataTable
-                        head={feature.table.head}
-                        rows={feature.table.rows}
-                      />
-                      {feature.table.note && (
-                        <p className="mt-3 text-[0.95rem] leading-relaxed text-ink">
-                          {feature.table.note}
-                        </p>
-                      )}
-                    </div>
-                  )}
-
-
-                  {/* 트러블슈팅 · 기술적 의사결정 — 구분선으로 나눈 세로 흐름 */}
-                  {feature.troubles && feature.troubles.length > 0 && (
-                    <div className="mt-10 border-t-2 border-tide/30 pt-6">
-                      <p className="font-semibold text-deep mb-1">
-                        {feature.troublesLabel ?? "트러블슈팅 · 기술적 의사결정"}
-                      </p>
-                      <div className="divide-y divide-line">
-                        {feature.troubles.map((trouble, ti) => (
-                          <div key={trouble.title} className="py-6">
-                            <h4 className="flex flex-wrap gap-x-2.5 gap-y-1 items-baseline leading-snug">
-                              <span className="rail text-tide shrink-0">
-                                {String(ti + 1).padStart(2, "0")}
-                              </span>
-                              <span className="font-semibold">
-                                {trouble.title}
-                              </span>
-                            </h4>
-
-                            {/* 표 — 문제·해결 두 줄을 대신한다 */}
-                            {trouble.table && (
-                              <div className="mt-3 pl-8">
-                                <DataTable
-                                  head={trouble.table.head}
-                                  rows={trouble.table.rows}
-                                />
-                              </div>
-                            )}
-
-                            <dl className="mt-3 pl-8 space-y-2 text-[0.9rem] leading-relaxed">
-                              {[
-                                ["문제", trouble.problem, "text-muted"],
-                                ["해결", trouble.solution, "text-deep"],
-                                ["효과", trouble.effect, "text-tide"],
-                              ]
-                                .filter(([, text]) => text)
-                                .map(([label, text, color]) => (
-                                  <div key={label} className="flex gap-2.5">
-                                    <dt
-                                      className={`rail shrink-0 w-8 font-semibold ${color}`}
-                                    >
-                                      {label}
-                                    </dt>
-                                    <dd className="text-ink/85">{text}</dd>
-                                  </div>
-                                ))}
-                            </dl>
-
-                            {trouble.diagram === "route" && (
-                              <div className="mt-5 pl-8">
-                                <RouteDiagram />
-                              </div>
-                            )}
-
-                            {/* 태그 + 상세 열기 — 한 줄에 좌우로 */}
-                            <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 pl-8">
-                              {trouble.tags && trouble.tags.length > 0 && (
-                                <ul className="flex flex-wrap gap-1.5">
-                                  {trouble.tags.map((tag) => (
-                                    <li
-                                      key={tag}
-                                      className="rail rounded-md bg-ground border border-line px-2 py-0.5 text-muted"
-                                    >
-                                      #{tag}
-                                    </li>
-                                  ))}
-                                </ul>
-                              )}
-
-                              {trouble.details &&
-                                trouble.details.length > 0 && (
-                                  <TroubleDetails
-                                    title={trouble.title}
-                                    eyebrow={
-                                      feature.troublesLabel ??
-                                      "트러블슈팅 · 기술적 의사결정"
-                                    }
-                                    details={trouble.details}
-                                    tech={trouble.tech}
-                                  />
-                                )}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* 이 항목을 다룬 글 — 하단 목록과 중복되지만, 읽는 자리에서
-                      바로 넘어갈 수 있는 쪽이 실제로 눌린다 */}
-                  {feature.writeups && feature.writeups.length > 0 && (
-                    <div className="mt-6 flex flex-wrap items-baseline gap-x-3 gap-y-2 border-t border-line pt-4">
-                      <span className="rail shrink-0 text-muted">기록</span>
-                      {feature.writeups.map((post) => (
-                        <a
-                          key={post.href}
-                          href={post.href}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="rail inline-flex items-center gap-1 rounded-full border border-line px-3 py-1 text-deep transition-colors hover:border-tide hover:bg-tide/10"
-                        >
-                          {post.title}
-                          <span aria-hidden="true" className="text-tide">
-                            ↗
-                          </span>
-                        </a>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                <FeatureCard key={feature.name} feature={feature} />
               ))}
             </div>
           </section>
+        )}
+
+        {/* 구현 상세 — 절이 여러 개로 갈릴 때. 카드 모양은 위와 같다 */}
+        {project.featureGroups && project.featureGroups.length > 0 && (
+          <>
+            {project.featureGroups.map((group) => (
+              <section key={group.label} className="mt-16">
+                <h2 className="text-2xl font-bold tracking-tight">
+                  {group.label}
+                </h2>
+                {group.intro && (
+                  <p className={`mt-4 max-w-3xl ${leadText}`}>{group.intro}</p>
+                )}
+                {group.points && group.points.length > 0 && (
+                  <ul className="mt-6 space-y-3">
+                    {group.points.map((pt) => (
+                      <li
+                        key={pt}
+                        className="relative pl-5 text-[0.95rem] leading-relaxed before:absolute before:left-0 before:top-[0.6em] before:h-1.5 before:w-1.5 before:rounded-full before:bg-deep"
+                      >
+                        {pt}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {group.items && group.items.length > 0 && (
+                  <div className="mt-8 space-y-6">
+                    {group.items.map((feature) => (
+                      <FeatureCard key={feature.name} feature={feature} />
+                    ))}
+                  </div>
+                )}
+              </section>
+            ))}
+          </>
         )}
 
         {/* 주요 기능 개발 */}
@@ -792,6 +632,11 @@ export default function LightProjectView({
             <h2 className="text-2xl font-bold tracking-tight">
               {project.featuresLabel ?? "그 외 기능"}
             </h2>
+            {project.featuresIntro && (
+              <p className={`mt-4 max-w-3xl ${leadText}`}>
+                {project.featuresIntro}
+              </p>
+            )}
             <ul className="mt-6 space-y-3">
               {project.features.map((feature) => (
                 <li
@@ -867,6 +712,32 @@ export default function LightProjectView({
                   <p className="mt-5 text-[0.95rem] leading-relaxed text-muted">
                     {trouble.body}
                   </p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* 회고 — 갈래로 나뉘는 경우 (잘한 점 / 아쉬운 점 / 더 해본다면) */}
+        {project.closingGroups && project.closingGroups.length > 0 && (
+          <section className="mt-16 border-t border-line pt-12">
+            <h2 className="text-2xl font-bold tracking-tight">
+              {project.closingLabel ?? "마무리"}
+            </h2>
+            <div className="mt-8 max-w-3xl space-y-8">
+              {project.closingGroups.map((group) => (
+                <div key={group.title}>
+                  <p className="font-semibold text-deep">{group.title}</p>
+                  <ul className="mt-3 space-y-2.5">
+                    {group.points.map((pt) => (
+                      <li
+                        key={pt}
+                        className="relative pl-5 text-[0.95rem] leading-relaxed text-ink before:absolute before:left-0 before:top-[0.6em] before:h-1.5 before:w-1.5 before:rounded-full before:bg-tide"
+                      >
+                        {pt}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               ))}
             </div>

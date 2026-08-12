@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <title>커버 — 월간지 구독관리 시스템</title>
+    <link rel="stylesheet" href="cover.css" />
+    <style>
+      .cover {
+        background: #e8eef5;
+      }
+
+      /* 확대하지 않는다 — 화면 좌우가 온전히 다 보여야 무슨 화면인지 읽힌다.
+         세로로 긴 페이지 캡처라 아래쪽은 자연히 화면 밖으로 이어진다 */
+      .shot {
+        --zoom: 1;
+        --focus: top center;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 목업 오른쪽 · 카피 왼쪽 -->
+    <div class="cover">
+      <div class="copy">
+        <p class="eyebrow">외주 · 운영 중</p>
+        <h1 class="title">월간지<br />구독관리 시스템</h1>
+        <p class="desc">
+          엑셀 수작업을 대체한<br />
+          내부 관리 시스템.<br />
+          기획·개발·배포 <b>단독 수행</b>
+        </p>
+      </div>
+
+      <div class="stage">
+        <div class="laptop">
+          <div class="screen">
+            <div class="shot">
+              <img src="../../public/magazine-manager/after.png" alt="" />
+            </div>
+          </div>
+          <div class="base"></div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

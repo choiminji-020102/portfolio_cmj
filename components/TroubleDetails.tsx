@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import type { TroubleBlock, TroubleDetail } from "@/lib/projectDetails";
+import CodeBlock from "./CodeBlock";
 import SodamDrawer from "./SodamDrawer";
 
 /* 긴 heading은 부제를 떼고 탭 라벨로 쓴다 — "성능 최적화 — 피처 선정" → "성능 최적화" */
@@ -38,11 +39,7 @@ function Block({ blk }: { blk: TroubleBlock }) {
     );
 
   if (blk.type === "code")
-    return (
-      <pre className="overflow-x-auto rounded-lg bg-ink p-4 text-[0.78rem] leading-relaxed text-[#e6e4ea]">
-        <code>{blk.code}</code>
-      </pre>
-    );
+    return <CodeBlock code={blk.code} lang={blk.lang} />;
 
   /* 설명 위 · 그래프 아래 가로 전체 폭 (원본 해상도보다 크게는 늘리지 않는다) */
   if (blk.type === "split")
@@ -174,7 +171,8 @@ export default function TroubleDetails({
           <p className="text-[0.95rem] font-bold tracking-tight text-deep">
             {current.heading}
           </p>
-          <div className="mt-4 space-y-3">
+          {/* 서랍 본문 — 코드·표가 문단 사이에 끼므로 문단 간격보다 조금 넓게 */}
+          <div className="mt-4 space-y-4">
             {current.blocks.map((blk, bi) => (
               <Block key={bi} blk={blk} />
             ))}

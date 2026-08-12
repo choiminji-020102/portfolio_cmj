@@ -5,6 +5,8 @@
 
   screenshots 가 비어 있으면 갤러리는 플레이스홀더를 보여준다 — 자료가 오면 채운다.
 */
+import type { CodeLang } from "./highlight";
+
 export interface Trouble {
   title: string;
   body: string;
@@ -13,8 +15,13 @@ export interface Trouble {
 
 /* 해결책을 제목+불릿으로 쪼갠 블록 (챗봇처럼 해결이 여러 갈래일 때) */
 export interface SolutionBlock {
-  title: string;
+  /* 원문에 소제목이 없으면 비운다 — 없는 제목을 지어내지 않는다 */
+  title?: string;
   points: string[];
+  /* 불릿을 코드 앞에 둔다 (원문이 목록 → 코드 순서인 경우) */
+  pointsFirst?: boolean;
+  /* 블록을 닫는 문단 — 불릿이 아니라 서술로 끝나는 원문을 위해 */
+  note?: string;
   /* 제목 바로 아래 붙는 그림 — 원문에서 소제목 다음에 오던 자리를 그대로 지킨다 */
   figure?: {
     src: string;
@@ -25,13 +32,19 @@ export interface SolutionBlock {
   };
   /* 그림과 불릿 사이에 끼는 계산 과정 */
   code?: string;
+  /* code 의 언어. 주지 않으면 색을 입히지 않는다 (계산식·출력 예시용) */
+  lang?: CodeLang;
+  /* "side" — 코드와 그림을 좌우로 나란히, 그림 높이를 코드에 맞춘다.
+     세로로 긴 그림(그래프 구조도)이 혼자 커지는 것을 막는다.
+     기본(미지정)은 그림 → 코드 세로 배치 */
+  layout?: "side";
 }
 
 /* 풀버전 상세 — 문서 순서 그대로 섞이는 블록들 */
 export type TroubleBlock =
   | { type: "sub"; text: string } // 굵은 소제목 (1. 2. 등)
   | { type: "text"; text: string } // 문단
-  | { type: "code"; code: string } // 코드 블록
+  | { type: "code"; code: string; lang?: CodeLang } // 코드 블록
   | { type: "list"; items: string[] } // 불릿 리스트
   | { type: "table"; head: string[]; rows: string[][] } // 표
   | {
@@ -102,12 +115,25 @@ export interface AiFeature {
   writeups?: { title: string; href: string }[];
 }
 
+/* 여러 절로 나뉘는 구현 상세 — AI / 백엔드 / 트러블슈팅처럼
+   같은 카드 모양을 쓰되 큰 제목으로 갈라야 하는 묶음 */
+export interface FeatureGroup {
+  label: string;
+  /** 묶음 첫머리 리드 문장 */
+  intro?: string;
+  items?: AiFeature[];
+  /** 카드까지 갈 것 없이 불릿으로 끝나는 절 */
+  points?: string[];
+}
+
 export interface LightProject {
   slug: string;
   title: string;
   badge: string;
   period: string;
   teamSize: string;
+  /** 제목 바로 아래 한 줄 — 스크롤 없이 역할이 잡히게 한다 (요약보다 앞) */
+  tagline?: string;
   summary: string;
   /** 요약이 여러 문단일 때 이어지는 나머지 — summary 는 메타 description 에도 쓰이므로 첫 문단만 담는다 */
   summaryMore?: string[];
@@ -116,6 +142,14 @@ export interface LightProject {
   homepage?: string;
   /** homepage 버튼 라벨. 기본값 '홈페이지' */
   homepageLabel?: string;
+  /** 시연 영상 — GitHub 버튼 옆에 나란히. 상단에서 바로 결과물로 진입하는 통로 */
+  demo?: string;
+  /** demo 버튼 라벨. 기본값 '시연 영상' */
+  demoLabel?: string;
+  /** 발표자료 PDF — 새 탭에서 열린다 (public/ 아래 경로) */
+  slides?: string;
+  /** slides 버튼 라벨. 기본값 '발표자료' */
+  slidesLabel?: string;
   screenshots: string[];
   /** 과제 개요 — 대상·클래스·데이터·태스크 같은 사실 항목 */
   overview?: { label: string; value: string }[];
@@ -175,26 +209,68 @@ export interface LightProject {
   backgroundOrigin?: string;
   /** 제안 배경 — 우리가 세운 목표 */
   backgroundGoal?: string;
+  /** 배경 안에 펼치는 표 — 기존 대안과 그 한계처럼 배경의 근거가 표인 경우 */
+  backgroundTable?: { label?: string; head: string[]; rows: string[][] };
+  /** 배경을 닫는 문단들 — 표 아래로 이어지는 결론 */
+  backgroundClosing?: string[];
+  /** 배경 마지막에 짚는 기능 축 — 담당 항목은 mine 으로 표시한다 */
+  backgroundScope?: { label: string; text: string; mine?: boolean }[];
   /** 팀 프로젝트에서 본인이 담당한 역할 (리드 문장) */
   myRole?: string;
+  /** myRole 섹션 라벨. 기본값 '내가 맡은 역할' */
+  myRoleLabel?: string;
   /** 내가 맡은 역할 — 담당 축(영역) */
   myRoleAreas?: { title: string; desc: string }[];
   /** 내가 맡은 역할 — 작업 범위(순서) */
   myRolePipeline?: string[];
+  /** 내가 맡은 역할 — 구조·흐름 다이어그램 (mermaid 원문) */
+  myRoleDiagrams?: { caption?: string; chart: string }[];
+  /** 결과물 — "무엇을 만들었나"를 화면으로 먼저 보여주는 구간.
+      코드·모델 배치 같은 기술 상세보다 앞에 온다 */
+  showcase?: {
+    label: string;
+    intro?: string;
+    shots: {
+      src: string;
+      width: number;
+      height: number;
+      /** 화면 이름 */
+      title: string;
+      /** 그 화면이 하는 일 한 줄 */
+      desc: string;
+      /** 2단 배치에서 어느 칸에 놓을지. 하나라도 지정하면 2단이 된다.
+          세로로 긴 캡처를 2번 칸에 혼자 두면 짧은 캡처 여러 장과 높이가 맞는다.
+          기본값 1 (좁은 화면에서는 칸 구분 없이 원래 순서대로 쌓인다) */
+      column?: 1 | 2;
+    }[];
+    /** 캡처 아래 붙는 단서 문장 */
+    note?: string;
+  };
   /** 핵심 AI 기능 상세 (문제→해결→수치) */
   aiFeatures?: AiFeature[];
   /** aiFeatures 섹션 라벨. 기본값 '핵심 AI 기능' */
   aiFeaturesLabel?: string;
+  /** 절이 여러 개로 갈리는 구현 상세 — aiFeatures 와 같은 카드를 큰 제목으로 묶는다 */
+  featureGroups?: FeatureGroup[];
   features: string[];
   /** features 섹션 라벨. 기본값 '그 외 기능' */
   featuresLabel?: string;
+  /** features 목록 위에 붙는 리드 문장 */
+  featuresIntro?: string;
   /** 기존 서비스 대비 차별점 */
   differentiators?: string[];
   /** 활용한 공공데이터·외부 데이터 */
   dataSources?: string[];
   troubles?: Trouble[];
+  /** 사용 기술 — 구분별 표. 회고 바로 앞, 본문을 닫는 자리에 온다
+      (상단 '과제 개요'(overview)와 달리 문서 후반의 기술 정리용) */
+  techStack?: { label: string; value: string }[];
+  /** techStack 섹션 라벨. 기본값 '사용 기술' */
+  techStackLabel?: string;
   /** 마무리 회고 — 결과가 아니라 무엇이 남았는지 */
   closing?: string[];
+  /** 회고를 갈래로 나눠 쓰는 경우 (잘한 점 / 아쉬운 점 / 더 해본다면) */
+  closingGroups?: { title: string; points: string[] }[];
   /** closing 섹션 라벨. 기본값 '마무리' */
   closingLabel?: string;
   /** 작업 중 정리한 외부 글(기술 블로그 등) — 본문에서 덜어낸 상세의 근거 */
@@ -207,57 +283,543 @@ export interface LightProject {
 
 export const lightProjects: LightProject[] = [
   /*
-    다 맡케팅 상세 — 뼈대만 세운 상태.
-    아래 서술은 lib/profile.ts 카드(summary·role·outcome·stack)에서 확인된 범위로만 작성했다.
-    비워 둔 것: 스크린샷, 성능 지표, 트러블슈팅, 팀 규모·본인 파트의 정확한 경계,
-    Seedance·KoELECTRA를 어디에 썼는지. 자료가 오면 채운다.
+    다 맡케팅 상세 — files/다맡케팅-포트폴리오.md 가 바탕이지만 절 순서를 다시 짰다.
+    읽는 사람이 스택을 먼저 확인하고 결과물을 본 뒤 기술 상세로 들어가도록:
+      1 배경 · 2 담당 범위 · 3 사용 기술 · 4 결과물 · 5 AI · 6 백엔드 · 7 트러블슈팅 · 8 회고.
+    원문 5절(프론트엔드)은 화면 캡처가 본문이라 4절 결과물로 흡수했다.
+    캡처 4장과 demo.mp4 는 팀 시연 영상에서 뽑아 public/damatketing/ 에 둔다.
   */
   {
     slug: "damatketing",
     title: "다 맡케팅",
     badge: "KT AIVLE · 대상",
-    period: "2025.08 — 2025.09",
-    teamSize: "팀 프로젝트",
-    summary:
-      "소상공인의 홍보 쇼츠 제작부터 SNS 게시글 작성, 성과 리포트까지를 생성형 AI로 이어 붙인 마케팅 자동화 플랫폼입니다. 저는 장면이 흔들리지 않게 붙잡는 일관성 유지와 게시글 생성 파이프라인을 설계·구현했습니다.",
+    period: "2025.07.07 — 2025.09.02 (약 2개월)",
+    teamSize: "7명 (AI/백엔드 5, AI/프론트 2)",
+    tagline:
+      "7인 팀 프로젝트에서 SNS 마케팅 도메인을 AI 파이프라인부터 화면까지 담당",
+    summary: "소상공인을 위한 AI 마케팅 자동화 플랫폼입니다.",
     stack: [
-      "LangGraph",
-      "GPT-4o",
-      "Flux.1 Kontext",
-      "Seedance",
-      "KoELECTRA",
+      "Python",
       "FastAPI",
+      "LangChain",
+      "LangGraph",
+      "OpenAI API",
+      "Java",
+      "Spring Boot",
+      "Kafka",
+      "OAuth 2.0",
+      "YouTube Data API",
+      "AWS S3",
+      "React",
+      "Redux",
+      "Docker",
+      "MSA",
     ],
+    github: "https://github.com/KT-AIVLE-04",
+    demo: "/damatketing/demo.mp4",
     screenshots: [],
-    backgroundLabel: "과제 배경",
+    backgroundLabel: "1. 프로젝트 배경",
     background:
-      "소상공인에게 마케팅은 본업 밖의 일입니다 — 홍보 영상 제작, SNS 게시, 성과 확인이 저마다 다른 도구와 시간을 요구합니다.",
-    backgroundEffect:
-      "이 세 단계를 생성형 AI로 하나의 흐름에 묶는 것이 과제의 목표였습니다.",
+      "소상공인은 마케팅에 쓸 인력도 시간도 부족합니다. 영업·재고·고객 응대가 우선이라 SNS 운영은 늘 뒤로 밀리고, 광고 영상을 외주로 맡기면 100만 원 이상의 비용이 듭니다. 그렇다고 기존 도구가 대안이 되지도 못합니다.",
+    backgroundTable: {
+      head: ["대안", "한계"],
+      rows: [
+        ["광고 대행사", "고비용, 소통 불투명, 업종 맞춤성 부족"],
+        ["SNS 광고 툴", "광고 집행만 가능, 콘텐츠 제작 기능 없음"],
+        ["AI 영상 제작 툴", "영상 생성만 가능, 전략 기획·성과 분석 부재"],
+      ],
+    },
+    backgroundClosing: [
+      "“콘텐츠를 만드는 것”과 “그걸 채널에 올려 성과를 보는 것”이 분리되어 있다는 게 핵심 문제였습니다. 그래서 광고 영상 생성 → SNS 게시 → 성과 분석까지 하나의 흐름으로 잇는 원스톱 플랫폼을 만들기로 했습니다.",
+      "서비스는 세 개의 기능 축으로 구성되며, 그중 2번 SNS 게시글 관리 전 구간을 담당했습니다.",
+    ],
+    backgroundScope: [
+      { label: "1", text: "홍보 영상(숏츠) 자동 제작" },
+      { label: "2", text: "SNS 게시글 관리", mine: true },
+      { label: "3", text: "성과 분석 및 리포트 작성" },
+    ],
+    myRoleLabel: "2. 담당 범위",
     myRole:
-      "생성형 AI 파이프라인 중 두 축을 맡아 설계부터 구현까지 진행했습니다. 여러 장면으로 나뉘는 쇼츠에서 인물·배경이 장면마다 달라지지 않게 붙잡는 일, 그리고 만들어진 콘텐츠를 SNS 게시글로 바꾸는 생성 파이프라인을 만드는 일입니다.",
-    myRoleAreas: [
+      "SNS 게시글 관리 축 하나를 FastAPI 에이전트 · Spring Boot 서비스 · React 화면의 세 계층에 걸쳐 맡았습니다. 계층별로 사람이 나뉘지 않아 프롬프트 설계부터 API 계약, 화면 상태 관리까지 하나로 이어집니다.",
+    myRoleDiagrams: [
       {
-        title: "장면 일관성 유지",
-        desc: "쇼츠가 여러 장면으로 나뉘어도 인물·배경이 유지되도록 이미지 생성 단계를 설계·구현",
+        chart: `graph LR
+    subgraph FE["Frontend (React)"]
+        A[SNS 계정 연동]
+        B[게시글 생성]
+        C[게시글 관리]
+    end
+    subgraph BE["Backend (Spring Boot)"]
+        D[sns-service<br/>OAuth · 게시 · 채널]
+    end
+    subgraph AI["AI Engine (FastAPI)"]
+        E[게시글 생성 Agent<br/>LangGraph]
+    end
+    subgraph EXT["External"]
+        F[YouTube Data API]
+        G[OpenAI API]
+    end
+    A --> D
+    B --> D
+    C --> D
+    D --> E
+    D --> F
+    E --> G`,
       },
       {
-        title: "게시글 생성 파이프라인",
-        desc: "제작된 홍보 콘텐츠를 SNS 게시글로 변환하는 생성 흐름을 LangGraph로 구현",
+        caption: "전체 처리 흐름",
+        chart: `sequenceDiagram
+    autonumber
+    actor U as 사용자
+    participant BE as sns-service
+    participant AI as FastAPI Agent
+    participant YT as YouTube
+    participant KF as Kafka
+
+    rect rgb(243,240,255)
+    Note over U,AI: 1단계 · AI 게시글 생성
+    U->>BE: 콘텐츠 선택 + 키워드/업종/위치 입력
+    BE->>BE: S3 Presigned URL 발급
+    BE->>AI: 이미지 URL + 키워드 + 업종/위치/플랫폼
+    AI->>AI: 콘텐츠 분석 → 트렌드 → 본문 → 해시태그
+    AI-->>BE: 제목 · 본문 · 해시태그
+    BE-->>U: 생성 결과 (편집 가능)
+    end
+
+    rect rgb(255,241,242)
+    Note over U,KF: 2단계 · 게시 및 업로드
+    U->>BE: 즉시 게시 또는 예약 게시
+    BE->>YT: 영상 업로드 (+ publishAt)
+    YT-->>BE: videoId
+    BE->>BE: 게시글 메타데이터 DB 저장
+    BE->>KF: 게시글 생성 이벤트 발행
+    BE-->>U: 게시 완료
+    end`,
       },
     ],
-    myRolePipeline: [
-      "장면 분할·프롬프트 설계",
-      "참조 기반 이미지 생성",
-      "게시글 생성 체인 구성",
-      "파이프라인 연결",
+    showcase: {
+      label: "4. 결과물",
+      intro:
+        "담당한 SNS 도메인의 화면 전반을 React 로 구현하고 Redux 로 상태를 관리했습니다. 계정을 연동하고, AI 로 게시글을 만들고, 플랫폼에 올려 관리하기까지가 한 흐름으로 이어집니다.",
+      shots: [
+        {
+          src: "/damatketing/sns-connect-page.png",
+          width: 1440,
+          height: 1186,
+          title: "SNS 계정 연동",
+          desc: "플랫폼을 고르면 OAuth 팝업이 열리고, 연동이 끝나면 채널명·구독자·게시물·조회수가 카드에 표시됩니다. 연결 해제와 새로고침도 같은 카드에서 처리합니다.",
+        },
+        {
+          src: "/damatketing/post-upload.png",
+          width: 1400,
+          height: 2432,
+          column: 2,
+          title: "새 게시물 업로드 — 네 단계 한 화면",
+          desc: "① 콘텐츠 선택 → ② AI 게시글 작성 → ③ 게시 옵션 → ④ 플랫폼별 미리보기까지 한 페이지에서 끝납니다. 제목·본문·해시태그를 한 번에 만드는 버튼과 해시태그만 다시 뽑는 버튼을 나란히 두었고, 게시 시점에서 예약 게시를 고를 수 있습니다.",
+        },
+        {
+          src: "/damatketing/post-manage-page.png",
+          width: 1440,
+          height: 682,
+          title: "게시물 관리",
+          desc: "게시한 글을 플랫폼별로 걸러 보고, 조회수·좋아요·댓글과 함께 상세를 조회·수정·삭제합니다.",
+        },
+      ],
+      note: "전체 흐름은 상단의 시연 영상에서 확인할 수 있습니다.",
+    },
+    featureGroups: [
+      {
+        label: "5. AI — 게시글 생성 에이전트",
+        items: [
+          {
+            name: "5.1 왜 단일 프롬프트가 아니라 그래프인가",
+            tagline:
+              "게시글 생성은 성격이 다른 네 가지 일이 섞여 있습니다 — 이미지를 읽는 일, 외부 트렌드를 끌어오는 일, 문장을 쓰는 일, 규칙에 맞춰 태그를 고르는 일. 이걸 한 번의 호출로 처리하면 어느 단계가 잘못됐는지 짚어낼 수 없고, 일부만 다시 실행하는 것도 불가능합니다.",
+            problemLabel: "택한 구조",
+            problem:
+              "역할 단위로 노드를 나누고 LangGraph StateGraph 로 연결했습니다. 그 결과 단계별로 모델과 temperature 를 다르게 배치할 수 있었고, 해시태그만 재생성하는 API 를 별도 노드 조합으로 만들 수 있었습니다. 각 노드는 하나의 책임만 지고, 앞 단계의 구조화된 출력이 다음 단계의 입력이 됩니다.",
+            solutionLabel: "구현",
+            solutionBlocks: [
+              // 코드(좌)와 렌더된 그래프(우)를 나란히 — 세로로 긴 그림이라 코드 높이에 맞춘다
+              {
+                title: "그래프 구성",
+                layout: "side",
+                code: `workflow = StateGraph(SNSPostState)
+
+workflow.add_node("content_analyzer", content_analyzer)
+workflow.add_node("trend_analyzer", trend_analyzer)
+workflow.add_node("post_generator", post_generator)
+workflow.add_node("hashtag_generator", hashtag_generator)
+
+workflow.add_edge(START, "content_analyzer")
+workflow.add_edge("content_analyzer", "trend_analyzer")
+workflow.add_edge("trend_analyzer", "post_generator")
+workflow.add_edge("post_generator", "hashtag_generator")
+workflow.add_edge("hashtag_generator", END)`,
+                lang: "python",
+                figure: {
+                  src: "/damatketing/sns-post-graph.png",
+                  width: 180,
+                  height: 531,
+                  alt: "SNS 게시글 생성 그래프 구조",
+                },
+                points: [
+                  "LangGraph 를 택한 이유는 상태를 명시적으로 관리할 수 있어서입니다. Pydantic 모델로 State 를 정의해두면 각 노드가 무엇을 받아 무엇을 채우는지가 타입으로 드러나고, 중간 산출물을 그대로 검증·디버깅할 수 있습니다. 단순 체인으로 이었다면 중간에 무엇이 어떻게 넘어가는지 추적하기 어려웠을 겁니다.",
+                ],
+              },
+              {
+                title: "State 정의",
+                code: `class SNSPostState(BaseModel):
+    # 입력
+    content_data: str
+    sns_platform: Literal["instagram", "facebook", "youtube"]
+    business_type: str
+    user_keywords: List[str] = Field(default_factory=list)
+    location: Optional[str] = None
+
+    # 중간 생성물
+    content_summary: Optional[ContentData] = None
+    trend_analysis: Optional[TrendData] = None
+    generated_post: Optional[PostData] = None
+    hashtags: List[str] = Field(default_factory=list)`,
+                lang: "python",
+                points: [
+                  "상태 갱신은 state.model_copy(update={...}) 로 처리해 이전 상태를 훼손하지 않도록 했습니다.",
+                ],
+              },
+            ],
+          },
+          {
+            name: "5.2 노드별 역할과 모델 배치",
+            tagline:
+              "작업 성격에 따라 모델과 temperature 를 다르게 뒀습니다. 전 구간에 상위 모델을 쓰면 비용과 응답 시간이 커지고, 전 구간에 경량 모델을 쓰면 트렌드 분석의 품질이 떨어졌습니다.",
+            table: {
+              head: ["노드", "역할", "모델", "temp", "선택 이유"],
+              rows: [
+                [
+                  "content_analyzer",
+                  "이미지에서 주제·분위기·타겟 추출",
+                  "gpt-4o-mini",
+                  "0.3",
+                  "정형 추출 작업, 편차를 줄여야 함",
+                ],
+                [
+                  "trend_analyzer",
+                  "업종·지역·시기별 트렌드 8개 범주 도출",
+                  "gpt-4o",
+                  "0.7",
+                  "폭넓은 지식과 발상이 필요한 유일한 단계",
+                ],
+                [
+                  "post_generator",
+                  "제목·본문 생성",
+                  "gpt-4o-mini",
+                  "0.5",
+                  "앞 단계 입력이 충분해 경량 모델로 충분",
+                ],
+                [
+                  "hashtag_generator",
+                  "플랫폼별 해시태그 생성",
+                  "gpt-4o-mini",
+                  "0.7",
+                  "다양성은 필요하나 후처리로 통제 가능",
+                ],
+              ],
+            },
+          },
+          {
+            name: "5.3 트렌드 분석 — 맥락을 강제하는 프롬프트",
+            tagline:
+              "“최신 트렌드를 반영해줘”라고만 하면 LLM 은 어느 업종에나 통하는 뻔한 답을 냅니다. 현재 날짜·업종·매장 위치·대상 플랫폼을 컨텍스트로 주입하고, 출력을 8개 범주로 강제해 매장 맥락에 밀착한 결과를 유도했습니다.",
+            solutionLabel: "출력 강제",
+            solutionBlocks: [
+              {
+                title: "출력 형식",
+                code: `[출력 형식]
+{
+    "keywords": ["..."],        # 트렌딩 키워드
+    "hashtags": ["..."],        # 인기 해시태그
+    "memes": ["..."],           # 최신 밈
+    "current_issues": ["..."],  # 시사 이슈
+    "popular_topics": ["..."],  # 인기 주제
+    "business_trend": ["..."],  # 업종 트렌드
+    "season_trend": ["..."],    # 계절 트렌드
+    "location_trend": ["..."]   # 지역 트렌드
+}`,
+                lang: "json",
+                points: [
+                  "범주를 나눈 것 자체가 장치입니다. 자유 서술로 두면 한두 방향으로 쏠리는데, 칸을 만들어두면 각 관점을 빠짐없이 채웁니다.",
+                ],
+              },
+              {
+                title: "실제 출력 예시 (의류 쇼핑몰 / 서울 잠실 / 8월)",
+                code: `"keywords": ['맨투맨', '의류 쇼핑몰', '패션', '젊은 세대', '캐주얼 스타일']
+"season_trend": ['가을 맞이 패션템', '편안하고 따뜻한 의류']
+"location_trend": ['잠실의 패션 이벤트', '서울에서 즐기는 캐주얼 패션']`,
+                lang: "json",
+                points: [],
+              },
+            ],
+          },
+          {
+            name: "5.4 API 구성 — 부분 실행 지원",
+            tagline:
+              "노드를 책임 단위로 나눠둔 덕에, 전체 파이프라인을 돌리지 않고 필요한 구간만 실행하는 API 를 만들 수 있었습니다. 사용자가 본문은 마음에 드는데 해시태그만 다시 뽑고 싶은 경우가 있어, 해시태그 전용 엔드포인트를 따로 열었습니다.",
+            table: {
+              head: ["엔드포인트", "기능", "실행 노드"],
+              rows: [
+                [
+                  "POST /sns-post/agent/post",
+                  "게시글 + 해시태그 전체 생성",
+                  "4개 노드 전체",
+                ],
+                [
+                  "POST /sns-post/agent/tag",
+                  "기존 게시글 기준 해시태그만 재생성",
+                  "trend_analyzer → hashtag_generator",
+                ],
+              ],
+              note: "/tag 는 이미 작성된 제목·본문을 입력으로 받아 임시 State 를 구성한 뒤 두 노드만 직접 호출합니다. 이미지 분석과 본문 생성을 건너뛰므로 응답이 빠르고 API 호출 비용도 절반 이하로 줄었습니다.",
+            },
+          },
+          {
+            name: "5.5 해시태그 최적화",
+            tagline:
+              "플랫폼마다 해시태그 노출 알고리즘이 다릅니다. 과다 사용하면 스팸으로 분류되거나(Instagram), 아예 전부 무시됩니다(YouTube 는 15개 초과 시). 자료 조사를 거쳐 권장 개수와 우선순위 규칙을 정하고 프롬프트에 명시했습니다.",
+            table: {
+              head: ["플랫폼", "권장 개수", "우선순위 (중요 → 덜 중요)"],
+              rows: [
+                [
+                  "Instagram",
+                  "7~11개",
+                  "핵심 콘텐츠 키워드 → 세분화/타겟(지역·속성) → 트렌드/인기 → 브랜드",
+                ],
+                [
+                  "Facebook",
+                  "2~3개",
+                  "캠페인/이벤트 → 개인·커뮤니티 → 키워드+지역",
+                ],
+                [
+                  "YouTube",
+                  "3~5개",
+                  "영상 주제 → 트렌드/빅키워드(#Shorts 등) → 세분화 타겟 → 브랜드/채널",
+                ],
+              ],
+              note: "입력이 비었을 때의 처리도 규칙에 넣었습니다. 매장 위치가 없는데 지역 태그를 만들면 엉뚱한 지역이 붙기 때문에, location 이 비어 있으면 지역 태그를 생성하지 않도록 명시했습니다.",
+            },
+          },
+        ],
+      },
+      {
+        label: "6. 백엔드 — SNS 연동 및 게시",
+        items: [
+          {
+            name: "6.1 확장을 고려한 연동 구조",
+            problemLabel: "구조",
+            problem:
+              "팀 컨벤션인 헥사고날 구조(adapter.in / application / adapter.out)에 맞춰 계층을 분리하고, 플랫폼별 API 구현을 adapter.out 어댑터에 두어 외부 API 의존이 도메인으로 새어 들어오지 않도록 했습니다. 플랫폼 구분은 SnsType enum 으로 두어 플랫폼이 늘어날 때 추가 지점이 한곳에 모이도록 했습니다.",
+          },
+          {
+            name: "6.2 OAuth 2.0 연동과 CSRF 방어",
+            tagline:
+              "인가 코드 방식으로 Google API 접근 권한을 받되, 콜백이 정상 요청인지 검증하기 위해 state 파라미터를 서버에서 발급·소비하도록 구현했습니다.",
+            solutionLabel: "구현",
+            solutionBlocks: [
+              {
+                code: `public String issue(Long userId, Long storeId) {
+    String raw = userId + ":" + storeId + ":" + UUID.randomUUID();
+    String state = Base64.getUrlEncoder().withoutPadding()
+            .encodeToString(raw.getBytes(StandardCharsets.UTF_8));
+    repository.save(OAuthStateEntity.builder()
+            .state(state).userId(userId).storeId(storeId)
+            .expiresAt(Instant.now().plusSeconds(600)).build());
+    return state;
+}`,
+                lang: "java",
+                points: [
+                  "10분 TTL — 오래된 state 가 재사용되지 않도록 만료 시각을 함께 저장",
+                  "일회성 소비 — 검증 직후 삭제해 재사용을 원천 차단",
+                  "사용자·매장 식별자 바인딩 — 콜백 시점에 어떤 매장의 연동인지 복원",
+                ],
+                note: "토큰은 별도 서비스에서 관리하며, API 호출 직전 ensureValidToken() 으로 만료를 확인하고 필요하면 refresh token 으로 갱신합니다.",
+              },
+            ],
+          },
+          {
+            name: "6.3 영상 업로드와 예약 게시",
+            solutionLabel: "구현",
+            solutionBlocks: [
+              {
+                code: `VideoStatus status = new VideoStatus();
+status.setPrivacyStatus("private");        // 예약 게시하려면 private + publishAt
+if (publishAt != null) {
+    status.setPublishAt(new DateTime(publishAt.toInstant().toEpochMilli()));
+}
+...
+uploader.setDirectUploadEnabled(false);    // Resumable
+uploader.setChunkSize(10 * 1024 * 1024);   // 10MB`,
+                lang: "java",
+                points: [
+                  "예약 게시 — 비공개로 선업로드한 뒤 publishAt 을 지정해 플랫폼 스케줄링에 위임",
+                  "대용량 처리 — S3 객체를 메모리에 적재하지 않고 스트리밍, 10MB 청크 Resumable 업로드로 중단 시 재개",
+                ],
+              },
+            ],
+          },
+          {
+            name: "6.4 서비스 간 연동",
+            problemLabel: "구조",
+            problem:
+              "게시글 메타데이터가 필요한 성과 분석 서비스와는 Kafka 이벤트로 통신했습니다. 다른 서비스가 SNS 도메인 DB 를 직접 조회하지 않게 해 MSA 경계를 유지했습니다.",
+          },
+        ],
+      },
+      {
+        label: "7. 트러블슈팅",
+        items: [
+          {
+            name: "7.1 S3 Presigned URL 이 이미지로 인식되지 않던 문제",
+            problem:
+              "백엔드가 넘겨준 S3 Presigned URL 을 콘텐츠 분석 노드가 이미지로 처리하지 못하고 폴백으로 빠졌습니다. 확장자로 미디어 여부를 판별하고 있었는데, Presigned URL 은 쿼리스트링이 길게 붙고 경로에 확장자가 없는 경우가 있어 판별이 실패했습니다.",
+            solution:
+              "확장자 판별 앞에 신뢰 도메인 화이트리스트를 두어, 자사 CDN·S3 에서 온 URL 은 확장자와 무관하게 미디어로 처리하도록 했습니다.",
+            solutionBlocks: [
+              {
+                code: `if 'aivle.r-e.kr' in domain or 's3.amazonaws.com' in domain or 'cdn.aivle' in domain:
+    print("✅ AIVLE/S3 CDN 감지 - 미디어 파일로 처리")
+elif ext and ext not in IMAGE_EXTS:
+    ...  # 메타 요약으로 대체`,
+                lang: "python",
+                points: [],
+              },
+            ],
+          },
+          {
+            name: "7.2 LLM 이 JSON 형식을 지키지 않는 문제",
+            problem:
+              "“순수 JSON 만 반환하라”고 명시해도 코드블록으로 감싸거나 설명 문장을 덧붙이는 경우가 있어 파싱이 깨졌습니다.",
+            solution: "세 겹으로 방어했습니다.",
+            solutionBlocks: [
+              {
+                pointsFirst: true,
+                points: [
+                  "시스템 프롬프트에 금지 사항을 구체적으로 명시 (마크다운 금지, 백틱 금지, 추가 필드 금지)",
+                  "1차 파싱 실패 시 정규식으로 JSON 블록만 추출하는 관대한 파서로 재시도",
+                  "그래도 실패하면 폴백 객체를 반환해 파이프라인이 멈추지 않도록 처리",
+                ],
+                code: `def _extract_json(text: str):
+    try:
+        return json.loads(text)
+    except Exception:
+        pass
+    m = re.search(r"\\{.*\\}", text, re.DOTALL)   # 관대한 추출
+    if m:
+        try:
+            return json.loads(m.group(0))
+        except Exception:
+            return None
+    return None`,
+                lang: "python",
+                note: "순차 그래프에서는 앞 노드가 죽으면 뒤 노드가 전부 죽습니다. 품질이 조금 낮은 결과라도 흐름을 잇는 편이 낫다고 판단해, 이미지 분석에 실패해도 업종·키워드 기반의 최소 요약을 만들어 다음 노드로 넘겼습니다.",
+              },
+            ],
+          },
+          {
+            name: "7.3 해시태그 규칙을 프롬프트만으로는 못 지키는 문제",
+            problem:
+              "프롬프트에 개수 제한과 형식을 명시해도 LLM 이 종종 어겼습니다. 개수를 초과하거나, # 을 붙이거나, 이모지·공백이 섞이거나, 표기만 다른 중복 태그가 나왔습니다.",
+            solution:
+              "프롬프트로 유도하고 코드로 강제하는 이중 구조로 바꿨습니다. LLM 출력은 신뢰하지 않고 후처리 단계를 반드시 거치게 했습니다.",
+            solutionBlocks: [
+              {
+                code: `def _normalize_hashtags(raw):
+    for t in raw or []:
+        t = re.sub(r"\\s+", "", t)          # 공백 제거
+        t = re.sub(r"[^\\w#가-힣]", "", t)   # 이모지·특수문자 제거
+        if not t.startswith("#"):
+            t = f"#{t}"
+        norm.append(t.lower())             # 표기 통일 후 중복 제거
+    ...
+
+def _cap_by_platform(tags, platform):
+    limits = {"instagram": (7, 11), "facebook": (2, 3), "youtube": (3, 5)}
+    lo, hi = limits.get(platform, (3, 5))
+    return tags[:hi]                       # 플랫폼 한도 강제`,
+                lang: "python",
+                points: [],
+                note: "이 경험에서 LLM 출력에 대한 검증은 프롬프트가 아니라 코드의 책임이라는 걸 배웠습니다.",
+              },
+            ],
+          },
+          {
+            name: "7.4 예약 게시를 어떻게 처리할 것인가",
+            problemLabel: "고민",
+            problem:
+              "예약 시각에 맞춰 게시하려면 서버에 스케줄러를 두는 방식이 일반적입니다. 하지만 그러면 예약 시각에 서버가 내려가 있을 경우 게시가 통째로 누락됩니다. 재시도 로직과 중복 게시 방지까지 직접 관리해야 했습니다.",
+            solution:
+              "YouTube Data API 가 예약 공개를 지원한다는 점을 활용해, 영상을 비공개로 먼저 올려두고 공개 시각만 지정하는 방식으로 전환했습니다. 예약 이후의 책임을 플랫폼에 넘긴 셈입니다.",
+            troublesLabel: "결과",
+            troubles: [
+              {
+                title: "스케줄러를 만들지 않는 쪽을 택했다",
+                effect:
+                  "서버 가용성과 무관하게 예약이 보장되고, 스케줄러·재시도·중복 방지 로직이 전부 불필요해졌습니다. 다만 플랫폼이 예약 기능을 지원하지 않는 경우에는 쓸 수 없어, 향후 Instagram·Facebook 확장 시에는 별도 방식이 필요합니다.",
+              },
+            ],
+          },
+          {
+            name: "7.5 OAuth 콜백 응답 형식",
+            problem:
+              "연동 완료 후 콜백이 JSON 을 반환하고 있어, 팝업 창에 원시 JSON 이 그대로 노출됐습니다. 사용자는 연동이 성공한 건지 알 수 없었습니다.",
+            solution:
+              "콜백 응답을 HTML 템플릿으로 바꿔 성공·실패 화면을 렌더링하도록 수정했습니다. 템플릿 로딩이 실패하는 경우를 대비해 인라인 fallback HTML 도 함께 두었습니다.",
+          },
+        ],
+      },
     ],
-    // 앞에 '핵심 AI 기능' 섹션이 없으므로 '그 외 기능' 기본 라벨을 쓰지 않는다
-    featuresLabel: "주요 기능",
-    features: [
-      "홍보 쇼츠 자동 제작",
-      "SNS 게시글 자동 생성",
-      "마케팅 성과 리포트",
+    // 절 단위 본문은 featureGroups 가 다 담는다
+    features: [],
+    techStackLabel: "3. 사용 기술",
+    techStack: [
+      {
+        label: "AI",
+        value:
+          "Python, FastAPI, LangChain, LangGraph, OpenAI API (GPT-4o / 4o-mini)",
+      },
+      {
+        label: "Backend",
+        value:
+          "Java, Spring Boot, Kafka, OAuth 2.0, YouTube Data API, AWS S3, MySQL",
+      },
+      { label: "Frontend", value: "React, Redux" },
+      { label: "Infra", value: "Docker, MSA" },
+    ],
+    closingLabel: "8. 회고",
+    closingGroups: [
+      {
+        title: "잘한 점",
+        points: [
+          "책임 단위로 노드를 분리한 판단. 덕분에 단계별로 모델을 다르게 배치해 비용을 통제할 수 있었고, 해시태그만 재생성하는 API 도 노드 조합만으로 만들 수 있었습니다. 특정 단계의 품질이 떨어질 때 그 노드만 손보면 되어 개선도 수월했습니다.",
+          "LLM 출력을 코드로 검증하는 습관을 얻었습니다. 프롬프트는 유도일 뿐 보장이 아니라는 전제로 후처리를 설계하게 됐습니다.",
+          "예약 게시처럼 직접 만들지 않는 선택이 더 나은 경우가 있다는 것을 경험했습니다.",
+        ],
+      },
+      {
+        title: "아쉬운 점",
+        points: [
+          "Instagram·Facebook 연동 미완성 — 게시글·해시태그 생성 로직은 3개 플랫폼을 모두 지원하도록 만들었지만, 실제 계정 연동과 업로드는 YouTube 만 완료했습니다. 기간 내 우선순위 판단이었으나, 플랫폼별 노출 최적화를 설계해놓고 검증하지 못한 점이 아쉽습니다.",
+          "정량 지표 부재 — 생성 소요 시간, 게시 성공률 같은 지표를 측정하지 않은 채 진행했습니다. 개선 전후를 숫자로 비교할 수 없어 판단의 근거를 정성적으로만 남기게 됐습니다. 다음 프로젝트에서는 최소한의 계측을 먼저 붙이려 합니다.",
+          "에이전트 평가 체계 없음 — 생성 품질을 눈으로 확인하는 수준에 머물렀습니다. 정답 셋을 만들어두고 프롬프트 변경 시 회귀 검증을 하는 구조가 필요했습니다.",
+        ],
+      },
+      {
+        title: "더 해본다면",
+        points: [
+          "트렌드 분석에 실시간 검색 도구를 붙여 LLM 내부 지식의 한계를 보완",
+          "조건부 엣지를 활용해, 콘텐츠 분석이 실패한 경우 다른 경로로 우회하는 그래프 설계",
+          "생성 결과에 대한 사용자 피드백을 수집해 프롬프트 개선에 반영하는 루프 구성",
+        ],
+      },
     ],
   },
   {
@@ -283,6 +845,7 @@ export const lightProjects: LightProject[] = [
     github: "https://github.com/BlackCows-Team",
     homepage: "https://blackcows-team.github.io/blackcows-privacy/index.html",
     homepageLabel: "소개 페이지",
+    slides: "/sodam/presentation.pdf",
     screenshots: ["/sodam/home.png"],
     backgroundLabel: "과제 배경",
     background: "낙농업의 위기 — '소규모 농가가 버틸 수 없는 구조'",
