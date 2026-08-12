@@ -226,7 +226,8 @@ export interface LightProject {
   /** 내가 맡은 역할 — 구조·흐름 다이어그램 (mermaid 원문) */
   myRoleDiagrams?: { caption?: string; chart: string }[];
   /** 결과물 — "무엇을 만들었나"를 화면으로 먼저 보여주는 구간.
-      코드·모델 배치 같은 기술 상세보다 앞에 온다 */
+      코드·모델 배치 같은 기술 상세보다 앞에 온다.
+      note 는 캡처 앞(리드 문장 아래)에 놓인다 */
   showcase?: {
     label: string;
     intro?: string;
@@ -425,7 +426,6 @@ export const lightProjects: LightProject[] = [
           desc: "게시한 글을 플랫폼별로 걸러 보고, 조회수·좋아요·댓글과 함께 상세를 조회·수정·삭제합니다.",
         },
       ],
-      note: "전체 흐름은 상단의 시연 영상에서 확인할 수 있습니다.",
     },
     featureGroups: [
       {

@@ -559,21 +559,37 @@ export default function LightProjectView({
         {/* 결과물 — 기술 상세로 들어가기 전에 "무엇을 만들었나"를 화면으로 먼저 보여준다 */}
         {project.showcase && project.showcase.shots.length > 0 && (
           <section className="mt-16">
-            <h2 className="text-2xl font-bold tracking-tight">
-              {project.showcase.label}
-            </h2>
+            {/* 제목 옆에 시연 영상 — 캡처를 보러 온 자리에서 바로 움직이는 화면으로 넘어갈 수 있게.
+                버튼이 여기 있으면 "영상은 상단에 있다"는 안내문이 따로 필요 없다 */}
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h2 className="text-2xl font-bold tracking-tight">
+                {project.showcase.label}
+              </h2>
+              {project.demo && (
+                <a
+                  href={project.demo}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="rail inline-flex items-center gap-1.5 rounded-full border border-tide bg-tide/15 px-3.5 py-1.5 font-semibold text-deep transition-colors hover:bg-tide/25"
+                >
+                  <span aria-hidden="true">▶</span>
+                  {project.demoLabel ?? "시연 영상"}
+                </a>
+              )}
+            </div>
             {project.showcase.intro && (
               <p className={`mt-4 max-w-3xl ${leadText}`}>
                 {project.showcase.intro}
               </p>
             )}
-            {/* 캡처 격자 — 목록 배치와 클릭 확대는 클라이언트 쪽에서 (ShowcaseGallery) */}
-            <ShowcaseGallery shots={project.showcase.shots} />
+            {/* 단서 문장 — 지금은 쓰는 곳이 없다 (시연 영상은 위 버튼이 대신한다) */}
             {project.showcase.note && (
-              <p className="mt-8 border-l-2 border-tide/40 pl-4 text-[0.95rem] leading-relaxed text-muted">
+              <p className="mt-3 text-[0.95rem] leading-relaxed text-muted">
                 {project.showcase.note}
               </p>
             )}
+            {/* 캡처 격자 — 목록 배치와 클릭 확대는 클라이언트 쪽에서 (ShowcaseGallery) */}
+            <ShowcaseGallery shots={project.showcase.shots} />
           </section>
         )}
 
