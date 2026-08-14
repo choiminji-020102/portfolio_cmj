@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import type { Project } from "@/lib/projects";
+import { openCard, sectionTitle } from "@/lib/ui";
 import DrawerShell from "./drawer/DrawerShell";
 import ChallengeDetailView from "./drawer/ChallengeDetailView";
 import FeatureDetailView from "./drawer/FeatureDetailView";
@@ -22,57 +23,71 @@ export default function ProjectInteractive({ project }: Props) {
 
   return (
     <>
-      {/* Key Features */}
-      <div className="mb-12">
-        <h2 className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-5">Key Features</h2>
-        <div className="flex flex-col gap-3">
+      {/* 주요 기능 — 카드를 누르면 우측 패널에서 상세가 열린다 */}
+      <section className="mt-16">
+        <h2 className={sectionTitle}>주요 기능</h2>
+        <div className="mt-8 flex flex-col gap-3">
           {project.features.map((feature) => (
             <button
               key={feature.id}
               onClick={() => setView({ type: "feature", id: feature.id })}
-              className="group border border-stone-200 rounded-2xl p-5 hover:border-amber-300 hover:bg-amber-50/40 transition-all duration-200 text-left w-full"
+              className={openCard}
             >
               <div className="flex items-start gap-3">
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-stone-900 mb-1 group-hover:text-amber-600 transition-colors text-sm">
+                  <h3 className="font-semibold tracking-tight group-hover:text-deep transition-colors">
                     {feature.title}
                   </h3>
-                  <p className="text-stone-500 text-sm leading-relaxed">{feature.summary}</p>
+                  <p className="mt-1 text-sm leading-relaxed text-muted">
+                    {feature.summary}
+                  </p>
                 </div>
-                <span className="text-stone-300 group-hover:text-amber-400 transition-colors flex-shrink-0 mt-0.5">→</span>
+                <span
+                  aria-hidden="true"
+                  className="text-tide flex-shrink-0 mt-0.5 transition-transform group-hover:translate-x-0.5"
+                >
+                  →
+                </span>
               </div>
             </button>
           ))}
         </div>
-      </div>
+      </section>
 
-      {/* Challenges & Solutions */}
+      {/* 트러블 슈팅 — 번호는 기능 카드 안의 트러블 목록과 같은 표기를 쓴다 */}
       {project.challenges.length > 0 && (
-        <div className="mb-12">
-          <h2 className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-5">Challenges & Solutions</h2>
-          <div className="flex flex-col gap-3">
+        <section className="mt-16">
+          <h2 className={sectionTitle}>트러블 슈팅</h2>
+          <div className="mt-8 flex flex-col gap-3">
             {project.challenges.map((c, i) => (
               <button
                 key={c.id}
                 onClick={() => setView({ type: "challenge", id: c.id })}
-                className="group border border-stone-200 rounded-2xl p-5 hover:border-amber-300 hover:bg-amber-50/40 transition-all duration-200 text-left w-full"
+                className={openCard}
               >
                 <div className="flex items-start gap-3">
-                  <span className="w-5 h-5 rounded-full bg-stone-900 text-white text-xs flex items-center justify-center flex-shrink-0 font-bold mt-0.5">
-                    {i + 1}
+                  <span className="rail text-tide shrink-0 mt-1">
+                    {String(i + 1).padStart(2, "0")}
                   </span>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-stone-900 mb-1 group-hover:text-amber-600 transition-colors text-sm">
+                    <h3 className="font-semibold tracking-tight group-hover:text-deep transition-colors">
                       {c.title}
                     </h3>
-                    <p className="text-stone-500 text-sm leading-relaxed">{c.summary}</p>
+                    <p className="mt-1 text-sm leading-relaxed text-muted">
+                      {c.summary}
+                    </p>
                   </div>
-                  <span className="text-stone-300 group-hover:text-amber-400 transition-colors flex-shrink-0 mt-0.5">→</span>
+                  <span
+                    aria-hidden="true"
+                    className="text-tide flex-shrink-0 mt-0.5 transition-transform group-hover:translate-x-0.5"
+                  >
+                    →
+                  </span>
                 </div>
               </button>
             ))}
           </div>
-        </div>
+        </section>
       )}
 
       {/* 우측 슬라이딩 패널 */}

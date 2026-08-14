@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getFeature, getChallenge, projects } from "@/lib/projects";
+import { accentBlock, leadText, openCard, sectionTitle } from "@/lib/ui";
 import type { Metadata } from "next";
 
 interface Props {
@@ -35,100 +36,98 @@ export default async function FeaturePage({ params }: Props) {
     .filter(Boolean) as NonNullable<ReturnType<typeof getChallenge>>[];
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Top bar */}
-      <div className="border-b border-stone-200 sticky top-0 z-10 bg-white/90 backdrop-blur-md">
-        <div className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between">
+    <div className="min-h-screen bg-ground">
+      {/* 상단바 — 왼쪽은 돌아가기, 오른쪽은 형제 항목 사이 이동 */}
+      <div className="border-b border-line sticky top-0 z-10 bg-ground/90 backdrop-blur-md">
+        <div className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between gap-4">
           <Link
             href={`/projects/${slug}`}
-            className="flex items-center gap-2 text-sm text-stone-500 hover:text-amber-600 font-medium transition-colors"
+            className="rail inline-flex items-center gap-2 text-muted hover:text-ink transition-colors min-w-0"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            {project.title}
+            <span aria-hidden="true">←</span>
+            <span className="truncate">{project.title}</span>
           </Link>
 
-          <div className="flex items-center gap-1">
-            <span className="text-xs text-stone-400 mr-2">
+          <div className="rail flex items-center gap-3 shrink-0">
+            <span>
               {index + 1} / {project.features.length}
             </span>
             {prev ? (
               <Link
                 href={`/projects/${slug}/features/${prev.id}`}
-                className="p-1.5 rounded-lg text-stone-400 hover:text-amber-600 hover:bg-amber-50 transition-colors"
                 title={prev.title}
+                className="text-tide hover:text-deep transition-colors"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
+                ←
               </Link>
             ) : (
-              <span className="p-1.5 text-stone-200">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              </span>
+              <span className="text-line">←</span>
             )}
             {next ? (
               <Link
                 href={`/projects/${slug}/features/${next.id}`}
-                className="p-1.5 rounded-lg text-stone-400 hover:text-amber-600 hover:bg-amber-50 transition-colors"
                 title={next.title}
+                className="text-tide hover:text-deep transition-colors"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
+                →
               </Link>
             ) : (
-              <span className="p-1.5 text-stone-200">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </span>
+              <span className="text-line">→</span>
             )}
           </div>
         </div>
       </div>
 
-      <main className="max-w-5xl mx-auto px-6 py-14">
-        {/* Header */}
-        <div className="mb-12">
-          <div className="flex items-center gap-2 mb-4">
-            <span className="text-xs text-stone-400 font-medium uppercase tracking-widest">Feature</span>
-          </div>
-          <h1 className="text-3xl font-extrabold text-stone-900 leading-tight mb-4 tracking-tight">
+      <main className="max-w-5xl mx-auto px-6 py-12 sm:py-14">
+        <header className="border-b border-line pb-10">
+          <p className="rail text-muted">주요 기능</p>
+          <h1 className="mt-2 text-3xl sm:text-4xl font-bold tracking-tight leading-tight">
             {feature.title}
           </h1>
-          <p className="text-stone-500 leading-relaxed">{feature.summary}</p>
-        </div>
+          <p className={`mt-4 max-w-3xl ${leadText}`}>{feature.summary}</p>
+        </header>
 
-        {/* Description */}
-        <div className="mb-7">
-          <h2 className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-3">기능 설명</h2>
-          <div className="bg-stone-50 border border-stone-200 rounded-2xl p-6">
-            <p className="text-stone-700 text-sm leading-relaxed whitespace-pre-line">{feature.description}</p>
-          </div>
-        </div>
+        <section className="mt-16">
+          <h2 className={sectionTitle}>기능 설명</h2>
+          <p className={`mt-6 max-w-3xl whitespace-pre-line ${leadText}`}>
+            {feature.description}
+          </p>
+        </section>
 
-        {/* Screenshots */}
         {feature.screenshots && feature.screenshots.length > 0 && (
-          <div className="mb-10">
-            <h2 className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-4">개선 전 / 후</h2>
-            <div className="flex flex-col gap-6">
+          <section className="mt-16">
+            <h2 className={sectionTitle}>개선 전 / 후</h2>
+            <div className="mt-8 flex flex-col gap-8">
               {["before", "after"].map((type) => {
                 const shots = feature.screenshots!.filter((s) => s.type === type);
                 if (shots.length === 0) return null;
                 return (
                   <div key={type}>
-                    <p className={`text-xs font-semibold mb-3 ${type === "before" ? "text-stone-400" : "text-amber-600"}`}>
+                    <p
+                      className={`rail ${
+                        type === "before" ? "text-muted" : "text-tide"
+                      }`}
+                    >
                       {type === "before" ? "개선 전" : "개선 후"}
                     </p>
-                    <div className={`grid gap-4 ${shots.length > 1 ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1"}`}>
+                    <div
+                      className={`mt-3 grid gap-4 ${
+                        shots.length > 1 ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1"
+                      }`}
+                    >
                       {shots.map((s) => (
-                        <figure key={s.src} className="border border-stone-200 rounded-2xl overflow-hidden">
-                          <img src={s.src} alt={s.caption} className="w-full object-contain bg-stone-50" />
-                          <figcaption className="px-4 py-2.5 text-xs text-stone-500 border-t border-stone-100 bg-white">
+                        <figure
+                          key={s.src}
+                          className="overflow-hidden rounded-xl border border-line bg-surface"
+                        >
+                          {/* 캡처 원본 크기를 모르므로 next/image 대신 그대로 싣는다 */}
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={s.src}
+                            alt={s.caption}
+                            className="w-full object-contain bg-ground"
+                          />
+                          <figcaption className="rail border-t border-line px-4 py-2.5 text-muted">
                             {s.caption}
                           </figcaption>
                         </figure>
@@ -138,60 +137,68 @@ export default async function FeaturePage({ params }: Props) {
                 );
               })}
             </div>
-          </div>
+          </section>
         )}
 
-        {/* Core Logic */}
-        <div className="mb-10">
-          <h2 className="text-xs font-bold text-stone-400 uppercase tracking-widest mb-3">핵심 로직</h2>
-          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6">
-            <p className="text-stone-700 text-sm leading-relaxed whitespace-pre-line">{feature.coreLogic}</p>
-          </div>
-        </div>
+        {/* 핵심 로직 — 이 기능의 결론. 트러블 슈팅의 '설계 결정'과 같은 모양 */}
+        <section className="mt-16">
+          <h2 className={sectionTitle}>핵심 로직</h2>
+          <p
+            className={`mt-6 max-w-3xl whitespace-pre-line ${accentBlock} ${leadText}`}
+          >
+            {feature.coreLogic}
+          </p>
+        </section>
 
-        {/* Related Challenges */}
         {relatedChallenges.length > 0 && (
-          <div className="mb-12">
-            <div className="flex items-center gap-3 mb-5">
-              <h2 className="text-xs font-bold text-stone-400 uppercase tracking-widest">관련 기술적 챌린지</h2>
-              <div className="h-px flex-1 bg-stone-200" />
-              <span className="text-xs text-stone-400">심화</span>
+          <section className="mt-16">
+            {/* '심화' — 이 절이 본문이 아니라 더 깊이 들어가는 갈래임을 밝힌다 */}
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h2 className={sectionTitle}>관련 트러블 슈팅</h2>
+              <span className="rail text-muted">심화</span>
             </div>
-            <div className="flex flex-col gap-3">
+            <div className="mt-8 flex flex-col gap-3">
               {relatedChallenges.map(({ challenge, index: ci }) => (
                 <Link
                   key={challenge.id}
                   href={`/projects/${slug}/challenges/${challenge.id}`}
-                  className="group border border-stone-200 rounded-2xl p-5 hover:border-amber-300 hover:bg-amber-50/40 transition-all duration-200"
+                  className={openCard}
                 >
                   <div className="flex items-start gap-3">
-                    <span className="w-5 h-5 rounded-full bg-stone-900 text-white text-xs flex items-center justify-center flex-shrink-0 font-bold mt-0.5">
-                      {ci + 1}
+                    <span className="rail text-tide shrink-0 mt-1">
+                      {String(ci + 1).padStart(2, "0")}
                     </span>
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-stone-900 mb-1 group-hover:text-amber-600 transition-colors text-sm">
+                      <h3 className="font-semibold tracking-tight group-hover:text-deep transition-colors">
                         {challenge.title}
                       </h3>
-                      <p className="text-stone-500 text-sm leading-relaxed">{challenge.summary}</p>
+                      <p className="mt-1 text-sm leading-relaxed text-muted">
+                        {challenge.summary}
+                      </p>
                     </div>
-                    <span className="text-stone-300 group-hover:text-amber-400 transition-colors flex-shrink-0 mt-0.5">→</span>
+                    <span
+                      aria-hidden="true"
+                      className="text-tide flex-shrink-0 mt-0.5 transition-transform group-hover:translate-x-0.5"
+                    >
+                      →
+                    </span>
                   </div>
                 </Link>
               ))}
             </div>
-          </div>
+          </section>
         )}
 
-        {/* Bottom navigation */}
-        <div className="flex justify-between pt-8 border-t border-stone-200">
+        {/* 앞뒤 항목 */}
+        <div className="mt-16 flex justify-between gap-6 border-t border-line pt-8">
           {prev ? (
             <Link
               href={`/projects/${slug}/features/${prev.id}`}
-              className="flex items-center gap-2 text-sm text-stone-500 hover:text-amber-600 font-medium transition-colors max-w-[45%]"
+              className="rail inline-flex items-center gap-2 text-muted hover:text-ink transition-colors max-w-[45%]"
             >
-              <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
+              <span aria-hidden="true" className="text-tide">
+                ←
+              </span>
               <span className="truncate">{prev.title}</span>
             </Link>
           ) : (
@@ -200,12 +207,12 @@ export default async function FeaturePage({ params }: Props) {
           {next ? (
             <Link
               href={`/projects/${slug}/features/${next.id}`}
-              className="flex items-center gap-2 text-sm text-stone-500 hover:text-amber-600 font-medium transition-colors max-w-[45%] text-right"
+              className="rail inline-flex items-center gap-2 text-muted hover:text-ink transition-colors max-w-[45%]"
             >
               <span className="truncate">{next.title}</span>
-              <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
+              <span aria-hidden="true" className="text-tide">
+                →
+              </span>
             </Link>
           ) : (
             <div />
