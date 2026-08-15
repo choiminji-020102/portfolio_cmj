@@ -7,6 +7,15 @@
     <style>
       .cover {
         background: #edf2e3;
+        /*
+          카피(글자 + 캐릭터)만 살짝 오른쪽·아래로. 왼쪽 위 모서리에 붙어
+          있어 무게가 쏠렸다. 폰 이미지는 오른쪽 끝에 맞춰 둔 그대로 둔다.
+        */
+        --copy-x: 40px;
+        --copy-y: 30px;
+        /* 폰 이미지는 아주 살짝만 — 높이 590px 에 위아래 여백이 25px 뿐이라
+           많이 내리면 아래가 잘린다 */
+        --stage-y: 10px;
       }
 
       /*
@@ -14,12 +23,17 @@
         이미 그려져 있어 목업을 씌우면 폰 안에 폰이 들어간다.
 
         발표자료 슬라이드에서 검은 여백을 걷어내고 바깥 흰 배경을 투명하게
-        만든 이미지다(scratchpad/crop.py). 폰 2대·점선·말풍선·캐릭터가 한 장에
-        들어 있어 자르지 않고 통째로 건다 — 어느 하나도 잘리지 않게.
+        만든 이미지다(scratchpad/crop.py). 원본(chatbot-phones.png)에는 폰 아래로
+        점선·말풍선·캐릭터가 더 있었지만 폰만 남겼다(-crop):
+        카드에서는 말풍선 글자가 초록 얼룩으로만 보이고, 그 안의 젖소는
+        왼쪽 캐릭터와 겹쳤다. 덜어낸 만큼 폰을 키워 앱 화면이 또렷해진다.
+
+        높이 585px — 1051×1083 이라 폭이 568px 이 된다. 무대(640) 안에서
+        위아래로 조금 남는 선. 더 키우면 --stage-y 로 내린 만큼 아래가 닿는다.
       */
       .art {
         display: block;
-        height: 590px;
+        height: 585px;
         width: auto;
       }
 
@@ -46,7 +60,7 @@
       </div>
 
       <div class="stage">
-        <img class="art" src="../../public/sodam/chatbot-phones.png" alt="" />
+        <img class="art" src="../../public/sodam/chatbot-phones-crop.png" alt="" />
       </div>
     </div>
   </body>

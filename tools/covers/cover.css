@@ -50,6 +50,20 @@ body {
   flex-direction: row-reverse;
 }
 
+/*
+  블록 밀기 — 카피와 무대를 각각 가로·세로로 옮긴다.
+  카피가 짧으면 한쪽에 빈 자리가 크게 남아 무게가 쏠린다. 글자를 키우거나
+  줄을 늘리는 대신 통째로 밀어 여백을 맞추는 편이 손이 적게 간다.
+  우하단 배지 자리(110×110)와 정중앙 알약 자리를 침범하지 않는 선까지만.
+*/
+.cover > .copy {
+  transform: translate(var(--copy-x, 0), var(--copy-y, 0));
+}
+
+.cover > .stage {
+  transform: translate(var(--stage-x, 0), var(--stage-y, 0));
+}
+
 /* ── 카피 ─────────────────────────────────────── */
 /*
   카피와 무대를 반씩 나눈다. 목업을 무대 폭보다 넉넉히 작게 잡아야
@@ -164,6 +178,27 @@ body {
   margin: 0 auto;
   border-radius: 0 0 6px 6px;
   background: rgba(26, 19, 47, 0.16);
+}
+
+/*
+  사진 액자 — 목업 없이 사진만 카드로 얹는다.
+  화면 캡처가 아니라 사진(초음파 등)이 소재일 때 쓴다. 모니터에 끼우면
+  "화면 속 그림"이 되는데, 사진은 그 자체가 대상이라 액자가 방해가 된다.
+
+  무대를 가장자리까지 채우는 통짜 배치도 해봤지만, 정사각 무대에 맞추느라
+  좌우가 크게 잘려 부채꼴과 라벨을 잃었다. 원본 비율을 지키는 편이 낫다.
+  폭은 각 커버에서 --w 로 조절한다.
+*/
+.photo {
+  width: var(--w, 560px);
+  border-radius: 14px;
+  overflow: hidden;
+  filter: drop-shadow(0 28px 40px rgba(26, 19, 47, 0.28));
+}
+
+.photo img {
+  width: 100%;
+  display: block;
 }
 
 /* 모니터 — 노트북보다 넓고 받침이 목처럼 좁다 */

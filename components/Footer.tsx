@@ -1,7 +1,9 @@
-const EMAIL = "h20206524@glab.hallym.ac.kr";
+import { contact } from "@/lib/profile";
+
+const EMAIL = contact.email;
 
 const links = [
-  { label: "GitHub", href: "https://github.com/choiminji-020102" },
+  { label: "GitHub", href: contact.github },
   { label: "Email", href: `mailto:${EMAIL}` },
 ];
 

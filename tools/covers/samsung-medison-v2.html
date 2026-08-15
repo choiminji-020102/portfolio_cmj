@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <title>커버 — 초음파 다중 구조물 검출</title>
+    <link rel="stylesheet" href="cover.css" />
+    <style>
+      .cover {
+        background: #e2eef1;
+        /*
+          카피 줄이 짧아 오른쪽에 200px 가까이 비어 있었다.
+          사진과 글자를 함께 밀어 왼쪽 40px / 오른쪽 205px 이던 여백을
+          양쪽 120px 대로 맞춘다.
+        */
+        --copy-x: 70px;
+        --stage-x: 70px;
+      }
+
+      /*
+        소재가 화면 캡처가 아니라 초음파 영상이라 모니터 목업을 걷어내고
+        사진만 액자로 얹는다 (.photo).
+
+        폭 560px — 무대(640px)에 좌우 40px 여백이 남는다. 원본 비율을 지켜야
+        부채꼴과 라벨 일곱 개가 다 살아난다. 카드에서는 0.39배로 줄어
+        라벨 글자는 어차피 읽히지 않지만, 초음파라는 것과 구조물 윤곽선은 남는다.
+      */
+      .photo {
+        --w: 560px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 초음파 왼쪽 · 카피 오른쪽 (flip) -->
+    <div class="cover flip">
+      <div class="copy">
+        <p class="eyebrow">삼성메디슨 · 인턴</p>
+        <h1 class="title sm">초음파<br />다중 구조물 검출</h1>
+        <p class="desc">
+          초음파 6개 구조물 검출.<br />
+          성능 병목이<br />
+          <b>정답 데이터에 있음을 규명</b>
+        </p>
+      </div>
+
+      <div class="stage">
+        <div class="photo">
+          <img src="../../public/samsung-medison/ref-ileocecal.png" alt="" />
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

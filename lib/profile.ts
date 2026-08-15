@@ -2,8 +2,16 @@
   경력 · 교육 · 자격 데이터.
   프로젝트 상세는 lib/projects.ts 가 따로 가진다.
 
+  contact — 상단바와 하단 Contact 절이 같이 쓴다. 두 군데에 적어두면
+  한쪽만 고치는 사고가 나므로 여기 한 벌만 둔다.
+
   track — 좌측 메타축에 붙는 분류 라벨. 색이 아니라 텍스트로 갈래를 표시한다.
 */
+export const contact = {
+  email: "t3335150@gmail.com",
+  github: "https://github.com/choiminji-020102",
+};
+
 export type Track =
   | "AI · 의료영상"
   | "AI · 비전"
@@ -291,7 +299,7 @@ export const projectCards: ProjectCard[] = [
     teamSize: "팀 프로젝트",
     stack: ["LangGraph", "GPT-4o", "Flux.1 Kontext", "Seedance", "KoELECTRA", "FastAPI"],
     slug: "damatketing",
-    thumbnail: "/covers/damatketing.png",
+    thumbnail: "/covers/damatketing-v2.png",
     role: "장면 일관성 · 게시글 생성 파이프라인 설계·구현",
     outcome: "쇼츠 제작 → SNS 게시 → 성과 리포트 자동화",
   },
@@ -338,7 +346,7 @@ export const projectCards: ProjectCard[] = [
       "TensorRT",
     ],
     slug: "samsung-medison",
-    thumbnail: "/covers/samsung-medison.png",
+    thumbnail: "/covers/samsung-medison-v2.png",
     role: "학습 데이터 구축 · 검증 도구 개발",
     outcome: "성능 병목을 정답 데이터로 규명",
   },

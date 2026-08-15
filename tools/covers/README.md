@@ -15,7 +15,13 @@ cd tools/covers
 ./capture.sh sodam      # 하나만
 ```
 
-`public/covers/<slug>.png` 가 나온다. `lib/profile.ts` 의 `thumbnail` 에 이미 연결돼 있다.
+`public/covers/<html 파일명>.png` 가 나온다. `lib/profile.ts` 의 `thumbnail` 에 연결한다.
+
+파일명은 보통 프로젝트 slug 를 쓰지만, **이미 배포한 커버의 그림을 갈아끼울 때는
+파일명도 함께 바꾼다.** 경로가 같으면 브라우저가 옛 그림을 계속 쓴다. 그래서
+`samsung-medison` 은 `samsung-medison-v2` 로 두었다. html 이름을 바꾸면 출력 이름도
+따라 바뀌므로 `capture.sh` 를 다시 돌려도 옛 이름이 되살아나지 않는다.
+(`thumbnail: "/covers/x.png?v=2"` 같은 쿼리는 쓸 수 없다 — Next 이미지 최적화가 400 을 낸다.)
 
 별도 설치 없이 로컬 Chrome 의 headless 모드를 쓴다. 2x(2560×1280)로 찍고 1280 폭으로
 줄인다 — 다운샘플링이 1x 렌더보다 선명하다.
@@ -69,6 +75,9 @@ cd tools/covers
 
 ## 남은 것
 
-`samsung-medison` 은 원본 초음파 영상의 공개 가능 여부가 확정되지 않아 파이프라인
-다이어그램을 대신 넣었다. 영상 캡처를 쓸 수 있게 되면 `img` 의 `src` 를 바꾸고
-html 안의 `object-fit: contain` 재정의를 지우면 된다.
+`samsung-medison` 커버의 초음파 영상은 **프로젝트에서 다룬 원본 데이터가 아니라
+회맹부 해부를 보여주는 참고 이미지**다(`public/samsung-medison/ref-ileocecal.png`).
+원본 영상의 공개 가능 여부가 확정되면 `img` 의 `src` 만 바꾸면 된다.
+
+커버에는 출처를 적을 자리가 없으니, 상세 페이지에서 참고 이미지를 함께 쓸 때는
+`overviewFiguresNote` 로 성격을 반드시 밝힌다.

@@ -5,6 +5,8 @@
 */
 
 import Image from "next/image";
+import { contact } from "@/lib/profile";
+import GitHubIcon from "./GitHubIcon";
 
 // 픽셀 마스크의 계단형 경계 (직각). 둥글게 감싸면 형광펜처럼 읽혀서 각지게.
 const CONTOUR =
@@ -56,6 +58,20 @@ export default function Hero() {
             묶을 기준을 정해왔습니다. 모호한 것에 선을 긋고 왜 거기인지 설명할 수
             있는 개발자입니다.
           </p>
+
+          {/* 소개를 읽고 바로 코드로 넘어갈 수 있게 — 상단바 아이콘과 같은 곳을 가리킨다 */}
+          <a
+            href={contact.github}
+            target="_blank"
+            rel="noreferrer"
+            className="rail mt-8 inline-flex items-center gap-2 rounded-full border border-line px-4 py-2 font-semibold text-ink transition-colors hover:border-tide hover:bg-tide/8"
+          >
+            <GitHubIcon className="h-4 w-4" />
+            github.com/choiminji-020102
+            <span aria-hidden="true" className="text-tide">
+              ↗
+            </span>
+          </a>
         </div>
 
         {/* 오른쪽 — 프로필 사진 + 요약 정보 블록 */}

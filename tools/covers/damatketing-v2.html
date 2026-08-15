@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <title>커버 — 다 맡케팅</title>
+    <link rel="stylesheet" href="cover.css" />
+    <style>
+      .cover {
+        background: #ede9f6;
+      }
+
+      /*
+        노트북 목업 + 관리 화면 캡처를 걷어내고 팀 썸네일의 키 비주얼을 쓴다.
+        손 위로 YouTube · Instagram · Facebook 이 떠오르는 그림이라
+        "SNS 게시를 대신 맡아준다"는 이 프로젝트의 문장과 그대로 겹친다.
+
+        원본(AI 4조 썸네일.jpg)에는 제목·설명 문구가 박혀 있어 커버 카피와
+        부딪혔다. 글자 획만 골라 지우고(scratchpad, 라플라스 채우기)
+        비주얼만 남긴 것이 cover-art.png 다.
+
+        폭 520px — 세로가 긴 그림(1240×1288)이라 무대(640) 안에서
+        위아래 50px 씩 남는 선. 더 키우면 카드에서 답답해 보인다.
+      */
+      .photo {
+        --w: 520px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 그림 왼쪽 · 카피 오른쪽 (flip) -->
+    <div class="cover flip">
+      <div class="copy">
+        <p class="eyebrow">KT AIVLE · 대상</p>
+        <h1 class="title">다 맡케팅</h1>
+        <p class="desc">
+          쇼츠 제작부터 SNS 게시까지<br />
+          <b>생성형 AI로 자동화</b>한<br />
+          소상공인 마케팅 플랫폼.
+        </p>
+      </div>
+
+      <div class="stage">
+        <div class="photo">
+          <img src="../../public/damatketing/cover-art.png" alt="" />
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
