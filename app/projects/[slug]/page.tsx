@@ -57,9 +57,7 @@ export default async function ProjectPage({ params }: Props) {
           <p className="rail text-muted">
             {project.period}
             <span className="mx-2 text-line">·</span>
-            {project.teamSize === 1
-              ? "개인 프로젝트"
-              : `팀 프로젝트 (${project.teamSize}인)`}
+            {project.teamSize}
             <span className="mx-2 text-line">·</span>
             {project.status}
           </p>

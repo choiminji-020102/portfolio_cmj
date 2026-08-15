@@ -42,9 +42,11 @@ export interface Project {
   summary: string;
   problemSolutions: ProblemSolution[];
   role: string;
-  teamSize: number;
+  /* 인원·상태 모두 자유 문구다 — LightProject 와 같은 방식.
+     '외주 단독 개발 (1인)'처럼 숫자에서 도출할 수 없는 표기를 쓴다 */
+  teamSize: string;
   period: string;
-  status: "완료" | "진행 중" | "유지보수";
+  status: string;
   tags: string[];
   features: Feature[];
   challenges: Challenge[];
@@ -114,9 +116,9 @@ export const projects: Project[] = [
       },
     ],
     role: "기획, 요구사항 분석, DB 설계, 백엔드/프론트엔드 개발, 서버 배포까지 전 과정 단독 수행",
-    teamSize: 1,
+    teamSize: "외주 단독 개발 (1인)",
     period: "2025년 10월 ~ 현재",
-    status: "유지보수",
+    status: "2026년 7월 실운영 이관 · 유지보수 중",
     tags: [
       "Python",
       "FastAPI",
@@ -554,20 +556,6 @@ query = query.filter(
 
 export function getProject(slug: string): Project | undefined {
   return projects.find((p) => p.slug === slug);
-}
-
-export function getFeature(slug: string, featureId: string) {
-  const project = getProject(slug);
-  if (!project) return undefined;
-  const index = project.features.findIndex((f) => f.id === featureId);
-  if (index === -1) return undefined;
-  return {
-    feature: project.features[index],
-    project,
-    index,
-    prev: project.features[index - 1] ?? null,
-    next: project.features[index + 1] ?? null,
-  };
 }
 
 export function getChallenge(slug: string, challengeId: string) {
