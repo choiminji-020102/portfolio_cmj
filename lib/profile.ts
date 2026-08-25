@@ -37,7 +37,7 @@ export interface Career {
 export const careers: Career[] = [
   {
     org: "(주)선목 도서출판 목자의지혜",
-    employment: "외주",
+    employment: "프리랜서",
     role: "풀스택 — 기획·설계·개발·배포 단독 수행",
     period: "2025.10 — 2026.06",
     duration: "9개월 · 유지보수 계약 중",
@@ -48,7 +48,7 @@ export const careers: Career[] = [
         text: "구독자 관리·발송·정산 엑셀 수작업을 내부 관리 시스템으로 옮겨 실서비스 운영 중",
       },
       {
-        text: "매월 3,500건 정기구독 발송 명단을 버튼 한 번으로 생성 — 합포장 누락과 중복 발송 해소",
+        text: "정기구독 3,200건을 관리하며 매월 발송 명단을 버튼 한 번으로 생성 — 합포장 누락과 중복 발송 해소",
       },
       {
         text: "정기구독·단품·VIP 3종 발송 흐름을 단일 출력 구조로 통합하는 그룹화 알고리즘 설계",
@@ -75,7 +75,7 @@ export const careers: Career[] = [
     org: "삼성메디슨",
     employment: "인턴",
     role: "AI Vision 그룹 — 딥러닝 기반 초음파 영상 진단 기능 개발",
-    period: "2024.03 — 2024.08",
+    period: "2024.03.02 — 2024.08.31",
     duration: "6개월 · 계약 기간 만료",
     track: "AI · 의료영상",
     projectSlug: "samsung-medison",
@@ -228,7 +228,9 @@ export const certifications: Certification[] = [
   {
     name: "TOEIC Speaking IH (140)",
     org: "한국 TOEIC 위원회",
-    date: "2025.09",
+    /* 어학성적은 응시일 기준 — 유효기간 2년도 이 날부터 센다 (2027.09.21까지).
+       영구 자격증(SQLD·ADsP 등)은 연월로 충분해 일자를 쓰지 않는다 */
+    date: "2025.09.21",
     number: "105290",
   },
 ];
@@ -279,7 +281,7 @@ export const projectCards: ProjectCard[] = [
     title: "월간지 구독관리 시스템",
     summary:
       "출판사의 구독자 관리·발송·정산 수작업을 대체한 내부 관리 시스템. 기획부터 배포까지 단독 수행했고 현재 실서비스로 운영 중입니다.",
-    badge: "외주 · 운영 중",
+    badge: "프리랜서 · 운영 중",
     track: "풀스택",
     period: "2025.10 — 2026.06",
     teamSize: "1인",

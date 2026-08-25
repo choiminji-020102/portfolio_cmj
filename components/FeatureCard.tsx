@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { card } from "@/lib/ui";
 import type { AiFeature } from "@/lib/projectDetails";
 import CodeBlock from "./CodeBlock";
 import DataTable from "./DataTable";
@@ -13,7 +14,7 @@ import TroubleDetails from "./TroubleDetails";
 export default function FeatureCard({ feature }: { feature: AiFeature }) {
   return (
                 <div
-                  className="rounded-2xl bg-surface border border-line p-6 sm:p-7"
+                  className={card}
                 >
                   <div className="flex flex-wrap items-center gap-3">
                     <h3 className="text-lg font-semibold tracking-tight">

@@ -1,22 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { LightProject } from "@/lib/projectDetails";
+import { actionButton, bullet, leadText, sectionTitle, tagChip } from "@/lib/ui";
 import { AwardBadge } from "./AwardMark";
 import DataTable from "./DataTable";
 import FeatureCard from "./FeatureCard";
 import GitHubIcon from "./GitHubIcon";
 import MermaidDiagram from "./MermaidDiagram";
 import ShowcaseGallery from "./ShowcaseGallery";
-
-// 외부 링크 버튼 — TroubleDetails의 강조 pill과 같은 tide 스타일을 쓴다
-const actionButton =
-  "rail inline-flex items-center gap-1.5 rounded-full border border-tide/50 bg-tide/8 px-4 py-2 font-semibold text-deep transition-colors hover:border-tide hover:bg-tide/15";
-
-/*
-  리드 문단 — 헤더 요약, 과제 배경, 내가 맡은 역할이 모두 이 하나를 쓴다.
-  섹션마다 굵기·색이 달라지면 위계가 아니라 잡음으로 읽힌다.
-*/
-const leadText = "text-base leading-relaxed text-ink";
 
 export default function LightProjectView({
   project,
@@ -50,6 +41,12 @@ export default function LightProjectView({
             {project.period}
             <span className="mx-2 text-line">·</span>
             {project.teamSize}
+            {project.status && (
+              <>
+                <span className="mx-2 text-line">·</span>
+                {project.status}
+              </>
+            )}
           </p>
 
           <div className="mt-2 flex flex-wrap items-center gap-3">
@@ -80,7 +77,7 @@ export default function LightProjectView({
             {project.stack.map((item) => (
               <li
                 key={item}
-                className="rail bg-surface border border-line rounded-md px-2.5 py-1 text-ink/75"
+                className={tagChip}
               >
                 {item}
               </li>
@@ -146,7 +143,7 @@ export default function LightProjectView({
             타임라인이 없으면 개요가 단독으로 폭을 다 쓴다 */}
         {project.overview && project.overview.length > 0 && (
           <section className="mt-12">
-            <h2 className="text-2xl font-bold tracking-tight">
+            <h2 className={sectionTitle}>
               {project.overviewLabel ?? "과제 개요"}
             </h2>
             <div
@@ -236,7 +233,7 @@ export default function LightProjectView({
         {/* 제안 배경 */}
         {project.background && (
           <section className="mt-12">
-            <h2 className="text-2xl font-bold tracking-tight">
+            <h2 className={sectionTitle}>
               {project.backgroundLabel ?? "제안 배경"}
             </h2>
             {/* 좌(리드+규모별 그래프) / 우(두 원인 = 텍스트+그래픽) — 같은 높이 */}
@@ -472,7 +469,7 @@ export default function LightProjectView({
         {/* 내가 맡은 역할 */}
         {project.myRole && (
           <section className="mt-16">
-            <h2 className="text-2xl font-bold tracking-tight">
+            <h2 className={sectionTitle}>
               {project.myRoleLabel ?? "내가 맡은 역할"}
             </h2>
             <p className={`mt-6 ${leadText}`}>{project.myRole}</p>
@@ -544,7 +541,7 @@ export default function LightProjectView({
             읽는 사람은 스택을 초반에 확인하므로, 본문 끝이 아니라 여기서 한 번에 보여준다 */}
         {project.techStack && project.techStack.length > 0 && (
           <section className="mt-16">
-            <h2 className="text-2xl font-bold tracking-tight">
+            <h2 className={sectionTitle}>
               {project.techStackLabel ?? "사용 기술"}
             </h2>
             <div className="mt-6 max-w-3xl">
@@ -562,7 +559,7 @@ export default function LightProjectView({
             {/* 제목 옆에 시연 영상 — 캡처를 보러 온 자리에서 바로 움직이는 화면으로 넘어갈 수 있게.
                 버튼이 여기 있으면 "영상은 상단에 있다"는 안내문이 따로 필요 없다 */}
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <h2 className="text-2xl font-bold tracking-tight">
+              <h2 className={sectionTitle}>
                 {project.showcase.label}
               </h2>
               {project.demo && (
@@ -596,7 +593,7 @@ export default function LightProjectView({
         {/* 핵심 AI 기능 — 문제 → 해결 → 수치 */}
         {project.aiFeatures && project.aiFeatures.length > 0 && (
           <section className="mt-16">
-            <h2 className="text-2xl font-bold tracking-tight">
+            <h2 className={sectionTitle}>
               {project.aiFeaturesLabel ?? "핵심 AI 기능"}
             </h2>
             <div className="mt-8 space-y-6">
@@ -612,7 +609,7 @@ export default function LightProjectView({
           <>
             {project.featureGroups.map((group) => (
               <section key={group.label} className="mt-16">
-                <h2 className="text-2xl font-bold tracking-tight">
+                <h2 className={sectionTitle}>
                   {group.label}
                 </h2>
                 {group.intro && (
@@ -623,7 +620,7 @@ export default function LightProjectView({
                     {group.points.map((pt) => (
                       <li
                         key={pt}
-                        className="relative pl-5 text-[0.95rem] leading-relaxed before:absolute before:left-0 before:top-[0.6em] before:h-1.5 before:w-1.5 before:rounded-full before:bg-deep"
+                        className={`${bullet} before:bg-deep`}
                       >
                         {pt}
                       </li>
@@ -645,7 +642,7 @@ export default function LightProjectView({
         {/* 주요 기능 개발 */}
         {project.features.length > 0 && (
           <section className="mt-16">
-            <h2 className="text-2xl font-bold tracking-tight">
+            <h2 className={sectionTitle}>
               {project.featuresLabel ?? "그 외 기능"}
             </h2>
             {project.featuresIntro && (
@@ -657,7 +654,7 @@ export default function LightProjectView({
               {project.features.map((feature) => (
                 <li
                   key={feature}
-                  className="relative pl-5 text-[0.95rem] leading-relaxed before:absolute before:left-0 before:top-[0.6em] before:h-1.5 before:w-1.5 before:rounded-full before:bg-deep"
+                  className={`${bullet} before:bg-deep`}
                 >
                   {feature}
                 </li>
@@ -669,14 +666,14 @@ export default function LightProjectView({
         {/* 차별성 */}
         {project.differentiators && project.differentiators.length > 0 && (
           <section className="mt-16">
-            <h2 className="text-2xl font-bold tracking-tight">
+            <h2 className={sectionTitle}>
               기존 서비스와의 차별성
             </h2>
             <ul className="mt-6 space-y-3">
               {project.differentiators.map((item) => (
                 <li
                   key={item}
-                  className="relative pl-5 text-[0.95rem] leading-relaxed before:absolute before:left-0 before:top-[0.6em] before:h-1.5 before:w-1.5 before:rounded-full before:bg-tide"
+                  className={`${bullet} before:bg-tide`}
                 >
                   {item}
                 </li>
@@ -688,7 +685,7 @@ export default function LightProjectView({
         {/* 활용 데이터 */}
         {project.dataSources && project.dataSources.length > 0 && (
           <section className="mt-16">
-            <h2 className="text-2xl font-bold tracking-tight">활용 데이터</h2>
+            <h2 className={sectionTitle}>활용 데이터</h2>
             <ul className="mt-6 grid sm:grid-cols-2 gap-3">
               {project.dataSources.map((item) => (
                 <li
@@ -705,7 +702,7 @@ export default function LightProjectView({
         {/* 트러블슈팅 */}
         {project.troubles && project.troubles.length > 0 && (
           <section className="mt-16">
-            <h2 className="text-2xl font-bold tracking-tight">
+            <h2 className={sectionTitle}>
               트러블 슈팅 경험
             </h2>
             <div className="mt-8 space-y-12">
@@ -737,7 +734,7 @@ export default function LightProjectView({
         {/* 회고 — 갈래로 나뉘는 경우 (잘한 점 / 아쉬운 점 / 더 해본다면) */}
         {project.closingGroups && project.closingGroups.length > 0 && (
           <section className="mt-16 border-t border-line pt-12">
-            <h2 className="text-2xl font-bold tracking-tight">
+            <h2 className={sectionTitle}>
               {project.closingLabel ?? "마무리"}
             </h2>
             <div className="mt-8 max-w-3xl space-y-8">
@@ -748,7 +745,7 @@ export default function LightProjectView({
                     {group.points.map((pt) => (
                       <li
                         key={pt}
-                        className="relative pl-5 text-[0.95rem] leading-relaxed text-ink before:absolute before:left-0 before:top-[0.6em] before:h-1.5 before:w-1.5 before:rounded-full before:bg-tide"
+                        className={`${bullet} text-ink before:bg-tide`}
                       >
                         {pt}
                       </li>
@@ -764,7 +761,7 @@ export default function LightProjectView({
             첫 문단만 굵게 두어 결론을 앞세우고, 나머지는 본문 흐름으로 읽힌다 */}
         {project.closing && project.closing.length > 0 && (
           <section className="mt-16 border-t border-line pt-12">
-            <h2 className="text-2xl font-bold tracking-tight">
+            <h2 className={sectionTitle}>
               {project.closingLabel ?? "마무리"}
             </h2>
             {/* 줄길이 제한은 헤더 요약과 같은 값을 쓴다 — 회고만 좁아 보이지 않게 */}
@@ -788,7 +785,7 @@ export default function LightProjectView({
         {/* 작업 기록 — 본문에서 덜어낸 상세를 외부 글로 넘긴다 */}
         {project.writeups && project.writeups.length > 0 && (
           <section className="mt-16">
-            <h2 className="text-2xl font-bold tracking-tight">
+            <h2 className={sectionTitle}>
               {project.writeupsLabel ?? "작업 기록"}
             </h2>
             <p className="mt-3 text-[0.95rem] leading-relaxed text-muted">

@@ -131,6 +131,8 @@ export interface LightProject {
   title: string;
   badge: string;
   period: string;
+  /* 진행 상태 — 메타 줄 세 번째 칸. 월간지 상세와 같은 자리를 쓴다 */
+  status?: string;
   teamSize: string;
   /** 제목 바로 아래 한 줄 — 스크롤 없이 역할이 잡히게 한다 (요약보다 앞) */
   tagline?: string;

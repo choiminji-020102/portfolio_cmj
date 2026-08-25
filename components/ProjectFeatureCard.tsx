@@ -1,13 +1,12 @@
-"use client";
-
 import type { Feature, Project } from "@/lib/projects";
 import { card } from "@/lib/ui";
+import ShotGrid from "./ShotGrid";
 
 /*
   기능 카드 — 본문에 펼쳐 보여준다.
   예전에는 목록을 눌러 서랍을 열어야 내용을 볼 수 있었는데, 기능 7개를 합쳐도
-  3천 자 남짓이라 굳이 감출 이유가 없다. 반대로 트러블 슈팅은 코드·다이어그램까지
-  합쳐 1만 자가 넘어 지금처럼 눌러서 여는 쪽을 유지한다.
+  3천 자 남짓이라 굳이 감출 이유가 없다. 트러블 슈팅도 같은 이유로 본문에 펴 두었고,
+  아래 '관련 트러블 슈팅'은 그 자리로 건너뛰는 앵커다.
 
   다른 프로젝트의 FeatureCard(AiFeature 용)와 같은 시각 언어를 쓰되,
   필드 구성이 달라(설명·핵심 로직·개선 전후) 별도로 둔다.
@@ -15,11 +14,9 @@ import { card } from "@/lib/ui";
 export default function ProjectFeatureCard({
   feature,
   project,
-  onSelectChallenge,
 }: {
   feature: Feature;
   project: Project;
-  onSelectChallenge: (id: string) => void;
 }) {
   const related = feature.relatedChallengeIds
     .map((id) => {
@@ -28,8 +25,6 @@ export default function ProjectFeatureCard({
     })
     .filter(Boolean) as { challenge: Project["challenges"][0]; index: number }[];
 
-  const shots = (type: "before" | "after") =>
-    feature.screenshots?.filter((s) => s.type === type) ?? [];
 
   return (
     <div className={card}>
@@ -55,51 +50,15 @@ export default function ProjectFeatureCard({
 
       {feature.screenshots && feature.screenshots.length > 0 && (
         <div className="mt-6">
-          <p className="rail text-muted">개선 전 / 후</p>
-          <div className="mt-3 flex flex-col gap-5">
-            {(["before", "after"] as const).map((type) => {
-              const list = shots(type);
-              if (list.length === 0) return null;
-              return (
-                <div key={type}>
-                  <p
-                    className={`rail ${
-                      type === "before" ? "text-muted" : "text-tide"
-                    }`}
-                  >
-                    {type === "before" ? "개선 전" : "개선 후"}
-                  </p>
-                  <div
-                    className={`mt-2 grid gap-4 ${
-                      list.length > 1 ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1"
-                    }`}
-                  >
-                    {list.map((s) => (
-                      <figure
-                        key={s.src}
-                        className="overflow-hidden rounded-xl border border-line bg-ground/60"
-                      >
-                        {/* 캡처 원본 크기를 모르므로 next/image 대신 그대로 싣는다 */}
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={s.src}
-                          alt={s.caption}
-                          className="w-full object-contain"
-                        />
-                        <figcaption className="rail border-t border-line px-4 py-2.5 text-muted">
-                          {s.caption}
-                        </figcaption>
-                      </figure>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          <p className="rail text-muted">개선 전 / 후 — 누르면 크게 보인다</p>
+          {/* 전·후를 한 줄에 나란히 둔다 — 세로로 쌓으면 세로 캡처 한 장이 카드 폭을
+              통째로 차지해 비교가 되지 않고 스크롤만 길어진다.
+              대신 격자 크기로는 글자가 안 읽히므로 클릭 확대를 붙였다 (ShotGrid) */}
+          <ShotGrid shots={feature.screenshots} />
         </div>
       )}
 
-      {/* 이 기능에서 갈라져 나오는 트러블 슈팅 — 아래 목록의 같은 항목을 연다 */}
+      {/* 이 기능에서 갈라져 나오는 트러블 슈팅 — 아래 본문의 같은 항목으로 내려간다 */}
       {related.length > 0 && (
         <div className="mt-6 flex flex-wrap items-baseline gap-x-3 gap-y-2 border-t border-line pt-4">
           <span className="rail shrink-0 text-muted">관련 트러블 슈팅</span>
@@ -108,17 +67,16 @@ export default function ProjectFeatureCard({
             심화
           </span>
           {related.map(({ challenge, index }) => (
-            <button
+            <a
               key={challenge.id}
-              type="button"
-              onClick={() => onSelectChallenge(challenge.id)}
+              href={`#trouble-${challenge.id}`}
               className="rail inline-flex items-center gap-1.5 rounded-full border border-line px-3 py-1 text-deep transition-colors hover:border-tide hover:bg-tide/10"
             >
               <span className="text-tide">
                 {String(index + 1).padStart(2, "0")}
               </span>
               {challenge.title}
-            </button>
+            </a>
           ))}
         </div>
       )}
