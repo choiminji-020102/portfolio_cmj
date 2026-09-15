@@ -20,6 +20,17 @@ export type Track =
   | "풀스택"
   | "데이터 · 통계";
 
+/** 한 회사 안에서 사수·과제가 바뀌어 성과·기간·프로젝트 링크가 갈리는 구간 */
+export interface CareerPart {
+  label: string; // "파트 1"
+  role: string;
+  period: string;
+  duration: string;
+  points: { text: string; pending?: boolean }[];
+  stack: string[];
+  projectSlug?: string;
+}
+
 export interface Career {
   org: string;
   employment: string;
@@ -27,11 +38,14 @@ export interface Career {
   period: string;
   duration: string;
   track: Track;
-  /** 수치를 담은 성과 불릿. 숫자가 확정되지 않은 항목은 pending 으로 표시한다. */
+  /** 수치를 담은 성과 불릿. 숫자가 확정되지 않은 항목은 pending 으로 표시한다.
+      parts 가 있으면 이 필드 대신 parts[].points 를 쓴다 */
   points: { text: string; pending?: boolean }[];
   stack: string[];
-  /** 프로젝트 섹션에 상세가 있으면 그 slug */
+  /** 프로젝트 섹션에 상세가 있으면 그 slug. parts 가 있으면 parts[].projectSlug 를 쓴다 */
   projectSlug?: string;
+  /** 카드 하나 안에서 기간별로 갈리는 구간 — 있으면 points/stack/projectSlug 대신 이걸 렌더링한다 */
+  parts?: CareerPart[];
 }
 
 export const careers: Career[] = [
@@ -72,61 +86,69 @@ export const careers: Career[] = [
     ],
   },
   /*
-    삼성메디슨 인턴은 6개월(2024.03.02~08.31) 동안 사수가 바뀌며 담당 과제가
-    둘로 나뉜다 — 카드도 그에 맞춰 파트 1 / 파트 2 두 개로 쪼갠다. 기간·팀·
-    프로젝트 상세 링크가 서로 다르므로 하나로 합쳐두면 어느 성과가 어느
-    기간 것인지 알 수 없다.
+    삼성메디슨 인턴은 카드 하나 — 6개월(2024.03.02~08.31) 동안 사수가 바뀌며
+    담당 과제가 파트 1 / 파트 2 로 나뉘지만, 회사·직군은 하나이므로 카드는
+    합치고 성과·기간·프로젝트 링크만 parts 로 갈라 어느 성과가 어느 시기
+    것인지 구분한다.
 
     '제품이 안 됐다'가 아니라 '진행 불가 사유를 규명해 보고했다'로 쓴다 —
     같은 사실이지만 전자는 변명, 후자는 판단으로 읽힌다.
   */
   {
     org: "삼성메디슨",
-    employment: "인턴 · 파트 1",
-    role: "AI Vision 그룹 — 하복부 초음파 다중 구조물 검출",
-    period: "2024.03 — 2024.04",
-    duration: "2개월",
+    employment: "인턴",
+    role: "AI Vision 그룹 — 딥러닝 기반 초음파 영상 진단 기능 개발",
+    period: "2024.03.02 — 2024.08.31",
+    duration: "6개월 · 계약 기간 만료",
     track: "AI · 의료영상",
-    projectSlug: "samsung-medison",
-    points: [
+    points: [],
+    stack: [],
+    parts: [
       {
-        text: "성능 정체 원인 규명 — 조정과 결과 사이에 일관된 상관이 없다는 점을 근거로 병목이 모델이 아닌 정답 데이터에 있다고 가설 수립, 사내 임상의와 원본 영상·레이블을 함께 검토해 GT 마스크 경계 과다 문제를 확인·보고",
+        label: "파트 1",
+        role: "하복부 초음파 다중 구조물 검출",
+        period: "2024.03 — 2024.04",
+        duration: "2개월",
+        projectSlug: "samsung-medison",
+        points: [
+          {
+            text: "성능 정체 원인 규명 — 조정과 결과 사이에 일관된 상관이 없다는 점을 근거로 병목이 모델이 아닌 정답 데이터에 있다고 가설 수립, 사내 임상의와 원본 영상·레이블을 함께 검토해 GT 마스크 경계 과다 문제를 확인·보고",
+          },
+          {
+            text: "배포 제약 기준 모델 선정 — 후보 6종을 도메인·태스크 요건과 배포 환경 제약 관점에서 검토해 YOLOv8-seg 채택, AGPL-3.0 라이선스 리스크 규명해 함께 보고",
+          },
+          {
+            text: "학습 검증 도구 구현 — 정규화 레이블 역산 렌더링, GT/예측 병렬 비교, 폴리곤 마스크 렌더링으로 지표만으로는 드러나지 않던 클래스 인덱스 불일치·좌표계 오류 2건 규명",
+          },
+          {
+            text: "데이터 처리 파이프라인 구축 — AVI 프레임 추출 → 영상 단위 대표 크롭(프레임별 contour 최빈값) → GT 생성 → 학습, 영상 87개를 약 3만 장 데이터셋으로 확장",
+          },
+          {
+            text: "GT 레이블 생성 — CVAT XML 파싱의 구조적 한계(프레임 밖 좌표 선별 불가)를 확인하고 클래스별 annotation txt 병합 방식으로 재설계, 크롭본·원본 간 비대칭 좌표계 정합 처리",
+          },
+        ],
+        stack: ["Python", "PyTorch", "YOLOv8", "OpenCV", "CVAT", "TensorRT"],
       },
       {
-        text: "배포 제약 기준 모델 선정 — 후보 6종을 도메인·태스크 요건과 배포 환경 제약 관점에서 검토해 YOLOv8-seg 채택, AGPL-3.0 라이선스 리스크 규명해 함께 보고",
-      },
-      {
-        text: "학습 검증 도구 구현 — 정규화 레이블 역산 렌더링, GT/예측 병렬 비교, 폴리곤 마스크 렌더링으로 지표만으로는 드러나지 않던 클래스 인덱스 불일치·좌표계 오류 2건 규명",
-      },
-      {
-        text: "데이터 처리 파이프라인 구축 — AVI 프레임 추출 → 영상 단위 대표 크롭(프레임별 contour 최빈값) → GT 생성 → 학습, 영상 87개를 약 3만 장 데이터셋으로 확장",
-      },
-      {
-        text: "GT 레이블 생성 — CVAT XML 파싱의 구조적 한계(프레임 밖 좌표 선별 불가)를 확인하고 클래스별 annotation txt 병합 방식으로 재설계, 크롭본·원본 간 비대칭 좌표계 정합 처리",
+        label: "파트 2",
+        role: "산부인과 AI 랩 2D Follicle™ 팀 — 부인과 초음파 난포 세그멘테이션 향상",
+        period: "2024.05 — 2024.08",
+        duration: "4개월",
+        projectSlug: "samsung-medison-detection",
+        points: [
+          {
+            text: "학습 데이터 구축 — 세그멘테이션 성능 향상을 위해 수천 장 규모 초음파 영상을 선별해 GT 작성·기존 GT 품질 보정(한 차례 2,534장 중 883장 선별), 현재 제품에 탑재된 난포 검출 모델의 학습 데이터 전량이 이 기간에 만든 것",
+          },
+          {
+            text: "모델 개선 실험 — 손실 함수 3방향(Dice·Tversky·Focal Tversky) 비교로 FN 가중 Tversky Loss 채택, 손실 값으로는 드러나지 않는 소형 난포 누락을 잡기 위해 개수 기반 평가 절차를 직접 설계",
+          },
+          {
+            text: "난포 윤곽 측정 기능 개발 (C++) — 검사자가 찍은 4점을 지나는 닫힌 곡선을 자연 3차 스플라인으로 생성, 외부 라이브러리 반입이 불가한 사내 환경이라 직접 구현, 사내 테스트 빌드에 반영해 실제 장비에서 동작 검증",
+          },
+        ],
+        stack: ["C++", "Python", "PyTorch", "OpenCV", "ONNX"],
       },
     ],
-    stack: ["Python", "PyTorch", "YOLOv8", "OpenCV", "CVAT", "TensorRT"],
-  },
-  {
-    org: "삼성메디슨",
-    employment: "인턴 · 파트 2",
-    role: "산부인과 AI 랩 2D Follicle™ 팀 — 부인과 초음파 난포 세그멘테이션 향상",
-    period: "2024.05 — 2024.08",
-    duration: "4개월 · 계약 기간 만료",
-    track: "AI · 의료영상",
-    projectSlug: "samsung-medison-detection",
-    points: [
-      {
-        text: "학습 데이터 구축 — 세그멘테이션 성능 향상을 위해 수천 장 규모 초음파 영상을 선별해 GT 작성·기존 GT 품질 보정(한 차례 2,534장 중 883장 선별), 현재 제품에 탑재된 난포 검출 모델의 학습 데이터 전량이 이 기간에 만든 것",
-      },
-      {
-        text: "모델 개선 실험 — 손실 함수 3방향(Dice·Tversky·Focal Tversky) 비교로 FN 가중 Tversky Loss 채택, 손실 값으로는 드러나지 않는 소형 난포 누락을 잡기 위해 개수 기반 평가 절차를 직접 설계",
-      },
-      {
-        text: "난포 윤곽 측정 기능 개발 (C++) — 검사자가 찍은 4점을 지나는 닫힌 곡선을 자연 3차 스플라인으로 생성, 외부 라이브러리 반입이 불가한 사내 환경이라 직접 구현, 사내 테스트 빌드에 반영해 실제 장비에서 동작 검증",
-      },
-    ],
-    stack: ["C++", "Python", "PyTorch", "OpenCV", "ONNX"],
   },
 ];
 

@@ -26,19 +26,56 @@ export default function Experience() {
             }
           />
 
-          <CardLabel>주요 성과</CardLabel>
-          <Points points={career.points} />
+          {career.parts && career.parts.length > 0 ? (
+            /* 사수·과제가 바뀌어 기간·성과·링크가 갈리는 경우 — 카드 하나 안에서
+               구간별로 다시 나눈다. 회사·직군은 하나이므로 카드까지 쪼개지 않는다 */
+            <div className="mt-8 divide-y divide-line">
+              {career.parts.map((part, i) => (
+                <div key={part.label} className={i > 0 ? "pt-8 mt-8" : ""}>
+                  <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1.5">
+                    <Badge tone="accent">{part.label}</Badge>
+                    <p className="text-[0.95rem] font-medium">{part.role}</p>
+                  </div>
+                  <p className="rail mt-2">
+                    {part.period}
+                    <span className="mx-2 text-line">·</span>
+                    {part.duration}
+                  </p>
 
-          <CardLabel>사용 기술</CardLabel>
-          <Tags items={career.stack} />
+                  <CardLabel>주요 성과</CardLabel>
+                  <Points points={part.points} />
 
-          {career.projectSlug && (
-            <Link
-              href={`/projects/${career.projectSlug}`}
-              className="rail mt-7 inline-flex items-center gap-1.5 text-deep hover:underline underline-offset-4"
-            >
-              프로젝트 상세 보기 <span aria-hidden="true">→</span>
-            </Link>
+                  <CardLabel>사용 기술</CardLabel>
+                  <Tags items={part.stack} />
+
+                  {part.projectSlug && (
+                    <Link
+                      href={`/projects/${part.projectSlug}`}
+                      className="rail mt-7 inline-flex items-center gap-1.5 text-deep hover:underline underline-offset-4"
+                    >
+                      프로젝트 상세 보기 <span aria-hidden="true">→</span>
+                    </Link>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <>
+              <CardLabel>주요 성과</CardLabel>
+              <Points points={career.points} />
+
+              <CardLabel>사용 기술</CardLabel>
+              <Tags items={career.stack} />
+
+              {career.projectSlug && (
+                <Link
+                  href={`/projects/${career.projectSlug}`}
+                  className="rail mt-7 inline-flex items-center gap-1.5 text-deep hover:underline underline-offset-4"
+                >
+                  프로젝트 상세 보기 <span aria-hidden="true">→</span>
+                </Link>
+              )}
+            </>
           )}
         </Card>
       ))}
