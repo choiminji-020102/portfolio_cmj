@@ -1,0 +1,52 @@
+<svg viewBox="0 0 1360 600" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif">
+  <title>입력 축과 역산 축의 대조 검증</title>
+  <desc>입력한 두 축과 결과 마스크에서 역산한 축을 겹쳐 대조해, 크게 벗어나거나 꼬인 경우만 걸러낸다.</desc>
+  <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#5f5668"/>
+    </marker>
+  </defs>
+
+  <!-- ① 입력한 두 축 -->
+  <g>
+    <line x1="170" y1="272" x2="352" y2="304" stroke="#c2603a" stroke-width="3"/>
+    <line x1="258" y1="200" x2="264" y2="376" stroke="#c2603a" stroke-width="3"/>
+    <circle cx="170" cy="272" r="7.5" fill="#c2603a"/>
+    <circle cx="352" cy="304" r="7.5" fill="#c2603a"/>
+    <circle cx="258" cy="200" r="7.5" fill="#c2603a"/>
+    <circle cx="264" cy="376" r="7.5" fill="#c2603a"/>
+    <text x="261" y="492" text-anchor="middle" font-size="28" font-weight="700" fill="#1a132f">입력한 두 축</text>
+    <text x="261" y="524" text-anchor="middle" font-size="22" fill="#5f5668">수직으로 찍어도 조금씩 기울고 어긋난다</text>
+  </g>
+
+  <line x1="410" y1="288" x2="470" y2="288" stroke="#5f5668" stroke-width="2.5" marker-end="url(#ar)"/>
+
+  <!-- ② 결과에서 역산 -->
+  <g>
+    <path d="M 595 290 C 595 235, 630 205, 680 205 C 730 205, 768 245, 765 300 C 762 350, 725 375, 670 375 C 620 375, 595 340, 595 290 Z"
+          fill="#3d7f97" fill-opacity="0.13" stroke="#3d7f97" stroke-width="3"/>
+    <rect x="595" y="205" width="173" height="170" fill="none" stroke="#5f5668" stroke-width="2" stroke-dasharray="6 5"/>
+    <line x1="595" y1="290" x2="768" y2="290" stroke="#3d7f97" stroke-width="3"/>
+    <line x1="681" y1="205" x2="681" y2="375" stroke="#3d7f97" stroke-width="3"/>
+    <text x="681" y="492" text-anchor="middle" font-size="28" font-weight="700" fill="#1a132f">결과에서 역산한 축</text>
+    <text x="681" y="524" text-anchor="middle" font-size="22" fill="#5f5668">외접 사각형 기준이라 직교로 강제된다</text>
+  </g>
+
+  <line x1="830" y1="288" x2="890" y2="288" stroke="#5f5668" stroke-width="2.5" marker-end="url(#ar)"/>
+
+  <!-- ③ 대조 -->
+  <g>
+    <path d="M 1015 290 C 1015 235, 1050 205, 1100 205 C 1150 205, 1188 245, 1185 300 C 1182 350, 1145 375, 1090 375 C 1040 375, 1015 340, 1015 290 Z"
+          fill="#3d7f97" fill-opacity="0.08" stroke="#3d7f97" stroke-width="2" stroke-opacity="0.45"/>
+    <line x1="1015" y1="290" x2="1188" y2="290" stroke="#3d7f97" stroke-width="3"/>
+    <line x1="1101" y1="205" x2="1101" y2="375" stroke="#3d7f97" stroke-width="3"/>
+    <line x1="1016" y1="275" x2="1186" y2="305" stroke="#c2603a" stroke-width="3"/>
+    <line x1="1098" y1="208" x2="1104" y2="372" stroke="#c2603a" stroke-width="3"/>
+    <circle cx="1016" cy="275" r="6.5" fill="#c2603a"/>
+    <circle cx="1186" cy="305" r="6.5" fill="#c2603a"/>
+    <circle cx="1098" cy="208" r="6.5" fill="#c2603a"/>
+    <circle cx="1104" cy="372" r="6.5" fill="#c2603a"/>
+    <text x="1101" y="492" text-anchor="middle" font-size="28" font-weight="700" fill="#1a132f">겹쳐서 대조</text>
+    <text x="1101" y="524" text-anchor="middle" font-size="22" fill="#5f5668">차이는 남는다 — 크게 벗어나거나 꼬인 것만 걸러낸다</text>
+  </g>
+</svg>

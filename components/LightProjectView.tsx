@@ -199,7 +199,18 @@ export default function LightProjectView({
                 <p className="rail text-muted">
                   {project.overviewFiguresLabel ?? "참고 이미지"}
                 </p>
-                <div className="mt-4 grid gap-4 sm:grid-cols-3">
+                <div
+                  className={`mt-4 grid gap-4 ${
+                    project.overviewFigures.length >= 3
+                      ? "sm:grid-cols-3"
+                      : project.overviewFigures.length === 2
+                        ? "sm:grid-cols-2"
+                        : "max-w-[460px] sm:grid-cols-1"
+                  }`}
+                >
+                  {/* 이미지가 3장 미만이면 3분할 폭(300px) 대신 칸을 넓히되,
+                      1장만 남는 경우는 원본 해상도(약 460px 안팎)를 넘겨 확대되지
+                      않도록 grid 자체의 폭을 제한한다 */}
                   {project.overviewFigures.map((fig) => (
                     <figure key={fig.src}>
                       <div className="overflow-hidden rounded-xl border border-line bg-ink/90">
@@ -208,12 +219,22 @@ export default function LightProjectView({
                           alt={fig.alt}
                           width={fig.width}
                           height={fig.height}
-                          sizes="(max-width: 640px) 100vw, 300px"
+                          sizes={
+                            project.overviewFigures!.length >= 3
+                              ? "(max-width: 640px) 100vw, 300px"
+                              : "(max-width: 640px) 100vw, 460px"
+                          }
                           className="h-auto w-full"
                         />
                       </div>
                       {fig.caption && (
-                        <figcaption className="rail mt-2 text-muted">
+                        <figcaption
+                          className={
+                            fig.captionEmphasis
+                              ? "mt-2.5 text-[0.95rem] font-semibold leading-snug text-ink"
+                              : "rail mt-2 text-muted"
+                          }
+                        >
                           {fig.caption}
                         </figcaption>
                       )}
@@ -474,15 +495,23 @@ export default function LightProjectView({
             </h2>
             <p className={`mt-6 ${leadText}`}>{project.myRole}</p>
 
-            {/* 담당 축 — 3개 영역 */}
+            {/* 담당 축 — 프로젝트마다 갈래 수가 다르므로 칸 수를 맞춘다 */}
             {project.myRoleAreas && project.myRoleAreas.length > 0 && (
               <div className="mt-8">
                 <p className="rail text-muted">담당 영역</p>
-                <div className="mt-4 grid gap-6 sm:grid-cols-3">
+                <div
+                  className={`mt-4 grid gap-6 ${
+                    project.myRoleAreas.length >= 3
+                      ? "sm:grid-cols-3"
+                      : project.myRoleAreas.length === 2
+                        ? "sm:grid-cols-2"
+                        : "max-w-sm sm:grid-cols-1"
+                  }`}
+                >
                   {project.myRoleAreas.map((area) => (
                     <div
                       key={area.title}
-                      className="border-t-2 border-tide/40 pt-3"
+                      className="rounded-xl border border-line bg-surface p-4 sm:p-5"
                     >
                       <p className="text-[0.95rem] font-semibold leading-snug text-ink">
                         {area.title}

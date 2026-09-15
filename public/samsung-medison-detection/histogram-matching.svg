@@ -1,0 +1,64 @@
+<svg viewBox="0 0 1360 590" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif">
+  <title>Histogram matching 3단계</title>
+  <desc>기준 데이터의 난포 영역 밝기 분포를 뽑아 다른 쪽 데이터의 해당 픽셀을 어둡게 맞추고, 기준 원본과 합친 조합도 함께 실험한다.</desc>
+  <defs>
+    <marker id="arh" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#5f5668"/>
+    </marker>
+  </defs>
+
+  <!-- STEP 1 : 기준 데이터에서 난포 영역 분포만 추출 -->
+  <text x="60" y="46" font-size="19" font-weight="700" fill="#c2603a">1</text>
+  <text x="86" y="46" font-size="20" font-weight="700" fill="#1a132f">기준 데이터에서 난포 영역만</text>
+
+  <rect x="60" y="70" width="230" height="150" rx="8" fill="#f3f2f6" stroke="#cdc9d4" stroke-width="2"/>
+  <ellipse cx="130" cy="130" rx="30" ry="24" fill="#3d7f97" fill-opacity="0.30" stroke="#3d7f97" stroke-width="2.5"/>
+  <ellipse cx="205" cy="165" rx="26" ry="21" fill="#3d7f97" fill-opacity="0.30" stroke="#3d7f97" stroke-width="2.5"/>
+  <text x="175" y="243" text-anchor="middle" font-size="19" fill="#5f5668">기준 데이터</text>
+
+  <line x1="310" y1="145" x2="360" y2="145" stroke="#5f5668" stroke-width="2.5" marker-end="url(#arh)"/>
+
+  <!-- 히스토그램 (기준) -->
+  <g>
+    <line x1="390" y1="205" x2="560" y2="205" stroke="#cdc9d4" stroke-width="2"/>
+    <path d="M 395 205 L 410 190 L 425 160 L 440 120 L 455 105 L 470 128 L 485 165 L 500 188 L 520 200 L 555 204"
+          fill="#3d7f97" fill-opacity="0.18" stroke="#3d7f97" stroke-width="3"/>
+    <text x="475" y="243" text-anchor="middle" font-size="19" fill="#5f5668">난포 영역의 밝기 분포</text>
+    <text x="475" y="88" text-anchor="middle" font-size="17" fill="#3d7f97" font-weight="700">이 분포를 기준으로</text>
+  </g>
+
+  <!-- 구분선 -->
+  <line x1="60" y1="300" x2="1300" y2="300" stroke="#e6e4ea" stroke-width="1"/>
+
+  <!-- STEP 2 : 다른 쪽 데이터를 변환 -->
+  <text x="60" y="352" font-size="19" font-weight="700" fill="#c2603a">2</text>
+  <text x="86" y="352" font-size="20" font-weight="700" fill="#1a132f">다른 쪽 데이터의 해당 픽셀을 어둡게</text>
+
+  <rect x="60" y="378" width="230" height="150" rx="8" fill="#f3f2f6" stroke="#cdc9d4" stroke-width="2"/>
+  <ellipse cx="130" cy="438" rx="30" ry="24" fill="#3d7f97" fill-opacity="0.10" stroke="#3d7f97" stroke-width="2.5"/>
+  <ellipse cx="205" cy="473" rx="26" ry="21" fill="#3d7f97" fill-opacity="0.10" stroke="#3d7f97" stroke-width="2.5"/>
+  <text x="175" y="551" text-anchor="middle" font-size="19" fill="#5f5668">변환 전 — 상대적으로 밝음</text>
+
+  <line x1="310" y1="453" x2="360" y2="453" stroke="#5f5668" stroke-width="2.5" marker-end="url(#arh)"/>
+  <text x="335" y="435" text-anchor="middle" font-size="17" fill="#c2603a">어둡게</text>
+
+  <rect x="380" y="378" width="230" height="150" rx="8" fill="#f3f2f6" stroke="#cdc9d4" stroke-width="2"/>
+  <ellipse cx="450" cy="438" rx="30" ry="24" fill="#3d7f97" fill-opacity="0.30" stroke="#3d7f97" stroke-width="2.5"/>
+  <ellipse cx="525" cy="473" rx="26" ry="21" fill="#3d7f97" fill-opacity="0.30" stroke="#3d7f97" stroke-width="2.5"/>
+  <text x="495" y="551" text-anchor="middle" font-size="19" fill="#5f5668">변환 후 — 기준 분포에 맞춤</text>
+
+  <!-- STEP 3 : 합쳐서 학습 -->
+  <line x1="660" y1="453" x2="710" y2="453" stroke="#5f5668" stroke-width="2.5" marker-end="url(#arh)"/>
+
+  <text x="745" y="352" font-size="19" font-weight="700" fill="#c2603a">3</text>
+  <text x="771" y="352" font-size="20" font-weight="700" fill="#1a132f">원본과 합친 조합도 실험</text>
+
+  <rect x="745" y="378" width="300" height="150" rx="10" fill="#e3f0f4" stroke="#a9cbd4" stroke-width="2.5"/>
+  <rect x="772" y="410" width="112" height="88" rx="7" fill="#fff" stroke="#3d7f97" stroke-width="2"/>
+  <text x="828" y="459" text-anchor="middle" font-size="17" fill="#3d7f97" font-weight="700">기준 원본</text>
+  <text x="900" y="460" text-anchor="middle" font-size="26" fill="#3d7f97" font-weight="700">+</text>
+  <rect x="916" y="410" width="112" height="88" rx="7" fill="#fff" stroke="#3d7f97" stroke-width="2"/>
+  <text x="972" y="453" text-anchor="middle" font-size="17" fill="#3d7f97" font-weight="700">변환된</text>
+  <text x="972" y="472" text-anchor="middle" font-size="17" fill="#3d7f97" font-weight="700">데이터</text>
+  <text x="895" y="551" text-anchor="middle" font-size="19" fill="#5f5668">학습 데이터 조합 중 하나</text>
+</svg>

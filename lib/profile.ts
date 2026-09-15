@@ -331,6 +331,20 @@ export const projectCards: ProjectCard[] = [
     outcome: "럼피스킨 96.8% · 유방염 83.9%",
   },
   {
+    title: "부인과 초음파 난포 검출 — 2D Follicle™",
+    summary:
+      "여러 개의 난포 크기를 한 화면에서 자동 측정하는 부인과 초음파 AI 기능. 세그멘테이션 성능을 올리기 위해 학습 데이터 구축·모델 개선 실험·측정 기능(C++) 개발 세 갈래로 참여했고, 그렇게 만든 데이터가 현재 제품에 탑재된 검출 모델의 학습 데이터로 쓰이고 있습니다.",
+    badge: "삼성메디슨 · 인턴",
+    track: "AI · 의료영상",
+    period: "2024.05 — 2024.08",
+    teamSize: "2D Follicle™ 팀",
+    stack: ["C++", "Python", "PyTorch", "OpenCV", "ONNX"],
+    slug: "samsung-medison-detection",
+    thumbnail: "/covers/samsung-medison-detection.png",
+    role: "학습 데이터 구축 · 모델 개선 실험 · 측정 기능(C++) 개발",
+    outcome: "제품 탑재 모델의 학습 데이터 전량 구축",
+  },
+  {
     title: "초음파 다중 구조물 검출",
     summary:
       "하복부 초음파 영상에서 6개 구조물을 검출하는 과제. 학습을 반복하며 시각화 도구·GT 생성 함수·데이터 처리 파이프라인을 직접 만들었고, 성능이 정체되자 원인을 추적해 병목이 모델이 아니라 정답 데이터에 있음을 규명했습니다.",
