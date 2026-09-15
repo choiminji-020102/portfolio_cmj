@@ -94,7 +94,7 @@ export const careers: Career[] = [
         text: "성능 정체 원인 규명 — 조정과 결과 사이에 일관된 상관이 없다는 점을 근거로 병목이 모델이 아닌 정답 데이터에 있다고 가설 수립, 사내 임상의와 원본 영상·레이블을 함께 검토해 GT 마스크 경계 과다 문제를 확인·보고",
       },
       {
-        text: "배포 제약 기준 모델 선정 — 논문 FPS 대신 실측값(CPU ONNX 86ms vs TensorRT 1.2ms)으로 후보 6종을 비교해 YOLOv8-seg 채택, 이후 AGPL-3.0 라이선스로 상용 의료기기 탑재가 불가함을 규명해 함께 보고",
+        text: "배포 제약 기준 모델 선정 — 후보 6종을 도메인·태스크 요건과 배포 환경 제약 관점에서 검토해 YOLOv8-seg 채택, AGPL-3.0 라이선스 리스크 규명해 함께 보고",
       },
       {
         text: "학습 검증 도구 구현 — 정규화 레이블 역산 렌더링, GT/예측 병렬 비교, 폴리곤 마스크 렌더링으로 지표만으로는 드러나지 않던 클래스 인덱스 불일치·좌표계 오류 2건 규명",
@@ -106,7 +106,7 @@ export const careers: Career[] = [
         text: "GT 레이블 생성 — CVAT XML 파싱의 구조적 한계(프레임 밖 좌표 선별 불가)를 확인하고 클래스별 annotation txt 병합 방식으로 재설계, 크롭본·원본 간 비대칭 좌표계 정합 처리",
       },
       {
-        text: "난포 크기 측정 도구 AddCaliper 개발 (C++, Cubic Spline Interpolation) — 실제 초음파 장비에 적용",
+        text: "난포 윤곽 측정 기능 개발 (C++) — 검사자가 찍은 4점을 지나는 닫힌 곡선을 자연 3차 스플라인으로 생성, 외부 라이브러리 반입이 불가한 사내 환경이라 직접 구현, 사내 테스트 빌드에 반영해 실제 장비에서 동작 검증",
       },
     ],
     stack: [
@@ -382,7 +382,7 @@ export const skillGroups = [
   {
     name: "AI · 머신러닝",
     caption: "모델을 직접 구현하고 데이터에 맞게 최적화합니다",
-    items: ["PyTorch", "YOLOv3", "OpenCV", "Albumentations", "TensorBoard"],
+    items: ["PyTorch", "YOLOv3", "YOLOv8", "OpenCV", "Albumentations", "TensorBoard"],
   },
   {
     name: "백엔드",
