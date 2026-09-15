@@ -10,7 +10,7 @@ export default function Experience() {
       subtitle="실무에서 마주한 문제를 직접 정의하고 풀어온 기록입니다."
     >
       {careers.map((career) => (
-        <Card key={career.org}>
+        <Card key={`${career.org}-${career.period}`}>
           <CardHead
             org={career.org}
             badge={<Badge>{career.employment}</Badge>}
