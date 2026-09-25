@@ -2883,7 +2883,7 @@ if len(raw_documents) == 0:
       },
       {
         label: "제품에 남은 것",
-        value: "현재 탑재된 난포 검출 모델의 학습 데이터 전량",
+        value: "현재 탑재된 난포 검출 모델의 학습 데이터 구축에 참여",
       },
     ],
     overviewFiguresLabel: "2D Follicle™",
@@ -2902,7 +2902,7 @@ if len(raw_documents) == 0:
     myRoleAreas: [
       {
         title: "2D Follicle™",
-        desc: "학습 데이터 구축과 모델 개선 실험으로 세그멘테이션 성능 향상 — 현재 제품 모델이 학습하는 데이터 전량이 이 기간에 만든 것",
+        desc: "학습 데이터 구축과 모델 개선 실험으로 세그멘테이션 성능 향상 — 현재 제품 모델이 학습하는 데이터가 이 기간에 구축된 것",
       },
       {
         title: "AddCaliper — 난포 윤곽선 생성 (C++)",
