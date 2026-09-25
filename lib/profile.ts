@@ -137,7 +137,7 @@ export const careers: Career[] = [
         projectSlug: "samsung-medison-detection",
         points: [
           {
-            text: "학습 데이터 구축 — 세그멘테이션 성능 향상을 위해 수천 장 규모 초음파 영상을 선별해 GT 작성·기존 GT 품질 보정(한 차례 2,534장 중 883장 선별), 현재 제품에 탑재된 난포 검출 모델의 학습 데이터 전량이 이 기간에 만든 것",
+            text: "학습 데이터 구축 — 세그멘테이션 성능 향상을 위해 수천 장 규모 초음파 영상을 선별해 GT 작성·기존 GT 품질 보정, 현재 제품에 탑재된 난포 검출 모델의 학습 데이터 전량이 이 기간에 만든 것",
           },
           {
             text: "모델 개선 실험 — 손실 함수 3방향(Dice·Tversky·Focal Tversky) 비교로 FN 가중 Tversky Loss 채택, 손실 값으로는 드러나지 않는 소형 난포 누락을 잡기 위해 개수 기반 평가 절차를 직접 설계",
