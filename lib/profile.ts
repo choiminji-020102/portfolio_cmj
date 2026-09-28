@@ -53,8 +53,8 @@ export const careers: Career[] = [
     org: "(주)선목 도서출판 목자의지혜",
     employment: "프리랜서",
     role: "풀스택 — 기획·설계·개발·배포 단독 수행",
-    period: "2025.10 — 2026.06",
-    duration: "9개월 · 유지보수 계약 중",
+    period: "2025.10 — 2026.07",
+    duration: "10개월 · 유지보수 계약 중",
     track: "풀스택",
     projectSlug: "magazine-manager",
     points: [
@@ -137,7 +137,7 @@ export const careers: Career[] = [
         projectSlug: "samsung-medison-detection",
         points: [
           {
-            text: "학습 데이터 구축 — 세그멘테이션 성능 향상을 위해 수천 장 규모 초음파 영상을 선별해 GT 작성·기존 GT 품질 보정, 현재 제품에 탑재된 난포 검출 모델의 학습 데이터 전량이 이 기간에 만든 것",
+            text: "학습 데이터 구축 — 세그멘테이션 성능 향상을 위해 수천 장 규모 초음파 영상을 선별해 GT 작성·기존 GT 품질 보정, 현재 제품에 탑재된 난포 검출 모델의 학습 데이터가 이 기간에 구축된 것",
           },
           {
             text: "모델 개선 실험 — 손실 함수 3방향(Dice·Tversky·Focal Tversky) 비교로 FN 가중 Tversky Loss 채택, 손실 값으로는 드러나지 않는 소형 난포 누락을 잡기 위해 개수 기반 평가 절차를 직접 설계",
@@ -312,7 +312,7 @@ export const projectCards: ProjectCard[] = [
       "출판사의 구독자 관리·발송·정산 수작업을 대체한 내부 관리 시스템. 기획부터 배포까지 단독 수행했고 현재 실서비스로 운영 중입니다.",
     badge: "프리랜서 · 운영 중",
     track: "풀스택",
-    period: "2025.10 — 2026.06",
+    period: "2025.10 — 2026.07",
     teamSize: "1인",
     stack: ["FastAPI", "SQLAlchemy", "MySQL", "React", "TypeScript"],
     slug: "magazine-manager",
@@ -326,9 +326,9 @@ export const projectCards: ProjectCard[] = [
       "홍보 쇼츠 자동 제작부터 SNS 게시글·성과 리포트까지 생성형 AI로 연결한 플랫폼. 장면 일관성 유지와 게시글 생성 파이프라인을 설계·구현했습니다.",
     badge: "KT AIVLE · 대상",
     track: "AI · 생성형",
-    period: "2025.08 — 2025.09",
+    period: "2025.07 — 2025.08",
     teamSize: "팀 프로젝트",
-    stack: ["LangGraph", "GPT-4o", "Flux.1 Kontext", "Seedance", "KoELECTRA", "FastAPI"],
+    stack: ["LangGraph", "GPT-4o", "FastAPI"],
     slug: "damatketing",
     thumbnail: "/covers/damatketing-v2.png",
     role: "장면 일관성 · 게시글 생성 파이프라인 설계·구현",
@@ -371,7 +371,7 @@ export const projectCards: ProjectCard[] = [
     slug: "samsung-medison-detection",
     thumbnail: "/covers/samsung-medison-detection.png",
     role: "학습 데이터 구축 · 모델 개선 실험 · 측정 기능(C++) 개발",
-    outcome: "제품 탑재 모델의 학습 데이터 전량 구축",
+    outcome: "제품 탑재 모델의 학습 데이터 구축에 참여",
   },
   {
     title: "초음파 다중 구조물 검출",

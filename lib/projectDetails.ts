@@ -299,7 +299,7 @@ export const lightProjects: LightProject[] = [
     slug: "damatketing",
     title: "다 맡케팅",
     badge: "KT AIVLE · 대상",
-    period: "2025.07.07 — 2025.09.02 (약 2개월)",
+    period: "2025.07.07 — 2025.08.29 (8주)",
     teamSize: "7명 (AI/백엔드 5, AI/프론트 2)",
     tagline:
       "7인 팀 프로젝트에서 SNS 마케팅 도메인을 AI 파이프라인부터 화면까지 담당",
