@@ -51,12 +51,13 @@ export default function Hero() {
           </div>
 
           <p className="mt-8 text-lg sm:text-xl font-semibold">
-            경계를 정하는 일을 합니다.
+            잘 만드는 것보다, 제대로 묻는 게 먼저입니다.
           </p>
           <p className="mt-4 text-[0.95rem] sm:text-base leading-relaxed text-muted max-w-md">
-            초음파 영상에서는 병변의 윤곽을, 구독 관리 시스템에서는 같은 주소로
-            묶을 기준을 정해왔습니다. 모호한 것에 선을 긋고 왜 거기인지 설명할 수
-            있는 개발자입니다.
+            AI가 웬만한 구현을 대신하는 시대에도, 왜 이 방법이어야 하는지는
+            여전히 사람이 답해야 할 질문입니다. 성능이 멈췄을 때 다시 돌리는
+            대신 원인을 쫓았고, AI가 내놓은 결과는 그대로 믿지 않고 코드로
+            검증했습니다.
           </p>
 
           {/* 소개를 읽고 바로 코드로 넘어갈 수 있게 — 상단바 아이콘과 같은 곳을 가리킨다 */}
