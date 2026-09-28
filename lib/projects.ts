@@ -129,7 +129,7 @@ export const projects: Project[] = [
     ],
     teamSize: "프리랜서 단독 개발 (1인)",
     period: "2025년 10월 ~ 현재",
-    status: "2026년 7월 실운영 이관 · 유지보수 중",
+    status: "2026년 7월 실운영 이관 · 유지보수·추가개발 중",
     tags: [
       "Python",
       "FastAPI",

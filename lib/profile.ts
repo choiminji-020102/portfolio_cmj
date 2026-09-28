@@ -54,7 +54,7 @@ export const careers: Career[] = [
     employment: "프리랜서",
     role: "풀스택 — 기획·설계·개발·배포 단독 수행",
     period: "2025.10 — 2026.07",
-    duration: "10개월 · 유지보수 계약 중",
+    duration: "10개월 · 유지보수·추가개발 계약 중",
     track: "풀스택",
     projectSlug: "magazine-manager",
     points: [
