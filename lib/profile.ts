@@ -240,13 +240,13 @@ export const certifications: Certification[] = [
   {
     name: "SQL 개발자 (SQLD)",
     org: "한국데이터산업진흥원",
-    date: "2025.12",
+    date: "2025.12.12",
     number: "SQLD-059000879",
   },
   {
     name: "데이터분석 준전문가 (ADsP)",
     org: "한국데이터산업진흥원",
-    date: "2024.03",
+    date: "2024.03.22",
     number: "ADsP-040000771",
   },
   {
@@ -258,8 +258,7 @@ export const certifications: Certification[] = [
   {
     name: "TOEIC Speaking IH (140)",
     org: "한국 TOEIC 위원회",
-    /* 어학성적은 응시일 기준 — 유효기간 2년도 이 날부터 센다 (2027.09.21까지).
-       영구 자격증(SQLD·ADsP 등)은 연월로 충분해 일자를 쓰지 않는다 */
+    /* 어학성적은 응시일 기준 — 유효기간 2년도 이 날부터 센다 (2027.09.21까지) */
     date: "2025.09.21",
     number: "105290",
   },
