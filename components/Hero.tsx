@@ -70,8 +70,8 @@ export default function Hero() {
         </div>
 
         {/* 오른쪽 — 소개 */}
-        <div className="flex min-w-0 flex-col items-start md:h-full md:justify-between">
-          <p className="text-[0.95rem] sm:text-lg leading-relaxed max-w-2xl">
+        <div className="flex min-w-0 flex-col items-start md:h-full md:justify-center">
+          <p className="text-[0.95rem] sm:text-base leading-relaxed max-w-2xl">
             <span className="text-muted">
               AI로 인해 기술은 빠르게 평준화되고 있습니다. 결국 남는 건 그
               앞에 선 사람이라고 생각합니다. 저는 질문이 많은 편입니다. 왜
