@@ -12,17 +12,15 @@ import GitHubIcon from "./GitHubIcon";
 const CONTOUR =
   "1,80 1,62 4,62 4,44 7,44 7,28 12,28 12,16 22,16 22,9 38,9 38,14 54,14 54,7 72,7 72,12 86,12 86,6 95,6 95,20 98,20 98,40 96,40 96,60 99,60 99,78 95,78 95,88 88,88 88,94 70,94 70,89 52,89 52,95 34,95 34,89 16,89 16,94 6,94 6,86 1,86";
 
-const FOCUS = ["PyTorch", "FastAPI", "React", "TypeScript"];
-
 export default function Hero() {
   return (
-    <section id="hero" className="px-6 pt-36 pb-24 sm:pt-44 sm:pb-32">
-      <div className="max-w-5xl mx-auto grid md:grid-cols-[1fr_auto] gap-12 md:gap-16 items-start">
+    <section id="hero" className="px-6 pt-24 pb-16 sm:pt-28 sm:pb-20">
+      <div className="max-w-5xl mx-auto grid md:grid-cols-[1fr_auto] gap-10 md:gap-12 items-start">
         {/* 왼쪽 — 이름과 소개 */}
-        <div>
-          <p className="eyebrow mb-6">Portfolio / 2026</p>
+        <div className="min-w-0">
+          <p className="eyebrow mb-5">Portfolio / 2026</p>
 
-          <div className="relative inline-block px-7 py-5 sm:px-9 sm:py-6">
+          <div className="relative inline-block px-6 py-4 sm:px-8 sm:py-5">
             <svg
               className="absolute inset-0 w-full h-full pointer-events-none"
               viewBox="0 0 100 100"
@@ -50,14 +48,17 @@ export default function Hero() {
             </h1>
           </div>
 
-          <p className="mt-8 text-lg sm:text-xl font-semibold">
-            잘 만드는 것보다, 제대로 묻는 게 먼저입니다.
-          </p>
-          <p className="mt-4 text-[0.95rem] sm:text-base leading-relaxed text-muted max-w-md">
-            AI가 웬만한 구현을 대신하는 시대에도, 왜 이 방법이어야 하는지는
-            여전히 사람이 답해야 할 질문입니다. 성능이 멈췄을 때 다시 돌리는
-            대신 원인을 쫓았고, AI가 내놓은 결과는 그대로 믿지 않고 코드로
-            검증했습니다.
+          <p className="mt-7 text-[0.95rem] sm:text-base leading-relaxed max-w-md">
+            <span className="text-muted">
+              AI로 인해 기술은 빠르게 평준화되고 있습니다. 결국 남는 건 그
+              앞에 선 사람이라고 생각합니다. 저는 질문이 많은 편입니다. 왜
+              이게 필요한지, 왜 지금까지는 이렇게 해왔는지 묻다 보면 진짜
+              문제는 늘 나중에 보였습니다.{" "}
+            </span>
+            <span className="text-ink font-medium">
+              빨리 만드는 사람보다, 오래 남을 것을 아는 사람이 되고
+              싶습니다.
+            </span>
           </p>
 
           {/* 소개를 읽고 바로 코드로 넘어갈 수 있게 — 상단바 아이콘과 같은 곳을 가리킨다 */}
@@ -65,7 +66,7 @@ export default function Hero() {
             href={contact.github}
             target="_blank"
             rel="noreferrer"
-            className="rail mt-8 inline-flex items-center gap-2 rounded-full border border-line px-4 py-2 font-semibold text-ink transition-colors hover:border-tide hover:bg-tide/8"
+            className="rail mt-6 inline-flex items-center gap-2 rounded-full border border-line px-4 py-2 font-semibold text-ink transition-colors hover:border-tide hover:bg-tide/8"
           >
             <GitHubIcon className="h-4 w-4" />
             github.com/choiminji-020102
@@ -75,16 +76,15 @@ export default function Hero() {
           </a>
         </div>
 
-        {/* 오른쪽 — 프로필 사진 + 요약 정보 블록 */}
-        <div className="flex flex-col gap-8 md:items-end">
-          {/* 프로필 사진 — 세로 카드에 청록 하단 강조 바 */}
-          <div className="relative w-40 sm:w-44 shrink-0">
+        {/* 오른쪽 — 프로필 사진 */}
+        <div className="flex min-w-0 flex-col md:items-end">
+          <div className="relative w-36 sm:w-40 shrink-0">
             <div className="relative aspect-[3/4] overflow-hidden rounded-2xl border border-line shadow-[0_8px_24px_-12px_rgba(26,19,47,0.2)]">
               <Image
                 src="/profile.jpg"
                 alt="최민지 프로필 사진"
                 fill
-                sizes="176px"
+                sizes="160px"
                 className="object-cover object-top"
                 priority
               />
@@ -94,31 +94,6 @@ export default function Hero() {
               className="absolute -bottom-1.5 left-5 right-5 h-[3px] rounded-full bg-tide"
             />
           </div>
-
-          <dl className="rail space-y-6 md:text-right md:min-w-[13rem]">
-            <div>
-              <dt className="text-muted mb-1.5">FIELD</dt>
-              <dd className="text-ink text-sm">AI · 의료영상 / 풀스택</dd>
-            </div>
-          <div>
-            <dt className="text-muted mb-1.5">EDUCATION</dt>
-            <dd className="text-ink text-sm">한림대 인공지능융합학부</dd>
-            <dd className="text-muted">2025.02 졸업</dd>
-          </div>
-          <div>
-            <dt className="text-muted mb-2">FOCUS</dt>
-            <dd className="flex flex-wrap gap-1.5 md:justify-end">
-              {FOCUS.map((item) => (
-                <span
-                  key={item}
-                  className="border border-line rounded-md px-2 py-0.5 text-ink/75"
-                >
-                  {item}
-                </span>
-              ))}
-            </dd>
-          </div>
-          </dl>
         </div>
       </div>
 
