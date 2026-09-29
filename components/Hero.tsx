@@ -15,9 +15,9 @@ const CONTOUR =
 export default function Hero() {
   return (
     <section id="hero" className="px-6 pt-24 pb-16 sm:pt-28 sm:pb-20">
-      <div className="max-w-5xl mx-auto grid md:grid-cols-[1fr_auto] gap-10 md:gap-12 items-start">
-        {/* 왼쪽 — 이름과 소개 */}
-        <div className="min-w-0">
+      <div className="max-w-5xl mx-auto grid md:grid-cols-[auto_1fr] gap-8 md:gap-14 items-start">
+        {/* 왼쪽 — 이름과 사진 */}
+        <div>
           <p className="eyebrow mb-5">Portfolio / 2026</p>
 
           <div className="relative inline-block px-6 py-4 sm:px-8 sm:py-5">
@@ -48,7 +48,27 @@ export default function Hero() {
             </h1>
           </div>
 
-          <p className="mt-7 text-[0.95rem] sm:text-base leading-relaxed max-w-md">
+          <div className="relative w-36 sm:w-40 shrink-0 mt-7">
+            <div className="relative aspect-[3/4] overflow-hidden rounded-2xl border border-line shadow-[0_8px_24px_-12px_rgba(26,19,47,0.2)]">
+              <Image
+                src="/profile.jpg"
+                alt="최민지 프로필 사진"
+                fill
+                sizes="160px"
+                className="object-cover object-top"
+                priority
+              />
+            </div>
+            <span
+              aria-hidden="true"
+              className="absolute -bottom-1.5 left-5 right-5 h-[3px] rounded-full bg-tide"
+            />
+          </div>
+        </div>
+
+        {/* 오른쪽 — 소개 */}
+        <div className="min-w-0 md:pt-3">
+          <p className="text-[0.95rem] sm:text-base leading-relaxed max-w-md">
             <span className="text-muted">
               AI로 인해 기술은 빠르게 평준화되고 있습니다. 결국 남는 건 그
               앞에 선 사람이라고 생각합니다. 저는 질문이 많은 편입니다. 왜
@@ -74,26 +94,6 @@ export default function Hero() {
               ↗
             </span>
           </a>
-        </div>
-
-        {/* 오른쪽 — 프로필 사진 */}
-        <div className="flex min-w-0 flex-col md:items-end">
-          <div className="relative w-36 sm:w-40 shrink-0">
-            <div className="relative aspect-[3/4] overflow-hidden rounded-2xl border border-line shadow-[0_8px_24px_-12px_rgba(26,19,47,0.2)]">
-              <Image
-                src="/profile.jpg"
-                alt="최민지 프로필 사진"
-                fill
-                sizes="160px"
-                className="object-cover object-top"
-                priority
-              />
-            </div>
-            <span
-              aria-hidden="true"
-              className="absolute -bottom-1.5 left-5 right-5 h-[3px] rounded-full bg-tide"
-            />
-          </div>
         </div>
       </div>
 
