@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { card } from "@/lib/ui";
+import { card, stepCard, stepCardAccent, stepLabel } from "@/lib/ui";
 import type { AiFeature } from "@/lib/projectDetails";
 import CodeBlock from "./CodeBlock";
 import DataTable from "./DataTable";
@@ -59,15 +59,15 @@ export default function FeatureCard({ feature }: { feature: AiFeature }) {
                   )}
 
                   <div className="mt-5 grid lg:grid-cols-[1fr_auto] gap-6 lg:gap-10 items-start">
-                    {/* 왼쪽 — 문제/해결 글 */}
-                    <div className="space-y-6 text-[0.95rem] leading-relaxed">
+                    {/* 왼쪽 — 문제/해결 글. ChallengeSection과 같은 단계 카드 언어 */}
+                    <div className="space-y-4 text-[0.95rem] leading-relaxed">
                     {/* 문제 */}
                     {feature.problemList ? (
-                      <div>
-                        <p className="font-semibold text-muted mb-2">
+                      <div className={stepCard}>
+                        <p className={stepLabel}>
                           {feature.problemLabel ?? "문제"}
                         </p>
-                        <ul className="space-y-1.5">
+                        <ul className="mt-2.5 space-y-1.5">
                           {feature.problemList.map((p) => (
                             <li
                               key={p}
@@ -80,29 +80,27 @@ export default function FeatureCard({ feature }: { feature: AiFeature }) {
                       </div>
                     ) : (
                       feature.problem && (
-                        <p>
-                          <span className="font-semibold text-muted">
-                            문제&nbsp;&nbsp;
-                          </span>
-                          {feature.problem}
-                        </p>
+                        <div className={stepCard}>
+                          <p className={stepLabel}>문제</p>
+                          <p className="mt-2.5">{feature.problem}</p>
+                        </div>
                       )
                     )}
 
-                    {/* 해결 */}
+                    {/* 해결 — 이 항목의 결론. 유일하게 tide 상자로 띄운다 */}
                     {feature.solutionBlocks ? (
-                      <div>
-                        <p className="font-semibold text-deep mb-3">
+                      <div className={stepCardAccent}>
+                        <p className={stepLabel}>
                           {feature.solutionLabel ?? "해결"}
                         </p>
                         {/* 블록들 앞에 오는 리드 문장 — 해결 방향을 한 줄로 밝히고
                             그 근거를 블록에서 편다 */}
                         {feature.solution && (
-                          <p className="mb-4">{feature.solution}</p>
+                          <p className="mt-2.5 mb-4">{feature.solution}</p>
                         )}
                         {/* 블록 간 간격 — 안에 그림·코드가 들어가면 16px 로는
                             다음 소제목이 앞 블록에 붙어 읽힌다 */}
-                        <div className="space-y-7">
+                        <div className={`space-y-7 ${feature.solution ? "" : "mt-2.5"}`}>
                           {feature.solutionBlocks.map((block, bi) => (
                             <div
                               key={block.title ?? bi}
@@ -225,12 +223,10 @@ export default function FeatureCard({ feature }: { feature: AiFeature }) {
                       </div>
                     ) : (
                       feature.solution && (
-                        <p>
-                          <span className="font-semibold text-deep">
-                            해결&nbsp;&nbsp;
-                          </span>
-                          {feature.solution}
-                        </p>
+                        <div className={stepCardAccent}>
+                          <p className={stepLabel}>해결</p>
+                          <p className="mt-2.5">{feature.solution}</p>
+                        </div>
                       )
                     )}
                     </div>
@@ -320,7 +316,7 @@ export default function FeatureCard({ feature }: { feature: AiFeature }) {
                               </div>
                             )}
 
-                            <dl className="mt-3 pl-8 space-y-2 text-[0.9rem] leading-relaxed">
+                            <dl className="mt-3 pl-8 space-y-2.5 text-[0.9rem] leading-relaxed">
                               {[
                                 ["문제", trouble.problem, "text-muted"],
                                 ["해결", trouble.solution, "text-deep"],
@@ -328,9 +324,9 @@ export default function FeatureCard({ feature }: { feature: AiFeature }) {
                               ]
                                 .filter(([, text]) => text)
                                 .map(([label, text, color]) => (
-                                  <div key={label} className="flex gap-2.5">
+                                  <div key={label} className="flex gap-3">
                                     <dt
-                                      className={`rail shrink-0 w-8 font-semibold ${color}`}
+                                      className={`shrink-0 w-11 text-[0.8rem] font-bold tracking-tight ${color}`}
                                     >
                                       {label}
                                     </dt>

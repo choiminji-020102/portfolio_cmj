@@ -34,3 +34,13 @@ export const openCard =
 
 /** 본문에서 한 단계 들어올리는 강조 블록 — 설계 결정·핵심 로직처럼 결론에 해당하는 글 */
 export const accentBlock = "border-l-2 border-tide/40 pl-4";
+
+/*
+  단계 카드 — 문제·설계 결정·구현·결과처럼 이야기의 단계를 나누는 상자.
+  라벨을 rail 캡션이 아니라 상자 안의 소제목으로 올려 단계 사이 경계가
+  눈에 보이게 한다. 결론(설계 결정)만 tide 상자로 살짝 띄운다.
+*/
+export const stepCard = "rounded-xl border border-line bg-surface p-4 sm:p-5";
+export const stepCardAccent =
+  "rounded-xl border border-tide/40 bg-tide/6 p-4 sm:p-5";
+export const stepLabel = "text-[0.95rem] font-bold tracking-tight text-ink";

@@ -2,7 +2,17 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getProject, projects } from "@/lib/projects";
 import { getLightProject, lightProjects } from "@/lib/projectDetails";
-import { actionButton, bullet, card, leadText, sectionTitle, tagChip } from "@/lib/ui";
+import {
+  actionButton,
+  bullet,
+  card,
+  leadText,
+  sectionTitle,
+  stepCard,
+  stepCardAccent,
+  stepLabel,
+  tagChip,
+} from "@/lib/ui";
 import LightProjectView from "@/components/LightProjectView";
 import ProjectFeatureCard from "@/components/ProjectFeatureCard";
 import ChallengeSection from "@/components/ChallengeSection";
@@ -190,28 +200,36 @@ export default async function ProjectPage({ params }: Props) {
 
                 {typeof item.problem === "string" ||
                 typeof item.solution === "string" ? (
-                  /* 산문 항목 — 좌우로 나누면 분량이 어긋나므로 전체 폭에 세로로 편다 */
-                  <div className="mt-6 grid max-w-[52em] gap-y-7 sm:grid-cols-[3.25rem_1fr] sm:gap-x-7">
-                    <p className="rail pt-[0.35em] sm:text-right">문제</p>
-                    <ProblemSolutionBody value={item.problem} />
+                  /* 산문 항목 — ChallengeSection과 같은 단계 카드 언어 */
+                  <div className="mt-6 max-w-[52em] space-y-4">
+                    <div className={stepCard}>
+                      <p className={stepLabel}>문제</p>
+                      <div className="mt-2.5">
+                        <ProblemSolutionBody value={item.problem} />
+                      </div>
+                    </div>
 
-                    <p className="rail pt-[0.35em] sm:text-right">해결</p>
-                    <ProblemSolutionBody value={item.solution} />
+                    <div className={stepCardAccent}>
+                      <p className={stepLabel}>해결</p>
+                      <div className="mt-2.5">
+                        <ProblemSolutionBody value={item.solution} />
+                      </div>
+                    </div>
 
                     {item.result && (
-                      <>
-                        <p className="rail pt-[0.35em] font-semibold sm:text-right">
-                          결과
-                        </p>
-                        <ProblemSolutionBody value={item.result} />
-                      </>
+                      <div className={stepCard}>
+                        <p className={stepLabel}>결과</p>
+                        <div className="mt-2.5">
+                          <ProblemSolutionBody value={item.result} />
+                        </div>
+                      </div>
                     )}
                   </div>
                 ) : (
-                  <div className="mt-5 grid gap-6 lg:grid-cols-2 lg:gap-10">
-                    <div>
-                      <p className="mb-2 font-semibold text-muted">문제</p>
-                      <ul className="space-y-1.5">
+                  <div className="mt-5 grid gap-4 lg:grid-cols-2">
+                    <div className={stepCard}>
+                      <p className={stepLabel}>문제</p>
+                      <ul className="mt-2.5 space-y-1.5">
                         {item.problem.map((point) => (
                           <li key={point} className={`${bullet} before:bg-muted/50`}>
                             {point}
@@ -219,9 +237,9 @@ export default async function ProjectPage({ params }: Props) {
                         ))}
                       </ul>
                     </div>
-                    <div>
-                      <p className="mb-2 font-semibold text-deep">해결</p>
-                      <ul className="space-y-1.5">
+                    <div className={stepCardAccent}>
+                      <p className={stepLabel}>해결</p>
+                      <ul className="mt-2.5 space-y-1.5">
                         {item.solution.map((point) => (
                           <li key={point} className={`${bullet} before:bg-tide`}>
                             {point}

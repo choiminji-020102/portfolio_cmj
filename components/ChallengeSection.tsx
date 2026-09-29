@@ -1,6 +1,12 @@
 import type { Challenge, Project } from "@/lib/projects";
 import type { CodeLang } from "@/lib/highlight";
-import { accentBlock, sectionTitle } from "@/lib/ui";
+import {
+  accentBlock,
+  sectionTitle,
+  stepCard,
+  stepCardAccent,
+  stepLabel,
+} from "@/lib/ui";
 import CodeBlock from "./CodeBlock";
 import ShotGrid from "./ShotGrid";
 import SubscriptionPeriodDiagram from "./diagrams/SubscriptionPeriodDiagram";
@@ -43,68 +49,72 @@ function ChallengeCard({ challenge }: { challenge: Challenge }) {
               {challenge.summary}
             </p>
 
-            <div className="mt-5">
-              <p className={subLabel}>문제</p>
-              <p className={`mt-2 max-w-3xl ${body}`}>{challenge.problem}</p>
-            </div>
-
-            {/* 설계 결정 — 이 항목의 결론 */}
-            <div className="mt-5">
-              <p className={subLabel}>설계 결정</p>
-              <p className={`mt-2 max-w-3xl ${accentBlock} ${body}`}>
-                {challenge.decision}
-              </p>
-            </div>
-
-            {challenge.diagramId && (
-              <div className="mt-6">
-                <p className={subLabel}>구조</p>
-                <div className="mt-3 rounded-xl border border-line bg-surface p-3 sm:p-4">
-                  {challenge.diagramId === "subscription-period" && (
-                    <SubscriptionPeriodDiagram />
-                  )}
-                  {challenge.diagramId === "send-grouping" && (
-                    <SendGroupingDiagram />
-                  )}
-                  {challenge.diagramId === "duplicate-prevention" && (
-                    <DuplicatePreventionDiagram />
-                  )}
-                  {challenge.diagramId === "cafe24-sync" && <Cafe24SyncDiagram />}
-                  {challenge.diagramId === "pause-design" && <PauseDesignDiagram />}
-                </div>
+            <div className="mt-6 space-y-4">
+              <div className={stepCard}>
+                <p className={stepLabel}>문제</p>
+                <p className={`mt-2.5 max-w-3xl ${body}`}>{challenge.problem}</p>
               </div>
-            )}
 
-            <div className="mt-6">
-              <p className={subLabel}>구현</p>
-              <div className="mt-3 space-y-6">
-                {challenge.steps.map((step, si) => (
-                  <div key={si} className={accentBlock}>
-                    <p className={`flex gap-2.5 ${body}`}>
-                      <span className="rail text-tide shrink-0 pt-0.5">
-                        {String(si + 1).padStart(2, "0")}
-                      </span>
-                      <span>{step.description}</span>
-                    </p>
-                    {step.code && (
-                      <div className="mt-3">
-                        <p className="rail mb-1.5 text-muted">
-                          {step.code.language}
-                        </p>
-                        <CodeBlock
-                          code={step.code.content}
-                          lang={toLang(step.code.language)}
-                        />
-                      </div>
+              {/* 설계 결정 — 이 항목의 결론. 유일하게 tide 상자로 띄운다 */}
+              <div className={stepCardAccent}>
+                <p className={stepLabel}>설계 결정</p>
+                <p className={`mt-2.5 max-w-3xl ${body}`}>{challenge.decision}</p>
+              </div>
+
+              {challenge.diagramId && (
+                <div className={stepCard}>
+                  <p className={stepLabel}>구조</p>
+                  <div className="mt-3 rounded-lg border border-line bg-ground/60 p-3 sm:p-4">
+                    {challenge.diagramId === "subscription-period" && (
+                      <SubscriptionPeriodDiagram />
+                    )}
+                    {challenge.diagramId === "send-grouping" && (
+                      <SendGroupingDiagram />
+                    )}
+                    {challenge.diagramId === "duplicate-prevention" && (
+                      <DuplicatePreventionDiagram />
+                    )}
+                    {challenge.diagramId === "cafe24-sync" && (
+                      <Cafe24SyncDiagram />
+                    )}
+                    {challenge.diagramId === "pause-design" && (
+                      <PauseDesignDiagram />
                     )}
                   </div>
-                ))}
-              </div>
-            </div>
+                </div>
+              )}
 
-            <div className="mt-5">
-              <p className={subLabel}>결과</p>
-              <p className={`mt-2 max-w-3xl ${body}`}>{challenge.result}</p>
+              <div className={stepCard}>
+                <p className={stepLabel}>구현</p>
+                <div className="mt-3 space-y-6">
+                  {challenge.steps.map((step, si) => (
+                    <div key={si} className={accentBlock}>
+                      <p className={`flex gap-2.5 ${body}`}>
+                        <span className="rail text-tide shrink-0 pt-0.5">
+                          {String(si + 1).padStart(2, "0")}
+                        </span>
+                        <span>{step.description}</span>
+                      </p>
+                      {step.code && (
+                        <div className="mt-3">
+                          <p className="rail mb-1.5 text-muted">
+                            {step.code.language}
+                          </p>
+                          <CodeBlock
+                            code={step.code.content}
+                            lang={toLang(step.code.language)}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className={stepCard}>
+                <p className={stepLabel}>결과</p>
+                <p className={`mt-2.5 max-w-3xl ${body}`}>{challenge.result}</p>
+              </div>
             </div>
 
             {/* 화면 기록 — 서술의 숫자를 눈으로 확인시키는 자리라 결과 뒤에 둔다.

@@ -1,5 +1,5 @@
 import type { Feature, Project } from "@/lib/projects";
-import { card } from "@/lib/ui";
+import { card, stepCard, stepCardAccent, stepLabel } from "@/lib/ui";
 import ShotGrid from "./ShotGrid";
 
 /*
@@ -33,19 +33,21 @@ export default function ProjectFeatureCard({
         {feature.summary}
       </p>
 
-      <div className="mt-5">
-        <p className="rail text-muted">기능 설명</p>
-        <p className="mt-2 whitespace-pre-line text-[0.95rem] leading-relaxed">
-          {feature.description}
-        </p>
-      </div>
+      <div className="mt-5 space-y-4">
+        <div className={stepCard}>
+          <p className={stepLabel}>기능 설명</p>
+          <p className="mt-2.5 whitespace-pre-line text-[0.95rem] leading-relaxed">
+            {feature.description}
+          </p>
+        </div>
 
-      {/* 핵심 로직 — 이 기능의 결론. 트러블 슈팅의 '설계 결정'과 같은 표시 */}
-      <div className="mt-5">
-        <p className="rail text-muted">핵심 로직</p>
-        <p className="mt-2 whitespace-pre-line border-l-2 border-tide/40 pl-4 text-[0.95rem] leading-relaxed">
-          {feature.coreLogic}
-        </p>
+        {/* 핵심 로직 — 이 기능의 결론. 트러블 슈팅의 '설계 결정'과 같은 표시 */}
+        <div className={stepCardAccent}>
+          <p className={stepLabel}>핵심 로직</p>
+          <p className="mt-2.5 whitespace-pre-line text-[0.95rem] leading-relaxed">
+            {feature.coreLogic}
+          </p>
+        </div>
       </div>
 
       {feature.screenshots && feature.screenshots.length > 0 && (
