@@ -14,13 +14,16 @@ const CONTOUR =
 
 export default function Hero() {
   return (
-    <section id="hero" className="px-6 pt-24 pb-16 sm:pt-28 sm:pb-20">
-      <div className="max-w-5xl mx-auto grid md:grid-cols-[auto_1fr] gap-8 md:gap-14 items-start">
+    <section
+      id="hero"
+      className="flex min-h-screen items-center px-6 pt-16 pb-16"
+    >
+      <div className="max-w-5xl mx-auto grid w-full gap-8 md:grid-cols-[auto_1fr] md:items-stretch md:gap-16">
         {/* 왼쪽 — 이름과 사진 */}
         <div>
           <p className="eyebrow mb-5">Portfolio / 2026</p>
 
-          <div className="relative inline-block px-6 py-4 sm:px-8 sm:py-5">
+          <div className="relative inline-block px-4 py-3 sm:px-5 sm:py-3.5">
             <svg
               className="absolute inset-0 w-full h-full pointer-events-none"
               viewBox="0 0 100 100"
@@ -43,7 +46,7 @@ export default function Hero() {
               />
             </svg>
 
-            <h1 className="relative text-[3.5rem] sm:text-7xl font-bold tracking-tight leading-none">
+            <h1 className="relative text-4xl sm:text-5xl font-bold tracking-tight leading-none">
               최민지
             </h1>
           </div>
@@ -67,8 +70,8 @@ export default function Hero() {
         </div>
 
         {/* 오른쪽 — 소개 */}
-        <div className="min-w-0 md:pt-3">
-          <p className="text-[0.95rem] sm:text-base leading-relaxed max-w-md">
+        <div className="flex min-w-0 flex-col items-start md:h-full md:justify-between">
+          <p className="text-[0.95rem] sm:text-lg leading-relaxed max-w-2xl">
             <span className="text-muted">
               AI로 인해 기술은 빠르게 평준화되고 있습니다. 결국 남는 건 그
               앞에 선 사람이라고 생각합니다. 저는 질문이 많은 편입니다. 왜
