@@ -32,7 +32,7 @@ export default function LightProjectView({
         </div>
       </div>
 
-      <main className="max-w-5xl mx-auto px-6 py-12 sm:py-14">
+      <main className="section-scope max-w-5xl mx-auto px-6 py-12 sm:py-14">
         {/* 헤더 — 메타 → 제목·배지 → 요약 → 태그 → 링크 (모두 왼쪽 축 정렬)
             앱 스크린샷은 최상단 갤러리 대신 각 AI 기능 카드에서 보여준다 */}
         <header className="border-b border-line pb-10">

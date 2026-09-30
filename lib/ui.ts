@@ -8,8 +8,13 @@
 export const actionButton =
   "rail inline-flex items-center gap-1.5 rounded-full border border-tide/50 bg-tide/8 px-4 py-2 font-semibold text-deep transition-colors hover:border-tide hover:bg-tide/15";
 
-/** 절 제목 — 한글 h2. 작은 영어 대문자 라벨을 쓰지 않는다 */
-export const sectionTitle = "text-2xl font-bold tracking-tight";
+/*
+  절 제목 — 한글 h2. 작은 영어 대문자 라벨을 쓰지 않는다.
+  section-heading이 번호(counter)와 밑줄을 자동으로 붙인다 — globals.css 참고.
+  이 클래스를 쓰는 h2를 담은 최상위 <main>에는 반드시 section-scope를 준다.
+*/
+export const sectionTitle =
+  "section-heading text-2xl font-bold tracking-tight";
 
 /*
   리드 문단 — 헤더 요약, 과제 배경, 내가 맡은 역할이 모두 이 하나를 쓴다.

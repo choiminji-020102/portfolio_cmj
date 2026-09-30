@@ -85,7 +85,7 @@ export default async function ProjectPage({ params }: Props) {
         </div>
       </div>
 
-      <main className="max-w-5xl mx-auto px-6 py-12 sm:py-14">
+      <main className="section-scope max-w-5xl mx-auto px-6 py-12 sm:py-14">
         {/* 헤더 — 메타 → 제목 → 한 줄 요약 → 요약 → 태그 → 링크.
             다른 상세(LightProjectView)와 같은 순서·같은 자리를 쓴다 */}
         <header className="border-b border-line pb-10">

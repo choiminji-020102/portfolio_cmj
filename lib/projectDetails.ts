@@ -324,7 +324,7 @@ export const lightProjects: LightProject[] = [
     github: "https://github.com/KT-AIVLE-04",
     demo: "/damatketing/demo.mp4",
     screenshots: [],
-    backgroundLabel: "1. 프로젝트 배경",
+    backgroundLabel: "프로젝트 배경",
     background:
       "소상공인은 마케팅에 쓸 인력도 시간도 부족합니다. 영업·재고·고객 응대가 우선이라 SNS 운영은 늘 뒤로 밀리고, 광고 영상을 외주로 맡기면 100만 원 이상의 비용이 듭니다. 그렇다고 기존 도구가 대안이 되지도 못합니다.",
     backgroundTable: {
@@ -344,7 +344,7 @@ export const lightProjects: LightProject[] = [
       { label: "2", text: "SNS 게시글 관리", mine: true },
       { label: "3", text: "성과 분석 및 리포트 작성" },
     ],
-    myRoleLabel: "2. 담당 범위",
+    myRoleLabel: "담당 범위",
     myRole:
       "SNS 게시글 관리 축 하나를 FastAPI 에이전트 · Spring Boot 서비스 · React 화면의 세 계층에 걸쳐 맡았습니다. 계층별로 사람이 나뉘지 않아 프롬프트 설계부터 API 계약, 화면 상태 관리까지 하나로 이어집니다.",
     myRoleDiagrams: [
@@ -404,7 +404,7 @@ export const lightProjects: LightProject[] = [
       },
     ],
     showcase: {
-      label: "4. 결과물",
+      label: "결과물",
       intro:
         "담당한 SNS 도메인의 화면 전반을 React 로 구현하고 Redux 로 상태를 관리했습니다. 계정을 연동하고, AI 로 게시글을 만들고, 플랫폼에 올려 관리하기까지가 한 흐름으로 이어집니다.",
       shots: [
@@ -434,7 +434,7 @@ export const lightProjects: LightProject[] = [
     },
     featureGroups: [
       {
-        label: "5. AI — 게시글 생성 에이전트",
+        label: "AI — 게시글 생성 에이전트",
         items: [
           {
             name: "5.1 왜 단일 프롬프트가 아니라 그래프인가",
@@ -616,7 +616,7 @@ workflow.add_edge("hashtag_generator", END)`,
         ],
       },
       {
-        label: "6. 백엔드 — SNS 연동 및 게시",
+        label: "백엔드 — SNS 연동 및 게시",
         items: [
           {
             name: "6.1 확장을 고려한 연동 구조",
@@ -680,7 +680,7 @@ uploader.setChunkSize(10 * 1024 * 1024);   // 10MB`,
         ],
       },
       {
-        label: "7. 트러블슈팅",
+        label: "트러블슈팅",
         items: [
           {
             name: "7.1 S3 Presigned URL 이 이미지로 인식되지 않던 문제",
@@ -784,7 +784,7 @@ def _cap_by_platform(tags, platform):
     ],
     // 절 단위 본문은 featureGroups 가 다 담는다
     features: [],
-    techStackLabel: "3. 사용 기술",
+    techStackLabel: "사용 기술",
     techStack: [
       {
         label: "AI",
@@ -799,7 +799,7 @@ def _cap_by_platform(tags, platform):
       { label: "Frontend", value: "React, Redux" },
       { label: "Infra", value: "Docker, MSA" },
     ],
-    closingLabel: "8. 회고",
+    closingLabel: "회고",
     closingGroups: [
       {
         title: "잘한 점",

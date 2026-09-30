@@ -107,6 +107,33 @@ body {
   color: var(--muted);
 }
 
+/*
+  섹션 제목 — 번호 + 밑줄로 "장"이 바뀌는 지점을 표시한다.
+  카운터는 각 페이지의 최상위 <main>에서 .section-scope로 리셋하고,
+  이 스코프 안의 h2.section-heading마다 자동으로 하나씩 늘어난다.
+  컴포넌트 경계(ChallengeSection·LightProjectView)를 넘어도 DOM 트리 기준이라 이어진다.
+*/
+.section-scope {
+  counter-reset: section;
+}
+.section-heading {
+  counter-increment: section;
+  display: flex;
+  align-items: baseline;
+  gap: 0.875rem;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 0.75rem;
+}
+.section-heading::before {
+  content: counter(section, decimal-leading-zero);
+  font-family: var(--font-plex-mono), ui-monospace, monospace;
+  font-size: 0.8125rem;
+  letter-spacing: 0.02em;
+  color: var(--tide);
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
 /* 키보드 포커스는 항상 보이게 */
 :focus-visible {
   outline: 2px solid var(--deep);
