@@ -11,7 +11,7 @@
   <text x="40" y="40" font-size="12" fill="#5f5668">XML 어노테이션</text>
   <rect x="40" y="54" width="600" height="72" rx="4" fill="#f3f2f6" stroke="#cdc9d4" stroke-width="0.5"/>
   <text x="60" y="82" font-size="13" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#1a132f">&lt;points frame="142" outside="1" points="1100.0,340.5 1118.2,352.7 ..." /&gt;</text>
-  <text x="60" y="106" font-size="12" fill="#8f4522">outside = 1 (이 프레임에 객체 없음) — 그런데 좌표 필드는 그대로 채워져 있다</text>
+  <text x="60" y="106" font-size="12" fill="#8f4522">outside = 1 (이 프레임에 객체 없음) - 그런데 좌표 필드는 그대로 채워져 있다</text>
 
   <line x1="340" y1="126" x2="340" y2="158" stroke="#5f5668" stroke-width="1.5" marker-end="url(#arrow2)"/>
 
@@ -21,7 +21,7 @@
   <text x="392" y="298" font-size="12" fill="#5f5668">900</text>
   <line x1="400" y1="196" x2="400" y2="290" stroke="#3d7f97" stroke-width="0.5" stroke-dasharray="4 4"/>
   <circle cx="480" cy="239" r="5" fill="#c04a49"/>
-  <text x="494" y="243" font-size="12" fill="#92312f">x = 1100 — 이미지 밖</text>
+  <text x="494" y="243" font-size="12" fill="#92312f">x = 1100 - 이미지 밖</text>
   <text x="40" y="322" font-size="12" fill="#5f5668">1100 ÷ 900 = 1.22 → 정규화 유효 범위(0~1) 초과</text>
 
   <text x="494" y="265" font-size="12" fill="#5f5668">좌표만으로는 유효한</text>

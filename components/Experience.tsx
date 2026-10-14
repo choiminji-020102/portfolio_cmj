@@ -27,9 +27,9 @@ export default function Experience() {
           />
 
           {career.parts && career.parts.length > 0 ? (
-            /* 사수·과제가 바뀌어 기간·성과·링크가 갈리는 경우 — 카드 하나 안에서
+            /* 사수·과제가 바뀌어 기간·성과·링크가 갈리는 경우 - 카드 하나 안에서
                구간별로 다시 나눈다. 회사·직군은 하나이므로 카드까지 쪼개지 않는다.
-               구분선 위아래 여백을 space-y(선 위)·pt(선 아래)로 대칭을 맞춘다 —
+               구분선 위아래 여백을 space-y(선 위)·pt(선 아래)로 대칭을 맞춘다 -
                divide-y 는 두 여백이 겹쳐 선이 링크에 바짝 붙어 보였다 */
             <div className="mt-8 space-y-10">
               {career.parts.map((part, i) => (

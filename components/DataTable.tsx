@@ -1,4 +1,4 @@
-/* 본문 표 — 항목 단위 비교표와 트러블 근거표가 같은 모양을 쓴다.
+/* 본문 표 - 항목 단위 비교표와 트러블 근거표가 같은 모양을 쓴다.
    서랍(TroubleDetails)에 넣지 않고 읽는 자리에 그대로 편다 */
 export default function DataTable({
   head,

@@ -11,7 +11,7 @@ export default function PauseDesignDiagram() {
     {
       label: "방식 B",
       name: "콤마 문자열 저장",
-      detail: 'pause_months = "202605,202606,202607" — 달 수 늘수록 파싱 비용 증가, 필터 비효율',
+      detail: 'pause_months = "202605,202606,202607" - 달 수 늘수록 파싱 비용 증가, 필터 비효율',
       verdict: "탈락",
       verdictColor: "text-red-500",
       bg: "bg-stone-50 border-stone-200",
@@ -37,7 +37,7 @@ export default function PauseDesignDiagram() {
   const tableFields = [
     { col: "pause_id", type: "bigint (PK)", desc: "휴지 고유 ID" },
     { col: "order_item_id", type: "bigint (FK)", desc: "어떤 정기구독에 대한 휴지인지" },
-    { col: "pause_issue", type: "varchar(6)", desc: "중단 호 (예: 202605) — 불변 필드" },
+    { col: "pause_issue", type: "varchar(6)", desc: "중단 호 (예: 202605) - 불변 필드" },
     { col: "reason", type: "text, nullable", desc: "고객 요청 사유" },
     { col: "admin_id", type: "bigint (FK)", desc: "처리한 관리자 ID" },
     { col: "is_deleted", type: "boolean", desc: "소프트 삭제 여부" },
@@ -112,7 +112,7 @@ export default function PauseDesignDiagram() {
         <div className="grid grid-cols-2 gap-3">
           <div className="rounded-2xl border border-green-200 bg-green-50 p-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-bold text-green-700">정책 1 — 연장형 (채택)</span>
+              <span className="text-xs font-bold text-green-700">정책 1 - 연장형 (채택)</span>
               <span className="text-xs font-bold text-green-600">✓ 채택</span>
             </div>
             <ul className="space-y-1">
@@ -126,7 +126,7 @@ export default function PauseDesignDiagram() {
           </div>
           <div className="rounded-2xl border border-stone-200 bg-stone-50 p-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-bold text-stone-500">정책 2 — 종료일 유지 (미채택)</span>
+              <span className="text-xs font-bold text-stone-500">정책 2 - 종료일 유지 (미채택)</span>
               <span className="text-xs text-stone-300 font-bold">✗</span>
             </div>
             <ul className="space-y-1">

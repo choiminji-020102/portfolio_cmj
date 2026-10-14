@@ -8,7 +8,7 @@ type Showcase = NonNullable<LightProject["showcase"]>;
 type Shot = Showcase["shots"][number];
 
 /*
-  결과물 캡처 갤러리 — 목록은 작게, 클릭하면 원본 크기로 펼친다.
+  결과물 캡처 갤러리 - 목록은 작게, 클릭하면 원본 크기로 펼친다.
   페이지 전체를 담은 캡처라 목록 크기로는 화면 속 글자가 읽히지 않는다.
 
   본문(제목·리드·단서)은 서버 쪽 LightProjectView 가 그대로 들고 있고,
@@ -20,7 +20,7 @@ export default function ShowcaseGallery({ shots }: { shots: Shot[] }) {
 
   const close = useCallback(() => setOpenIndex(null), []);
 
-  /* 2단 배치 — 세로로 긴 캡처를 2번 칸에 혼자 두면 짧은 캡처 여러 장과 높이가 맞는다.
+  /* 2단 배치 - 세로로 긴 캡처를 2번 칸에 혼자 두면 짧은 캡처 여러 장과 높이가 맞는다.
      2번 칸 캡처는 1번 칸에 쌓인 장수만큼 세로로 걸친다
      (Tailwind 가 훑을 수 있도록 클래스는 문자열 그대로 적는다) */
   const twoCol = shots.some((s) => s.column === 2);
@@ -87,7 +87,7 @@ export default function ShowcaseGallery({ shots }: { shots: Shot[] }) {
               <p className="text-[0.95rem] font-semibold leading-snug text-ink">
                 {shot.title}
               </p>
-              <p className="mt-1 text-sm leading-relaxed text-muted">
+              <p className="mt-1 break-keep text-sm leading-relaxed text-muted">
                 {shot.desc}
               </p>
             </figcaption>

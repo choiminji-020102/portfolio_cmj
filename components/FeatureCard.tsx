@@ -5,10 +5,15 @@ import CodeBlock from "./CodeBlock";
 import DataTable from "./DataTable";
 import RagDiagram from "./RagDiagram";
 import RouteDiagram from "./RouteDiagram";
+import BackendChainDiagram from "./BackendChainDiagram";
+import MermaidDiagram from "./MermaidDiagram";
+import JwtTokenDiagram from "./JwtTokenDiagram";
+import HashtagPromptDiagram from "./HashtagPromptDiagram";
+import TrendPromptDiagram from "./TrendPromptDiagram";
 import TroubleDetails from "./TroubleDetails";
 
 /*
-  기능 카드 — 문제 → 해결 → 수치 한 장.
+  기능 카드 - 문제 → 해결 → 수치 한 장.
   '핵심 AI 기능'(aiFeatures)과 절로 갈리는 구현 상세(featureGroups)가 같은 모양을 쓴다.
 */
 export default function FeatureCard({ feature }: { feature: AiFeature }) {
@@ -30,10 +35,12 @@ export default function FeatureCard({ feature }: { feature: AiFeature }) {
                     <p className="rail mt-2 text-tide">{feature.when}</p>
                   )}
                   {feature.tagline && (
-                    <p className="mt-1.5 text-sm text-muted">{feature.tagline}</p>
+                    <p className="mt-2 whitespace-pre-line text-[0.95rem] leading-relaxed text-ink">
+                      {feature.tagline}
+                    </p>
                   )}
 
-                  {/* 설명 그림 — 좌표계·파이프라인처럼 글보다 그림이 빠른 것들.
+                  {/* 설명 그림 - 좌표계·파이프라인처럼 글보다 그림이 빠른 것들.
                       원본 폭보다 크게 늘리지 않고, 좁은 화면에서만 줄어든다 */}
                   {feature.figures && feature.figures.length > 0 && (
                     <div className="mt-5 space-y-5">
@@ -59,8 +66,8 @@ export default function FeatureCard({ feature }: { feature: AiFeature }) {
                   )}
 
                   <div className="mt-5 grid lg:grid-cols-[1fr_auto] gap-6 lg:gap-10 items-start">
-                    {/* 왼쪽 — 문제/해결 글. ChallengeSection과 같은 단계 카드 언어 */}
-                    <div className="space-y-4 text-[0.95rem] leading-relaxed">
+                    {/* 왼쪽 - 문제/해결 글. ChallengeSection과 같은 단계 카드 언어 */}
+                    <div className="min-w-0 space-y-4 text-[0.95rem] leading-relaxed">
                     {/* 문제 */}
                     {feature.problemList ? (
                       <div className={stepCard}>
@@ -73,7 +80,15 @@ export default function FeatureCard({ feature }: { feature: AiFeature }) {
                               key={p}
                               className="relative pl-5 before:absolute before:left-0 before:top-[0.6em] before:h-1.5 before:w-1.5 before:rounded-full before:bg-muted/50"
                             >
-                              {p}
+                              {p.startsWith("**")
+                                ? p.split("**").map((part, i) =>
+                                    i === 1 ? (
+                                      <strong key={i}>{part}</strong>
+                                    ) : (
+                                      part
+                                    ),
+                                  )
+                                : p}
                             </li>
                           ))}
                         </ul>
@@ -81,24 +96,26 @@ export default function FeatureCard({ feature }: { feature: AiFeature }) {
                     ) : (
                       feature.problem && (
                         <div className={stepCard}>
-                          <p className={stepLabel}>문제</p>
-                          <p className="mt-2.5">{feature.problem}</p>
+                          <p className={stepLabel}>
+                            {feature.problemLabel ?? "문제"}
+                          </p>
+                          <p className="mt-2.5 whitespace-pre-line">{feature.problem}</p>
                         </div>
                       )
                     )}
 
-                    {/* 해결 — 이 항목의 결론. 유일하게 tide 상자로 띄운다 */}
+                    {/* 해결 - 이 항목의 결론. 유일하게 tide 상자로 띄운다 */}
                     {feature.solutionBlocks ? (
                       <div className={stepCardAccent}>
                         <p className={stepLabel}>
                           {feature.solutionLabel ?? "해결"}
                         </p>
-                        {/* 블록들 앞에 오는 리드 문장 — 해결 방향을 한 줄로 밝히고
+                        {/* 블록들 앞에 오는 리드 문장 - 해결 방향을 한 줄로 밝히고
                             그 근거를 블록에서 편다 */}
                         {feature.solution && (
-                          <p className="mt-2.5 mb-4">{feature.solution}</p>
+                          <p className="mt-2.5 mb-4 whitespace-pre-line">{feature.solution}</p>
                         )}
-                        {/* 블록 간 간격 — 안에 그림·코드가 들어가면 16px 로는
+                        {/* 블록 간 간격 - 안에 그림·코드가 들어가면 16px 로는
                             다음 소제목이 앞 블록에 붙어 읽힌다 */}
                         <div className={`space-y-7 ${feature.solution ? "" : "mt-2.5"}`}>
                           {feature.solutionBlocks.map((block, bi) => (
@@ -110,7 +127,7 @@ export default function FeatureCard({ feature }: { feature: AiFeature }) {
                                 <p className="font-semibold">{block.title}</p>
                               )}
 
-                              {/* 코드 앞에 오는 불릿 — 원문이 목록 → 코드 순서일 때 */}
+                              {/* 코드 앞에 오는 불릿 - 원문이 목록 → 코드 순서일 때 */}
                               {block.pointsFirst && block.points.length > 0 && (
                                 <ul
                                   className={`space-y-1 ${
@@ -128,7 +145,7 @@ export default function FeatureCard({ feature }: { feature: AiFeature }) {
                                 </ul>
                               )}
 
-                              {/* 좌우 배치 — 코드가 높이를 정하고 그림은 거기에 맞춘다.
+                              {/* 좌우 배치 - 코드가 높이를 정하고 그림은 거기에 맞춘다.
                                   그림은 fill 이라 자기 높이를 주장하지 않는다 */}
                               {block.layout === "side" &&
                               block.code &&
@@ -179,6 +196,24 @@ export default function FeatureCard({ feature }: { feature: AiFeature }) {
                                 </figure>
                               )}
 
+                              {block.custom === "trend-prompt" && (
+                                <TrendPromptDiagram />
+                              )}
+                              {block.custom === "hashtag-prompt" && (
+                                <HashtagPromptDiagram />
+                              )}
+                              {block.custom === "backend-chain" && (
+                                <BackendChainDiagram />
+                              )}
+                              {block.chart && (
+                                <div className={`rounded-xl border border-line bg-surface p-3 pb-5 sm:p-4 sm:pb-6 [&_svg]:overflow-visible w-full min-w-0 max-w-full overflow-x-auto max-sm:[&_svg]:min-w-[640px] max-sm:[&>div]:justify-start ${block.chart.includes("sequenceDiagram") ? "sm:[&_svg]:mx-auto sm:[&_svg]:h-auto sm:[&_svg]:w-[62%]" : ""}`}>
+                                  <MermaidDiagram chart={block.chart} />
+                                </div>
+                              )}
+                              {block.custom === "jwt-tokens" && (
+                                <JwtTokenDiagram />
+                              )}
+
                               {block.layout !== "side" && block.code && (
                                 <CodeBlock
                                   code={block.code}
@@ -197,7 +232,7 @@ export default function FeatureCard({ feature }: { feature: AiFeature }) {
                                 block.points.length > 0 && (
                                   <ul
                                     className={`space-y-1 ${
-                                      block.figure || block.code
+                                      block.figure || block.code || block.custom || block.chart
                                         ? "mt-4"
                                         : "mt-1.5"
                                     }`}
@@ -213,7 +248,7 @@ export default function FeatureCard({ feature }: { feature: AiFeature }) {
                                   </ul>
                                 )}
 
-                              {/* 블록을 닫는 서술 — 불릿이 아니라 문단으로 끝나는 원문 */}
+                              {/* 블록을 닫는 서술 - 불릿이 아니라 문단으로 끝나는 원문 */}
                               {block.note && (
                                 <p className="mt-4">{block.note}</p>
                               )}
@@ -225,13 +260,25 @@ export default function FeatureCard({ feature }: { feature: AiFeature }) {
                       feature.solution && (
                         <div className={stepCardAccent}>
                           <p className={stepLabel}>해결</p>
-                          <p className="mt-2.5">{feature.solution}</p>
+                          <p className="mt-2.5 whitespace-pre-line">{feature.solution}</p>
                         </div>
                       )
                     )}
+
+                    {/* 결과 - 문제·해결과 같은 단계 카드 */}
+                    {feature.result && (
+                      <div className={stepCard}>
+                        <p className={stepLabel}>
+                          {feature.resultLabel ?? "결과"}
+                        </p>
+                        <p className="mt-2.5 whitespace-pre-line">
+                          {feature.result}
+                        </p>
+                      </div>
+                    )}
                     </div>
 
-                    {/* 오른쪽 — 시연 영상 (없으면 사진). 박스를 영상 폭에 맞춤 */}
+                    {/* 오른쪽 - 시연 영상 (없으면 사진). 박스를 영상 폭에 맞춤 */}
                     {feature.video ? (
                       <div className="mx-auto lg:ml-auto lg:mr-0 w-fit rounded-xl bg-ground/60 border border-line p-3">
                         <video
@@ -260,14 +307,14 @@ export default function FeatureCard({ feature }: { feature: AiFeature }) {
                     )}
                   </div>
 
-                  {/* 구조 다이어그램 — 아래 풀폭 (챗봇) */}
+                  {/* 구조 다이어그램 - 아래 풀폭 (챗봇) */}
                   {feature.diagram === "rag" && (
                     <div className="mt-6 rounded-xl bg-ground/60 border border-line p-3 sm:p-4">
                       <RagDiagram />
                     </div>
                   )}
 
-                  {/* 항목 단위 비교표 — 후보 서베이처럼 표가 곧 본문인 경우 */}
+                  {/* 항목 단위 비교표 - 후보 서베이처럼 표가 곧 본문인 경우 */}
                   {feature.table && (
                     <div className="mt-6">
                       {feature.table.label && (
@@ -280,7 +327,7 @@ export default function FeatureCard({ feature }: { feature: AiFeature }) {
                         rows={feature.table.rows}
                       />
                       {feature.table.note && (
-                        <p className="mt-3 text-[0.95rem] leading-relaxed text-ink">
+                        <p className="mt-3 whitespace-pre-line text-[0.95rem] leading-relaxed text-ink">
                           {feature.table.note}
                         </p>
                       )}
@@ -288,7 +335,7 @@ export default function FeatureCard({ feature }: { feature: AiFeature }) {
                   )}
 
 
-                  {/* 트러블슈팅 · 기술적 의사결정 — 구분선으로 나눈 세로 흐름 */}
+                  {/* 트러블슈팅 · 기술적 의사결정 - 구분선으로 나눈 세로 흐름 */}
                   {feature.troubles && feature.troubles.length > 0 && (
                     <div className="mt-10 border-t-2 border-tide/30 pt-6">
                       <p className="font-semibold text-deep mb-1">
@@ -306,7 +353,7 @@ export default function FeatureCard({ feature }: { feature: AiFeature }) {
                               </span>
                             </h4>
 
-                            {/* 표 — 문제·해결 두 줄을 대신한다 */}
+                            {/* 표 - 문제·해결 두 줄을 대신한다 */}
                             {trouble.table && (
                               <div className="mt-3 pl-8">
                                 <DataTable
@@ -341,7 +388,7 @@ export default function FeatureCard({ feature }: { feature: AiFeature }) {
                               </div>
                             )}
 
-                            {/* 태그 + 상세 열기 — 한 줄에 좌우로 */}
+                            {/* 태그 + 상세 열기 - 한 줄에 좌우로 */}
                             <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 pl-8">
                               {trouble.tags && trouble.tags.length > 0 && (
                                 <ul className="flex flex-wrap gap-1.5">
@@ -375,7 +422,7 @@ export default function FeatureCard({ feature }: { feature: AiFeature }) {
                     </div>
                   )}
 
-                  {/* 이 항목을 다룬 글 — 하단 목록과 중복되지만, 읽는 자리에서
+                  {/* 이 항목을 다룬 글 - 하단 목록과 중복되지만, 읽는 자리에서
                       바로 넘어갈 수 있는 쪽이 실제로 눌린다 */}
                   {feature.writeups && feature.writeups.length > 0 && (
                     <div className="mt-6 flex flex-wrap items-baseline gap-x-3 gap-y-2 border-t border-line pt-4">

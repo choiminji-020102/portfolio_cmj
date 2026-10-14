@@ -55,7 +55,7 @@ export function Card({ children }: { children: ReactNode }) {
   );
 }
 
-/* 세로선 없는 단순 카드 — 그리드 배치용. 좌측 상단에 청록 강조 바만 남긴다. */
+/* 세로선 없는 단순 카드 - 그리드 배치용. 좌측 상단에 청록 강조 바만 남긴다. */
 export function PlainCard({ children }: { children: ReactNode }) {
   return (
     <article className="relative h-full flex flex-col rounded-2xl bg-surface border border-line shadow-[0_1px_2px_rgba(26,19,47,0.04),0_8px_24px_-12px_rgba(26,19,47,0.12)] p-7 sm:p-8 transition-shadow hover:shadow-[0_2px_4px_rgba(26,19,47,0.06),0_16px_36px_-16px_rgba(26,19,47,0.2)]">
@@ -68,7 +68,7 @@ export function PlainCard({ children }: { children: ReactNode }) {
   );
 }
 
-/* 카드 머리 — 기관명 + 배지, 역할, 메타 한 줄 */
+/* 카드 머리 - 기관명 + 배지, 역할, 메타 한 줄 */
 export function CardHead({
   org,
   badge,

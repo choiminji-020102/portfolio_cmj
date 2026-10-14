@@ -93,7 +93,7 @@ export default function SendGroupingDiagram() {
         <div className="w-px h-5 bg-stone-300" />
       </div>
       <div className="rounded-2xl border border-stone-200 bg-stone-50 p-4">
-        <div className="text-xs font-bold text-stone-400 uppercase tracking-wider mb-2">② SendGroup 목록 생성 — 3종 모두 동일한 형태</div>
+        <div className="text-xs font-bold text-stone-400 uppercase tracking-wider mb-2">② SendGroup 목록 생성 - 3종 모두 동일한 형태</div>
         <div className="grid grid-cols-3 gap-2 mb-3">
           {["address_id", "recipient_name / recipient_phone", "country_code / postal_code", "order_items (품목 목록)", "product_kind", "customer_memo"].map((field) => (
             <div key={field} className="bg-white border border-stone-200 rounded-lg px-2.5 py-1.5 text-xs font-mono text-stone-500 text-center">

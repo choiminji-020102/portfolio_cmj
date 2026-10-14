@@ -5,6 +5,7 @@ import { actionButton, bullet, leadText, sectionTitle, tagChip } from "@/lib/ui"
 import { AwardBadge } from "./AwardMark";
 import DataTable from "./DataTable";
 import FeatureCard from "./FeatureCard";
+import FeatureOverview from "./FeatureOverview";
 import GitHubIcon from "./GitHubIcon";
 import MermaidDiagram from "./MermaidDiagram";
 import ShowcaseGallery from "./ShowcaseGallery";
@@ -16,8 +17,46 @@ export default function LightProjectView({
 }) {
   // 제안 배경 막대그래프 세그먼트 색 (진→연)
   const barTones = ["bg-deep", "bg-deep/55", "bg-deep/35", "bg-deep/20"];
-  // 원인 갈래가 없는 프로젝트는 배경을 1단으로 — 화살표와 빈 칸을 만들지 않는다
+  // 원인 갈래가 없는 프로젝트는 배경을 1단으로 - 화살표와 빈 칸을 만들지 않는다
   const hasCauses = (project.backgroundCauses?.length ?? 0) > 0;
+  // 결과물 - 기술 상세로 들어가기 전에 "무엇을 만들었나"를 화면으로 먼저 보여준다.
+  // showcaseFirst 인 프로젝트는 담당 범위보다 앞, 아니면 사용 기술 뒤에 놓는다
+  const showcaseSection =
+    project.showcase && project.showcase.shots.length > 0 ? (
+      <section className="mt-16">
+        {/* 제목 옆에 시연 영상 - 캡처를 보러 온 자리에서 바로 움직이는 화면으로 넘어갈 수 있게.
+            버튼이 여기 있으면 "영상은 상단에 있다"는 안내문이 따로 필요 없다 */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className={sectionTitle}>
+            {project.showcase.label}
+          </h2>
+          {project.demo && (
+            <a
+              href={project.demo}
+              target="_blank"
+              rel="noreferrer"
+              className="rail inline-flex items-center gap-1.5 rounded-full border border-tide bg-tide/15 px-3.5 py-1.5 font-semibold text-deep transition-colors hover:bg-tide/25"
+            >
+              <span aria-hidden="true">▶</span>
+              {project.demoLabel ?? "시연 영상"}
+            </a>
+          )}
+        </div>
+        {project.showcase.intro && (
+          <p className={`mt-4 ${leadText}`}>
+            {project.showcase.intro}
+          </p>
+        )}
+        {/* 단서 문장 - 지금은 쓰는 곳이 없다 (시연 영상은 위 버튼이 대신한다) */}
+        {project.showcase.note && (
+          <p className="mt-3 text-[0.95rem] leading-relaxed text-muted">
+            {project.showcase.note}
+          </p>
+        )}
+        {/* 캡처 격자 - 목록 배치와 클릭 확대는 클라이언트 쪽에서 (ShowcaseGallery) */}
+        <ShowcaseGallery shots={project.showcase.shots} />
+      </section>
+    ) : null;
   return (
     <div className="min-h-screen bg-ground">
       {/* 상단바 */}
@@ -33,10 +72,10 @@ export default function LightProjectView({
       </div>
 
       <main className="section-scope max-w-5xl mx-auto px-6 py-12 sm:py-14">
-        {/* 헤더 — 메타 → 제목·배지 → 요약 → 태그 → 링크 (모두 왼쪽 축 정렬)
+        {/* 헤더 - 메타 → 제목·배지 → 요약 → 태그 → 링크 (모두 왼쪽 축 정렬)
             앱 스크린샷은 최상단 갤러리 대신 각 AI 기능 카드에서 보여준다 */}
         <header className="border-b border-line pb-10">
-          {/* 기간·팀을 제목 위 라벨로 — 제목이 블록의 시각 앵커가 되도록 */}
+          {/* 기간·팀을 제목 위 라벨로 - 제목이 블록의 시각 앵커가 되도록 */}
           <p className="rail text-muted">
             {project.period}
             <span className="mx-2 text-line">·</span>
@@ -56,7 +95,7 @@ export default function LightProjectView({
             <AwardBadge badge={project.badge} />
           </div>
 
-          {/* 한 줄 요약 — 스크롤하지 않고도 역할이 파악되도록 제목에 바로 붙인다 */}
+          {/* 한 줄 요약 - 스크롤하지 않고도 역할이 파악되도록 제목에 바로 붙인다 */}
           {project.tagline && (
             <p className="mt-3 max-w-3xl text-lg font-semibold leading-snug text-deep">
               {project.tagline}
@@ -84,7 +123,7 @@ export default function LightProjectView({
             ))}
           </ul>
 
-          {/* 외부 링크 — 헤더를 닫는 액션 줄.
+          {/* 외부 링크 - 헤더를 닫는 액션 줄.
               시연 영상을 GitHub 옆에 두어 상단에서 바로 결과물로 들어갈 수 있게 한다 */}
           {(project.github ||
             project.demo ||
@@ -139,7 +178,7 @@ export default function LightProjectView({
           )}
         </header>
 
-        {/* 과제 개요 — 사실 항목(좌) + 작업 타임라인(우).
+        {/* 과제 개요 - 사실 항목(좌) + 작업 타임라인(우).
             타임라인이 없으면 개요가 단독으로 폭을 다 쓴다 */}
         {project.overview && project.overview.length > 0 && (
           <section className="mt-12">
@@ -192,7 +231,7 @@ export default function LightProjectView({
               </p>
             )}
 
-            {/* 참고 이미지 — 검출 대상이 실제로 어떻게 보이는지.
+            {/* 참고 이미지 - 검출 대상이 실제로 어떻게 보이는지.
                 본인이 만든 산출물이 아니므로 성격을 반드시 밝힌다 */}
             {project.overviewFigures && project.overviewFigures.length > 0 && (
               <div className="mt-10">
@@ -257,7 +296,7 @@ export default function LightProjectView({
             <h2 className={sectionTitle}>
               {project.backgroundLabel ?? "제안 배경"}
             </h2>
-            {/* 좌(리드+규모별 그래프) / 우(두 원인 = 텍스트+그래픽) — 같은 높이 */}
+            {/* 좌(리드+규모별 그래프) / 우(두 원인 = 텍스트+그래픽) - 같은 높이 */}
             <div
               className={`mt-6 grid gap-6 ${
                 hasCauses
@@ -265,9 +304,9 @@ export default function LightProjectView({
                   : ""
               }`}
             >
-              {/* 왼쪽 — 리드는 맨 위, 그래프는 맨 아래. 오른쪽 컬럼과 상·하단선을 맞춘다 */}
+              {/* 왼쪽 - 리드는 맨 위, 그래프는 맨 아래. 오른쪽 컬럼과 상·하단선을 맞춘다 */}
               <div className="flex flex-col justify-between gap-6">
-                {/* 리드 — 위기 → 결과 */}
+                {/* 리드 - 위기 → 결과 */}
                 <div>
                   <p className={leadText}>{project.background}</p>
                   {project.backgroundEffect && (
@@ -293,7 +332,7 @@ export default function LightProjectView({
                 )}
               </div>
 
-              {/* 파생 화살표 — 데스크톱 →, 모바일 ↓ */}
+              {/* 파생 화살표 - 데스크톱 →, 모바일 ↓ */}
               {hasCauses && (
                 <div
                   aria-hidden="true"
@@ -314,7 +353,7 @@ export default function LightProjectView({
                 </div>
               )}
 
-              {/* 오른쪽 — 두 원인: 각 원인 텍스트 아래에 해당 그래픽 */}
+              {/* 오른쪽 - 두 원인: 각 원인 텍스트 아래에 해당 그래픽 */}
               {project.backgroundCauses &&
                 project.backgroundCauses.length > 0 && (
                   <div className="flex flex-col gap-7">
@@ -402,7 +441,7 @@ export default function LightProjectView({
                 )}
             </div>
 
-            {/* 기존 대안과 그 한계 — 배경의 근거가 표인 경우 */}
+            {/* 기존 대안과 그 한계 - 배경의 근거가 표인 경우 */}
             {project.backgroundTable && (
               <div className="mt-6 max-w-3xl">
                 {project.backgroundTable.label && (
@@ -420,22 +459,22 @@ export default function LightProjectView({
             {/* 표 아래로 이어지는 결론 */}
             {project.backgroundClosing &&
               project.backgroundClosing.length > 0 && (
-                <div className="mt-6 max-w-3xl space-y-3">
+                <div className="mt-6 space-y-3">
                   {project.backgroundClosing.map((para) => (
-                    <p key={para} className={leadText}>
+                    <p key={para} className={`whitespace-pre-line ${leadText}`}>
                       {para}
                     </p>
                   ))}
                 </div>
               )}
 
-            {/* 기능 축 — 나란히 놓아 셋을 한눈에, 담당한 축만 강조한다 */}
+            {/* 기능 축 - 나란히 놓아 셋을 한눈에, 담당한 축만 강조한다 */}
             {project.backgroundScope && project.backgroundScope.length > 0 && (
-              <ol className="mt-6 grid max-w-3xl gap-3 sm:grid-cols-3">
+              <ol className="mt-6 grid gap-3 sm:grid-cols-3">
                 {project.backgroundScope.map((item) => (
                   <li
                     key={item.label}
-                    className={`flex flex-col items-center justify-center rounded-xl border px-4 py-3 text-center ${
+                    className={`relative flex flex-col items-center rounded-xl border px-4 py-4 text-center ${
                       item.mine
                         ? "border-tide/50 bg-tide/8"
                         : "border-line bg-surface"
@@ -455,15 +494,29 @@ export default function LightProjectView({
                     >
                       {item.text}
                     </span>
+                    {item.points && item.points.length > 0 && (
+                      <ul className="mt-3 w-full space-y-1.5 border-t border-line pt-3 text-left text-[0.85rem] leading-relaxed text-muted">
+                        {item.points.map((pt) => (
+                          <li
+                            key={pt}
+                            className="relative break-keep pl-4 before:absolute before:left-0 before:top-[0.6em] before:h-1 before:w-1 before:rounded-full before:bg-tide"
+                          >
+                            {pt}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                     {item.mine && (
-                      <span className="rail mt-1.5 text-tide">담당 영역</span>
+                      <span className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-full border border-tide/50 bg-tide px-2.5 py-0.5 text-[0.7rem] font-semibold leading-none tracking-normal text-white">
+                        담당 영역
+                      </span>
                     )}
                   </li>
                 ))}
               </ol>
             )}
 
-            {/* 계기 · 목표 — 박스 없이 2단 (하단 역할 박스와 중복 방지) */}
+            {/* 계기 · 목표 - 박스 없이 2단 (하단 역할 박스와 중복 방지) */}
             {(project.backgroundOrigin || project.backgroundGoal) && (
               <div className="mt-10 grid gap-x-10 gap-y-6 border-t border-line pt-8 sm:grid-cols-2">
                 {project.backgroundOrigin && (
@@ -487,15 +540,21 @@ export default function LightProjectView({
           </section>
         )}
 
+        {project.featureOverview && (
+          <FeatureOverview data={project.featureOverview} />
+        )}
+
+        {project.showcaseFirst && showcaseSection}
+
         {/* 내가 맡은 역할 */}
         {project.myRole && (
           <section className="mt-16">
             <h2 className={sectionTitle}>
               {project.myRoleLabel ?? "내가 맡은 역할"}
             </h2>
-            <p className={`mt-6 ${leadText}`}>{project.myRole}</p>
+            <p className={`mt-6 whitespace-pre-line ${leadText}`}>{project.myRole}</p>
 
-            {/* 담당 축 — 프로젝트마다 갈래 수가 다르므로 칸 수를 맞춘다 */}
+            {/* 담당 축 - 프로젝트마다 갈래 수가 다르므로 칸 수를 맞춘다 */}
             {project.myRoleAreas && project.myRoleAreas.length > 0 && (
               <div className="mt-8">
                 <p className="rail text-muted">담당 영역</p>
@@ -525,7 +584,7 @@ export default function LightProjectView({
               </div>
             )}
 
-            {/* 작업 범위 — 순서 파이프라인 */}
+            {/* 작업 범위 - 순서 파이프라인 */}
             {project.myRolePipeline && project.myRolePipeline.length > 0 && (
               <div className="mt-8">
                 <p className="rail text-muted">작업 범위 · 전 과정</p>
@@ -546,14 +605,17 @@ export default function LightProjectView({
               </div>
             )}
 
-            {/* 구조 · 흐름 다이어그램 — 담당 구간이 어디에 걸쳐 있는지 */}
+            {/* 구조 · 흐름 다이어그램 - 담당 구간이 어디에 걸쳐 있는지 */}
             {project.myRoleDiagrams && project.myRoleDiagrams.length > 0 && (
               <div className="mt-8 space-y-6">
                 {project.myRoleDiagrams.map((d, i) => (
                   <figure key={i}>
-                    {d.caption && (
-                      <figcaption className="rail mb-2 text-muted">
-                        {d.caption}
+                    {(d.caption || d.legend) && (
+                      <figcaption className="rail mb-2 flex flex-wrap items-baseline justify-between gap-x-4 text-muted">
+                        <span>{d.caption}</span>
+                        {d.legend && (
+                          <span className="whitespace-pre">{d.legend}</span>
+                        )}
                       </figcaption>
                     )}
                     <div className="rounded-xl border border-line bg-surface p-3 sm:p-4">
@@ -566,7 +628,7 @@ export default function LightProjectView({
           </section>
         )}
 
-        {/* 사용 기술 — 담당 범위 바로 뒤.
+        {/* 사용 기술 - 담당 범위 바로 뒤.
             읽는 사람은 스택을 초반에 확인하므로, 본문 끝이 아니라 여기서 한 번에 보여준다 */}
         {project.techStack && project.techStack.length > 0 && (
           <section className="mt-16">
@@ -582,44 +644,9 @@ export default function LightProjectView({
           </section>
         )}
 
-        {/* 결과물 — 기술 상세로 들어가기 전에 "무엇을 만들었나"를 화면으로 먼저 보여준다 */}
-        {project.showcase && project.showcase.shots.length > 0 && (
-          <section className="mt-16">
-            {/* 제목 옆에 시연 영상 — 캡처를 보러 온 자리에서 바로 움직이는 화면으로 넘어갈 수 있게.
-                버튼이 여기 있으면 "영상은 상단에 있다"는 안내문이 따로 필요 없다 */}
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <h2 className={sectionTitle}>
-                {project.showcase.label}
-              </h2>
-              {project.demo && (
-                <a
-                  href={project.demo}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="rail inline-flex items-center gap-1.5 rounded-full border border-tide bg-tide/15 px-3.5 py-1.5 font-semibold text-deep transition-colors hover:bg-tide/25"
-                >
-                  <span aria-hidden="true">▶</span>
-                  {project.demoLabel ?? "시연 영상"}
-                </a>
-              )}
-            </div>
-            {project.showcase.intro && (
-              <p className={`mt-4 max-w-3xl ${leadText}`}>
-                {project.showcase.intro}
-              </p>
-            )}
-            {/* 단서 문장 — 지금은 쓰는 곳이 없다 (시연 영상은 위 버튼이 대신한다) */}
-            {project.showcase.note && (
-              <p className="mt-3 text-[0.95rem] leading-relaxed text-muted">
-                {project.showcase.note}
-              </p>
-            )}
-            {/* 캡처 격자 — 목록 배치와 클릭 확대는 클라이언트 쪽에서 (ShowcaseGallery) */}
-            <ShowcaseGallery shots={project.showcase.shots} />
-          </section>
-        )}
+        {!project.showcaseFirst && showcaseSection}
 
-        {/* 핵심 AI 기능 — 문제 → 해결 → 수치 */}
+        {/* 핵심 AI 기능 - 문제 → 해결 → 수치 */}
         {project.aiFeatures && project.aiFeatures.length > 0 && (
           <section className="mt-16">
             <h2 className={sectionTitle}>
@@ -633,7 +660,7 @@ export default function LightProjectView({
           </section>
         )}
 
-        {/* 구현 상세 — 절이 여러 개로 갈릴 때. 카드 모양은 위와 같다 */}
+        {/* 구현 상세 - 절이 여러 개로 갈릴 때. 카드 모양은 위와 같다 */}
         {project.featureGroups && project.featureGroups.length > 0 && (
           <>
             {project.featureGroups.map((group) => (
@@ -760,13 +787,13 @@ export default function LightProjectView({
           </section>
         )}
 
-        {/* 회고 — 갈래로 나뉘는 경우 (잘한 점 / 아쉬운 점 / 더 해본다면) */}
+        {/* 회고 - 갈래로 나뉘는 경우 (잘한 점 / 아쉬운 점 / 더 해본다면) */}
         {project.closingGroups && project.closingGroups.length > 0 && (
           <section className="mt-16 border-t border-line pt-12">
             <h2 className={sectionTitle}>
               {project.closingLabel ?? "마무리"}
             </h2>
-            <div className="mt-8 max-w-3xl space-y-8">
+            <div className="mt-8 space-y-8">
               {project.closingGroups.map((group) => (
                 <div key={group.title}>
                   <p className="font-semibold text-deep">{group.title}</p>
@@ -786,14 +813,14 @@ export default function LightProjectView({
           </section>
         )}
 
-        {/* 마무리 — 결과가 아니라 무엇이 남았는지.
+        {/* 마무리 - 결과가 아니라 무엇이 남았는지.
             첫 문단만 굵게 두어 결론을 앞세우고, 나머지는 본문 흐름으로 읽힌다 */}
         {project.closing && project.closing.length > 0 && (
           <section className="mt-16 border-t border-line pt-12">
             <h2 className={sectionTitle}>
               {project.closingLabel ?? "마무리"}
             </h2>
-            {/* 줄길이 제한은 헤더 요약과 같은 값을 쓴다 — 회고만 좁아 보이지 않게 */}
+            {/* 줄길이 제한은 헤더 요약과 같은 값을 쓴다 - 회고만 좁아 보이지 않게 */}
             <div className="mt-6 max-w-3xl space-y-4">
               {project.closing.map((para, i) => (
                 <p
@@ -811,7 +838,7 @@ export default function LightProjectView({
           </section>
         )}
 
-        {/* 작업 기록 — 본문에서 덜어낸 상세를 외부 글로 넘긴다 */}
+        {/* 작업 기록 - 본문에서 덜어낸 상세를 외부 글로 넘긴다 */}
         {project.writeups && project.writeups.length > 0 && (
           <section className="mt-16">
             <h2 className={sectionTitle}>

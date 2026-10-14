@@ -1,7 +1,7 @@
 import { tokenize, type CodeLang, type TokenKind } from "@/lib/highlight";
 
 /*
-  코드 블록 — 흰 바탕에 라이트 하이라이팅.
+  코드 블록 - 흰 바탕에 라이트 하이라이팅.
   본문이 밝은 페이지라 어두운 블록은 그 자리만 도드라진다.
 
   색은 Atom One Light 계열을 팔레트에 맞춰 살짝 눕힌 값.

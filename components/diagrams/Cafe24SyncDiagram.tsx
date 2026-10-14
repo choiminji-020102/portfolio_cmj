@@ -121,10 +121,10 @@ export default function Cafe24SyncDiagram() {
           <div className="text-xs font-bold text-amber-700 mb-1.5">정기구독 import 시점에 미리 N21 등록하는 이유</div>
           <div className="space-y-1.5">
             <p className="text-xs text-stone-600">
-              <span className="font-semibold">① 단품과 구분</span> — N20(배송준비중)에 두면 매일 들어오는 단품 주문과 섞여 구분이 안 됩니다. N21로 분리해 두면 Cafe24 관리자 화면에서 정기구독만 필터할 수 있습니다.
+              <span className="font-semibold">① 단품과 구분</span> - N20(배송준비중)에 두면 매일 들어오는 단품 주문과 섞여 구분이 안 됩니다. N21로 분리해 두면 Cafe24 관리자 화면에서 정기구독만 필터할 수 있습니다.
             </p>
             <p className="text-xs text-stone-600">
-              <span className="font-semibold">② PUT 한 번으로 처리</span> — Cafe24 API 설계 상 N21 진입(POST)에는 택배사·운송장번호가 필수이지만, N21→N30 전환(PUT)에는 shipping_code만 있으면 됩니다. import 시 미리 등록해 두면 발송 완료 시 추가 정보 없이 상태를 올릴 수 있습니다.
+              <span className="font-semibold">② PUT 한 번으로 처리</span> - Cafe24 API 설계 상 N21 진입(POST)에는 택배사·운송장번호가 필수이지만, N21→N30 전환(PUT)에는 shipping_code만 있으면 됩니다. import 시 미리 등록해 두면 발송 완료 시 추가 정보 없이 상태를 올릴 수 있습니다.
             </p>
           </div>
         </div>
@@ -134,7 +134,7 @@ export default function Cafe24SyncDiagram() {
             <div className="text-xs font-bold text-stone-500 mb-1.5">첫 발송만 PUT (YEARLY)</div>
             <p className="text-xs text-stone-500">
               같은 주문에 매월 Send가 생성되지만 Cafe24 주문은 1개입니다.
-              판단 기준: <span className="font-mono">last_send_issue IS NULL</span> — DB flush <span className="font-semibold">전</span> 시점에 확인해야 올바르게 체크됩니다.
+              판단 기준: <span className="font-mono">last_send_issue IS NULL</span> - DB flush <span className="font-semibold">전</span> 시점에 확인해야 올바르게 체크됩니다.
             </p>
           </div>
           <div className="rounded-2xl border border-stone-200 bg-stone-50 p-4">

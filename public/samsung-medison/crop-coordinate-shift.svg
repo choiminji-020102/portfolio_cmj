@@ -8,7 +8,7 @@
     </marker>
   </defs>
 
-  <text x="40" y="42" font-size="12" fill="#5f5668">원본 1280 × 720 — 라벨링은 여기서 했다</text>
+  <text x="40" y="42" font-size="12" fill="#5f5668">원본 1280 × 720 - 라벨링은 여기서 했다</text>
   <rect x="40" y="56" width="320" height="180" rx="4" fill="none" stroke="#cdc9d4" stroke-width="0.5" stroke-dasharray="4 4"/>
   <rect x="90" y="56" width="225" height="180" fill="#e3f0f4" stroke="#3d7f97" stroke-width="0.5"/>
   <rect x="40" y="56" width="50" height="180" fill="#f3f2f6" stroke="#cdc9d4" stroke-width="0.5"/>
@@ -21,7 +21,7 @@
 
   <line x1="392" y1="146" x2="432" y2="146" stroke="#5f5668" stroke-width="1.5" marker-end="url(#arrow)"/>
 
-  <text x="466" y="42" font-size="12" fill="#5f5668">크롭본 900 × 600 — 학습은 여기서 한다</text>
+  <text x="466" y="42" font-size="12" fill="#5f5668">크롭본 900 × 600 - 학습은 여기서 한다</text>
   <rect x="466" y="56" width="140" height="180" fill="#e3f0f4" stroke="#3d7f97" stroke-width="0.5"/>
   <circle cx="527" cy="146" r="5" fill="#c2603a"/>
   <circle cx="583" cy="146" r="5" fill="none" stroke="#c2603a" stroke-width="1" stroke-dasharray="3 3"/>

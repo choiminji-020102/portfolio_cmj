@@ -47,6 +47,6 @@
     <circle cx="1098" cy="208" r="6.5" fill="#c2603a"/>
     <circle cx="1104" cy="372" r="6.5" fill="#c2603a"/>
     <text x="1101" y="492" text-anchor="middle" font-size="28" font-weight="700" fill="#1a132f">겹쳐서 대조</text>
-    <text x="1101" y="524" text-anchor="middle" font-size="22" fill="#5f5668">차이는 남는다 — 크게 벗어나거나 꼬인 것만 걸러낸다</text>
+    <text x="1101" y="524" text-anchor="middle" font-size="22" fill="#5f5668">차이는 남는다 - 크게 벗어나거나 꼬인 것만 걸러낸다</text>
   </g>
 </svg>

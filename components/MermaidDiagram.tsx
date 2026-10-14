@@ -16,20 +16,27 @@ export default function MermaidDiagram({ chart }: Props) {
 
     async function render() {
       const mermaid = (await import("mermaid")).default;
-      mermaid.initialize({
-        startOnLoad: false,
-        theme: "neutral",
-        flowchart: { curve: "basis", padding: 20 },
-        themeVariables: {
-          primaryColor: "#fafaf9",
-          primaryBorderColor: "#d6d3d1",
-          primaryTextColor: "#1c1917",
-          lineColor: "#78716c",
-          secondaryColor: "#fff7ed",
-          tertiaryColor: "#f5f5f4",
-          fontSize: "14px",
-        },
-      });
+      // %%{init}%% 지시문이 있는 도식은 그 안의 테마를 그대로 쓴다
+      // (공통 테마가 지시문의 글자 크기·색을 덮어쓰지 않도록)
+      const ownTheme = chart.trimStart().startsWith("%%{init");
+      mermaid.initialize(
+        ownTheme
+          ? { startOnLoad: false }
+          : {
+              startOnLoad: false,
+              theme: "neutral",
+              flowchart: { curve: "basis", padding: 20 },
+              themeVariables: {
+                primaryColor: "#fafaf9",
+                primaryBorderColor: "#d6d3d1",
+                primaryTextColor: "#1c1917",
+                lineColor: "#78716c",
+                secondaryColor: "#fff7ed",
+                tertiaryColor: "#f5f5f4",
+                fontSize: "14px",
+              },
+            },
+      );
 
       const id = `mermaid-${Math.random().toString(36).slice(2)}`;
       const { svg } = await mermaid.render(id, chart);

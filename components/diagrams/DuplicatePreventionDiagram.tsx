@@ -16,7 +16,7 @@ export default function DuplicatePreventionDiagram() {
       {/* already_sent_ids 수집 */}
       <div className="rounded-2xl border border-stone-200 bg-stone-50 p-5">
         <div className="text-xs font-bold text-stone-400 uppercase tracking-wider mb-2">
-          already_sent_ids 수집 — 발송 완료로 간주하는 조건
+          already_sent_ids 수집 - 발송 완료로 간주하는 조건
         </div>
         <p className="text-xs text-stone-500 mb-3">
           그룹화 함수 진입 전, 이미 처리된 주문 품목 ID를 집합으로 수집합니다. 이 집합에 포함된 품목은 발송 후보에서 제외됩니다.
@@ -44,7 +44,7 @@ export default function DuplicatePreventionDiagram() {
             <div className="text-xs font-semibold text-stone-500 mb-2">발송 대상 선별 조건</div>
             <Condition
               text="already_sent_ids에 없음"
-              sub="호(issue) 비교 없음 — 어느 호든 이력이 있으면 영구 제외"
+              sub="호(issue) 비교 없음 - 어느 호든 이력이 있으면 영구 제외"
             />
           </div>
 
@@ -65,7 +65,7 @@ export default function DuplicatePreventionDiagram() {
             <div className="text-xs font-semibold text-stone-500 mb-2">발송 대상 선별 조건 (모두 통과해야 함)</div>
             <Condition
               text="이번 호 발송 이력 없음"
-              sub="SendItem.issue == issue 기준 — 지난 달 발송됐어도 이번 달은 다시 대상"
+              sub="SendItem.issue == issue 기준 - 지난 달 발송됐어도 이번 달은 다시 대상"
             />
             <Condition
               text="last_send_issue < issue (또는 null)"

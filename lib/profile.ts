@@ -2,10 +2,10 @@
   경력 · 교육 · 자격 데이터.
   프로젝트 상세는 lib/projects.ts 가 따로 가진다.
 
-  contact — 상단바와 하단 Contact 절이 같이 쓴다. 두 군데에 적어두면
+  contact - 상단바와 하단 Contact 절이 같이 쓴다. 두 군데에 적어두면
   한쪽만 고치는 사고가 나므로 여기 한 벌만 둔다.
 
-  track — 좌측 메타축에 붙는 분류 라벨. 색이 아니라 텍스트로 갈래를 표시한다.
+  track - 좌측 메타축에 붙는 분류 라벨. 색이 아니라 텍스트로 갈래를 표시한다.
 */
 export const contact = {
   email: "t3335150@gmail.com",
@@ -44,7 +44,7 @@ export interface Career {
   stack: string[];
   /** 프로젝트 섹션에 상세가 있으면 그 slug. parts 가 있으면 parts[].projectSlug 를 쓴다 */
   projectSlug?: string;
-  /** 카드 하나 안에서 기간별로 갈리는 구간 — 있으면 points/stack/projectSlug 대신 이걸 렌더링한다 */
+  /** 카드 하나 안에서 기간별로 갈리는 구간 - 있으면 points/stack/projectSlug 대신 이걸 렌더링한다 */
   parts?: CareerPart[];
 }
 
@@ -52,8 +52,8 @@ export const careers: Career[] = [
   {
     org: "(주)선목 도서출판 목자의지혜",
     employment: "프리랜서",
-    role: "풀스택 — 기획·설계·개발·배포 단독 수행",
-    period: "2025.10 — 2026.07",
+    role: "풀스택 - 기획·설계·개발·배포 단독 수행",
+    period: "2025.10 - 2026.07",
     duration: "10개월 · 유지보수·추가개발 계약 중",
     track: "풀스택",
     projectSlug: "magazine-manager",
@@ -62,7 +62,7 @@ export const careers: Career[] = [
         text: "구독자 관리·발송·정산 엑셀 수작업을 내부 관리 시스템으로 옮겨 실서비스 운영 중",
       },
       {
-        text: "정기구독 3,200건을 관리하며 매월 발송 명단을 버튼 한 번으로 생성 — 합포장 누락과 중복 발송 해소",
+        text: "정기구독 3,200건을 관리하며 매월 발송 명단을 버튼 한 번으로 생성 - 합포장 누락과 중복 발송 해소",
       },
       {
         text: "정기구독·단품·VIP 3종 발송 흐름을 단일 출력 구조로 통합하는 그룹화 알고리즘 설계",
@@ -86,19 +86,19 @@ export const careers: Career[] = [
     ],
   },
   /*
-    삼성메디슨 인턴은 카드 하나 — 6개월(2024.03.02~08.31) 동안 사수가 바뀌며
+    삼성메디슨 인턴은 카드 하나 - 6개월(2024.03.02~08.31) 동안 사수가 바뀌며
     담당 과제가 파트 1 / 파트 2 로 나뉘지만, 회사·직군은 하나이므로 카드는
     합치고 성과·기간·프로젝트 링크만 parts 로 갈라 어느 성과가 어느 시기
     것인지 구분한다.
 
-    '제품이 안 됐다'가 아니라 '진행 불가 사유를 규명해 보고했다'로 쓴다 —
+    '제품이 안 됐다'가 아니라 '진행 불가 사유를 규명해 보고했다'로 쓴다 -
     같은 사실이지만 전자는 변명, 후자는 판단으로 읽힌다.
   */
   {
     org: "삼성메디슨",
     employment: "인턴",
-    role: "AI Vision 그룹 — 딥러닝 기반 초음파 영상 진단 기능 개발",
-    period: "2024.03.02 — 2024.08.31",
+    role: "AI Vision 그룹 - 딥러닝 기반 초음파 영상 진단 기능 개발",
+    period: "2024.03.02 - 2024.08.31",
     duration: "6개월 · 계약 기간 만료",
     track: "AI · 의료영상",
     points: [],
@@ -107,43 +107,43 @@ export const careers: Career[] = [
       {
         label: "파트 1",
         role: "하복부 초음파 다중 구조물 검출",
-        period: "2024.03 — 2024.04",
+        period: "2024.03 - 2024.04",
         duration: "2개월",
         projectSlug: "samsung-medison",
         points: [
           {
-            text: "성능 정체 원인 규명 — 조정과 결과 사이에 일관된 상관이 없다는 점을 근거로 병목이 모델이 아닌 정답 데이터에 있다고 가설 수립, 사내 임상의와 원본 영상·레이블을 함께 검토해 GT 마스크 경계 과다 문제를 확인·보고",
+            text: "성능 정체 원인 규명 - 조정과 결과 사이에 일관된 상관이 없다는 점을 근거로 병목이 모델이 아닌 정답 데이터에 있다고 가설 수립, 사내 임상의와 원본 영상·레이블을 함께 검토해 GT 마스크 경계 과다 문제를 확인·보고",
           },
           {
-            text: "배포 제약 기준 모델 선정 — 후보 6종을 도메인·태스크 요건과 배포 환경 제약 관점에서 검토해 YOLOv8-seg 채택, AGPL-3.0 라이선스 리스크 규명해 함께 보고",
+            text: "배포 제약 기준 모델 선정 - 후보 6종을 도메인·태스크 요건과 배포 환경 제약 관점에서 검토해 YOLOv8-seg 채택, AGPL-3.0 라이선스 리스크 규명해 함께 보고",
           },
           {
-            text: "학습 검증 도구 구현 — 정규화 레이블 역산 렌더링, GT/예측 병렬 비교, 폴리곤 마스크 렌더링으로 지표만으로는 드러나지 않던 클래스 인덱스 불일치·좌표계 오류 2건 규명",
+            text: "학습 검증 도구 구현 - 정규화 레이블 역산 렌더링, GT/예측 병렬 비교, 폴리곤 마스크 렌더링으로 지표만으로는 드러나지 않던 클래스 인덱스 불일치·좌표계 오류 2건 규명",
           },
           {
-            text: "데이터 처리 파이프라인 구축 — AVI 프레임 추출 → 영상 단위 대표 크롭(프레임별 contour 최빈값) → GT 생성 → 학습, 영상 87개를 약 3만 장 데이터셋으로 확장",
+            text: "데이터 처리 파이프라인 구축 - AVI 프레임 추출 → 영상 단위 대표 크롭(프레임별 contour 최빈값) → GT 생성 → 학습, 영상 87개를 약 3만 장 데이터셋으로 확장",
           },
           {
-            text: "GT 레이블 생성 — CVAT XML 파싱의 구조적 한계(프레임 밖 좌표 선별 불가)를 확인하고 클래스별 annotation txt 병합 방식으로 재설계, 크롭본·원본 간 비대칭 좌표계 정합 처리",
+            text: "GT 레이블 생성 - CVAT XML 파싱의 구조적 한계(프레임 밖 좌표 선별 불가)를 확인하고 클래스별 annotation txt 병합 방식으로 재설계, 크롭본·원본 간 비대칭 좌표계 정합 처리",
           },
         ],
         stack: ["Python", "PyTorch", "YOLOv8", "OpenCV", "CVAT", "TensorRT"],
       },
       {
         label: "파트 2",
-        role: "산부인과 AI 랩 2D Follicle™ 팀 — 부인과 초음파 난포 세그멘테이션 향상",
-        period: "2024.05 — 2024.08",
+        role: "산부인과 AI 랩 2D Follicle™ 팀 - 부인과 초음파 난포 세그멘테이션 향상",
+        period: "2024.05 - 2024.08",
         duration: "4개월",
         projectSlug: "samsung-medison-detection",
         points: [
           {
-            text: "학습 데이터 구축 — 세그멘테이션 성능 향상을 위해 수천 장 규모 초음파 영상을 선별해 GT 작성·기존 GT 품질 보정, 현재 제품에 탑재된 난포 검출 모델의 학습 데이터가 이 기간에 구축된 것",
+            text: "학습 데이터 구축 - 세그멘테이션 성능 향상을 위해 수천 장 규모 초음파 영상을 선별해 GT 작성·기존 GT 품질 보정, 현재 제품에 탑재된 난포 검출 모델의 학습 데이터가 이 기간에 구축된 것",
           },
           {
-            text: "모델 개선 실험 — 손실 함수 3방향(Dice·Tversky·Focal Tversky) 비교로 FN 가중 Tversky Loss 채택, 손실 값으로는 드러나지 않는 소형 난포 누락을 잡기 위해 개수 기반 평가 절차를 직접 설계",
+            text: "모델 개선 실험 - 손실 함수 3방향(Dice·Tversky·Focal Tversky) 비교로 FN 가중 Tversky Loss 채택, 손실 값으로는 드러나지 않는 소형 난포 누락을 잡기 위해 개수 기반 평가 절차를 직접 설계",
           },
           {
-            text: "난포 윤곽 측정 기능 개발 (C++) — 검사자가 찍은 4점을 지나는 닫힌 곡선을 자연 3차 스플라인으로 생성, 외부 라이브러리 반입이 불가한 사내 환경이라 직접 구현, 사내 테스트 빌드에 반영해 실제 장비에서 동작 검증",
+            text: "난포 윤곽 측정 기능 개발 (C++) - 검사자가 찍은 4점을 지나는 닫힌 곡선을 자연 3차 스플라인으로 생성, 외부 라이브러리 반입이 불가한 사내 환경이라 직접 구현, 사내 테스트 빌드에 반영해 실제 장비에서 동작 검증",
           },
         ],
         stack: ["C++", "Python", "PyTorch", "OpenCV", "ONNX"],
@@ -169,7 +169,7 @@ export const educations: Education[] = [
     program: "7기 · AI 개발자 트랙",
     detail: "KT × 고용노동부",
     status: "수료",
-    period: "2025.03 — 2025.09",
+    period: "2025.03 - 2025.09",
     points: [
       { text: "빅프로젝트 대상(1위) 수상", pending: true },
       { text: "미니프로젝트 5건 수행", pending: true },
@@ -180,7 +180,7 @@ export const educations: Education[] = [
     program: "협력 실무 프로젝트",
     detail: "정보통신산업진흥원",
     status: "수료",
-    period: "2024.10 — 2024.11",
+    period: "2024.10 - 2024.11",
     points: [
       {
         text: "YOLOv3를 직접 구현해 킥보드 안전모 미착용·동승자 탑승을 탐지하는 시스템 개발",
@@ -189,7 +189,7 @@ export const educations: Education[] = [
         text: "AI-Hub 60만 장 규모 PM 데이터셋에서 위반 이미지를 선별하고 전처리 파이프라인 설계",
       },
       {
-        text: "학습된 모델을 FastAPI + React 웹 서비스로 연동 — 이미지를 끌어다 놓으면 탐지",
+        text: "학습된 모델을 FastAPI + React 웹 서비스로 연동 - 이미지를 끌어다 놓으면 탐지",
       },
     ],
     stack: ["PyTorch", "YOLOv3", "OpenCV", "FastAPI", "React", "Docker"],
@@ -199,7 +199,7 @@ export const educations: Education[] = [
     program: "인공지능융합학부 AI의료융합전공",
     detail: "심리학과 복수전공",
     status: "졸업",
-    period: "2020.03 — 2025.02",
+    period: "2020.03 - 2025.02",
     points: [
       { text: "총 취득학점 146.0 / 130" },
       { text: "총 평점평균 4.29 / 4.50" },
@@ -258,7 +258,7 @@ export const certifications: Certification[] = [
   {
     name: "TOEIC Speaking IH (140)",
     org: "한국 TOEIC 위원회",
-    /* 어학성적은 응시일 기준 — 유효기간 2년도 이 날부터 센다 (2027.09.21까지) */
+    /* 어학성적은 응시일 기준 - 유효기간 2년도 이 날부터 센다 (2027.09.21까지) */
     date: "2025.09.21",
     number: "105290",
   },
@@ -280,14 +280,14 @@ export const papers: Paper[] = [
 
 /*
   프로젝트 카드.
-  draft: true 인 항목은 화면에 나오지 않는다 — 내용이 채워지면 플래그를 지운다.
+  draft: true 인 항목은 화면에 나오지 않는다 - 내용이 채워지면 플래그를 지운다.
   빈 카드를 띄우느니 완성된 것만 보여주는 편이 낫다.
   slug 가 있으면 상세 페이지(app/projects/[slug])로 연결된다.
 */
 export interface ProjectCard {
   title: string;
   summary: string;
-  /** 어디서 나온 작업인지 — 경력·교육 섹션과 이어주는 배지 */
+  /** 어디서 나온 작업인지 - 경력·교육 섹션과 이어주는 배지 */
   badge: string;
   track: Track;
   period: string;
@@ -299,9 +299,9 @@ export interface ProjectCard {
   thumbnail?: string;
   /** GitHub 저장소. 있으면 카드에 GitHub 아이콘 링크가 뜬다. */
   github?: string;
-  /** 이 프로젝트에서 내가 맡은 범위 — 팀 작업에서 역할이 산문에 묻히지 않게 한다 */
+  /** 이 프로젝트에서 내가 맡은 범위 - 팀 작업에서 역할이 산문에 묻히지 않게 한다 */
   role?: string;
-  /** 어디까지 갔는지 — 성능 지표나 도달점 */
+  /** 어디까지 갔는지 - 성능 지표나 도달점 */
   outcome?: string;
 }
 
@@ -312,7 +312,7 @@ export const projectCards: ProjectCard[] = [
       "출판사의 구독자 관리·발송·정산 수작업을 대체한 내부 관리 시스템. 기획부터 배포까지 단독 수행했고, 2026.07 실운영 이관 후에도 유지보수·추가개발을 이어가고 있습니다.",
     badge: "프리랜서 · 운영 중",
     track: "풀스택",
-    period: "2025.10 — 2026.07",
+    period: "2025.10 - 2026.07",
     teamSize: "1인",
     stack: ["Python", "FastAPI", "SQLAlchemy", "MySQL", "React", "TypeScript", "TailwindCSS"],
     slug: "magazine-manager",
@@ -321,26 +321,26 @@ export const projectCards: ProjectCard[] = [
     outcome: "정기구독 3,200건 운영 · 페이징 결함 원인 규명·수정",
   },
   {
-    title: "다 맡케팅 — 소상공인 AI 마케팅 자동화",
+    title: "다 맡케팅 - 소상공인 AI 마케팅 자동화",
     summary:
-      "홍보 쇼츠 제작부터 SNS 게시·성과 리포트까지 생성형 AI로 연결한 플랫폼. 그중 SNS 게시글 관리 축을 AI 생성부터 계정 연동·예약 게시까지 FastAPI·Spring Boot·React 전 계층에서 설계·구현했습니다.",
+      "홍보 쇼츠 제작부터 SNS 게시·성과 리포트까지 생성형 AI로 연결한 플랫폼. 그중 SNS 게시물 관리 축을 AI 생성부터 계정 연동·예약 게시까지 FastAPI·Spring Boot·React 전 계층에서 설계·구현했습니다.",
     badge: "KT AIVLE · 대상",
     track: "AI · 생성형",
-    period: "2025.07 — 2025.08",
+    period: "2025.07 - 2025.08",
     teamSize: "팀 프로젝트",
     stack: ["LangGraph", "FastAPI", "GPT-4o", "Spring Boot", "OAuth 2.0", "React"],
     slug: "damatketing",
     thumbnail: "/covers/damatketing-v2.png",
-    role: "SNS 게시글 관리 — AI 생성·계정 연동·예약 게시 전 계층 설계·구현",
+    role: "SNS 게시물 관리 - AI 생성·계정 연동·예약 게시 전 계층 설계·구현",
     outcome: "책임 단위 노드 분리로 모델·비용 통제, LLM 출력 이중 검증 구조 설계",
   },
   {
-    title: "소담소담 — AI 젖소 관리 앱",
+    title: "소담소담 - AI 젖소 관리 앱",
     summary:
       "센서 없이 앱의 AI 분석만으로 젖소를 관리하는 소규모 낙농가 전용 서비스. 공공데이터 AI 모델로 질병 진단·생산성 예측을 지원하고, 낙농 특화 RAG 챗봇 '소담이'를 설계·구현했습니다.",
     badge: "창업경진대회 · 우수상",
     track: "AI · LLM",
-    period: "2025.04 — 2025.06",
+    period: "2025.04 - 2025.07",
     teamSize: "팀 프로젝트 · AI 파트 담당",
     // 상세 페이지(projectDetails.ts)의 stack과 같은 어휘를 쓴다
     stack: [
@@ -360,12 +360,12 @@ export const projectCards: ProjectCard[] = [
     outcome: "럼피스킨 96.8% · 유방염 83.9% · 착유량 설명력 82.4%",
   },
   {
-    title: "부인과 초음파 난포 검출 — 2D Follicle™",
+    title: "부인과 초음파 난포 검출 - 2D Follicle™",
     summary:
       "여러 개의 난포 크기를 한 화면에서 자동 측정하는 부인과 초음파 AI 기능. 손실 함수 비교 실험으로 세그멘테이션 성능을 개선했고, 그렇게 만든 학습 데이터가 현재 제품에 탑재된 검출 모델에 반영됐습니다. 검사자 입력 4점으로 난포 윤곽을 그리는 측정 기능(C++)은 사내 테스트 빌드까지 완성했습니다.",
     badge: "삼성메디슨 · 인턴",
     track: "AI · 의료영상",
-    period: "2024.05 — 2024.08",
+    period: "2024.05 - 2024.08",
     teamSize: "2D Follicle™ 팀",
     stack: ["C++", "Python", "PyTorch", "OpenCV", "ONNX"],
     slug: "samsung-medison-detection",
@@ -379,7 +379,7 @@ export const projectCards: ProjectCard[] = [
       "하복부 초음파 영상에서 6개 구조물을 검출하는 과제. 조건을 바꿔도 지표가 정체하자 사내 임상의와 함께 원본 영상·레이블을 검토해 병목이 모델이 아니라 GT 마스크 오류에 있음을 규명하고, 라이선스 리스크까지 함께 보고해 과제 중단을 이끌었습니다.",
     badge: "삼성메디슨 · 인턴",
     track: "AI · 의료영상",
-    period: "2024.03 — 2024.04",
+    period: "2024.03 - 2024.04",
     teamSize: "단독 수행",
     stack: [
       "Python",

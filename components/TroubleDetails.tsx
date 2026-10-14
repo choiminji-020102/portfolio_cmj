@@ -6,9 +6,9 @@ import type { TroubleBlock, TroubleDetail } from "@/lib/projectDetails";
 import CodeBlock from "./CodeBlock";
 import SodamDrawer from "./SodamDrawer";
 
-/* 긴 heading은 부제를 떼고 탭 라벨로 쓴다 — "성능 최적화 — 피처 선정" → "성능 최적화" */
+/* 긴 heading은 부제를 떼고 탭 라벨로 쓴다 - "성능 최적화 - 피처 선정" → "성능 최적화" */
 function tabLabel(heading: string) {
-  return heading.split(" — ")[0];
+  return heading.split(" - ")[0];
 }
 
 function Block({ blk }: { blk: TroubleBlock }) {
@@ -140,7 +140,7 @@ export default function TroubleDetails({
         title={title}
         eyebrow={eyebrow}
       >
-        {/* 기술 스택 — 항목 전체에 걸리는 값이라 탭 바깥에 둔다 */}
+        {/* 기술 스택 - 항목 전체에 걸리는 값이라 탭 바깥에 둔다 */}
         {tech && tech.length > 0 && (
           <p className="rail border-b border-line px-6 py-3 text-muted sm:px-8">
             <span className="font-semibold text-ink">기술 스택</span>
@@ -148,7 +148,7 @@ export default function TroubleDetails({
           </p>
         )}
 
-        {/* 섹션 탭 — 스크롤해도 상단에 고정 */}
+        {/* 섹션 탭 - 스크롤해도 상단에 고정 */}
         <div className="sticky top-0 z-10 flex gap-1 overflow-x-auto border-b border-line bg-ground/95 px-4 pt-2 backdrop-blur-sm sm:px-6">
           {details.map((d, i) => (
             <button
@@ -171,7 +171,7 @@ export default function TroubleDetails({
           <p className="text-[0.95rem] font-bold tracking-tight text-deep">
             {current.heading}
           </p>
-          {/* 서랍 본문 — 코드·표가 문단 사이에 끼므로 문단 간격보다 조금 넓게 */}
+          {/* 서랍 본문 - 코드·표가 문단 사이에 끼므로 문단 간격보다 조금 넓게 */}
           <div className="mt-4 space-y-4">
             {current.blocks.map((blk, bi) => (
               <Block key={bi} blk={blk} />

@@ -34,7 +34,7 @@ export default function Navbar() {
           CHOI MINJI
         </a>
 
-        {/* 오른쪽 묶음 — 화면 폭에 상관없이 GitHub 은 늘 보인다.
+        {/* 오른쪽 묶음 - 화면 폭에 상관없이 GitHub 은 늘 보인다.
             첫 화면에서 코드를 바로 확인할 수 있어야 해서 상단바에 둔다 */}
         <div className="flex items-center gap-6">
           <ul className="hidden md:flex items-center gap-7">

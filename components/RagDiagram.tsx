@@ -2,9 +2,9 @@
   소담이 챗봇의 RAG + Query Routing 파이프라인.
   발표자료 12p 구조도를 가로형으로 재구성했다.
 
-    위     — 사전 인덱싱: 문서 → Splitting/Embedding → Vector DB → 검색
-    가운데 — Query Routing 4분기, '낙농 전문 지식'만 Vector DB 검색을 거친다
-    오른쪽 — 사용자 휴대폰: Query 입력 → GPT → Response 출력
+    위     - 사전 인덱싱: 문서 → Splitting/Embedding → Vector DB → 검색
+    가운데 - Query Routing 4분기, '낙농 전문 지식'만 Vector DB 검색을 거친다
+    오른쪽 - 사용자 휴대폰: Query 입력 → GPT → Response 출력
 
   글자 크기는 FS 하나로 통일하고, 아이콘은 scale(0.9)로 한 단계 줄였다.
 */
@@ -25,7 +25,7 @@ const ROUTES = [
   { x: 904, label: "무관 질문" },
 ];
 
-/* 파란 로봇 — 중심은 x + 24 (몸통 60 × 0.8) */
+/* 파란 로봇 - 중심은 x + 24 (몸통 60 × 0.8) */
 function Robot({ x, y }: { x: number; y: number }) {
   return (
     <g transform={`translate(${x} ${y}) scale(0.8)`}>
@@ -72,7 +72,7 @@ export default function RagDiagram() {
           </marker>
         </defs>
 
-        {/* ───────── 위 — 사전 인덱싱 (가로 흐름) ───────── */}
+        {/* ───────── 위 - 사전 인덱싱 (가로 흐름) ───────── */}
         {DOCS.map((d) => (
           <g key={d.x} transform={`translate(${d.x} 20) scale(0.8)`}>
             <path
@@ -110,7 +110,7 @@ export default function RagDiagram() {
           </g>
         ))}
 
-        {/* 아이콘 4개(20~196)의 중심 108 에 맞춘 캡션 — 두 줄 */}
+        {/* 아이콘 4개(20~196)의 중심 108 에 맞춘 캡션 - 두 줄 */}
         <text
           x="108"
           y="96"
@@ -173,7 +173,7 @@ export default function RagDiagram() {
           markerEnd="url(#rag-arrow)"
         />
 
-        {/* Vector DB — 주황 실린더 (438~503, 중심 470) */}
+        {/* Vector DB - 주황 실린더 (438~503, 중심 470) */}
         <g transform="translate(420 22) scale(0.8)">
           <rect x="0" y="9" width="72" height="46" fill="#f07c2a" />
           <ellipse cx="36" cy="55" rx="36" ry="11" fill="#f07c2a" />
@@ -218,7 +218,7 @@ export default function RagDiagram() {
           markerEnd="url(#rag-arrow)"
         />
 
-        {/* 돋보기 — 검색 (손잡이가 아래 분기를 향한다) */}
+        {/* 돋보기 - 검색 (손잡이가 아래 분기를 향한다) */}
         <g transform="translate(544 26) scale(0.8)">
           <circle
             cx="16"
@@ -250,7 +250,7 @@ export default function RagDiagram() {
           markerEnd="url(#rag-arrow)"
         />
 
-        {/* ───────── 오른쪽 — 사용자 휴대폰 ───────── */}
+        {/* ───────── 오른쪽 - 사용자 휴대폰 ───────── */}
         <g>
           <rect
             x="1030"
@@ -334,7 +334,7 @@ export default function RagDiagram() {
           markerEnd="url(#rag-arrow)"
         />
 
-        {/* ───────── 가운데 — 라우팅 (축 707) ───────── */}
+        {/* ───────── 가운데 - 라우팅 (축 707) ───────── */}
         <Robot x={673} y={112} />
         <text
           x="697"
@@ -400,7 +400,7 @@ export default function RagDiagram() {
           </text>
         ))}
 
-        {/* 분기 다음 단계 — 가운데에서 답변 생성으로 */}
+        {/* 분기 다음 단계 - 가운데에서 답변 생성으로 */}
         <line
           x1="697"
           y1="304"

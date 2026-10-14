@@ -1,6 +1,6 @@
 /*
   배치는 min-hyuk 방식(좌 이름 + 우 정보 블록)을 따르되 색·서체는 우리 것.
-  이름 위 세그멘테이션 마스크가 시그니처 — 로드 시 계단형 윤곽이 그려지고 채워진다.
+  이름 위 세그멘테이션 마스크가 시그니처 - 로드 시 계단형 윤곽이 그려지고 채워진다.
   CSS 애니메이션만 쓴다. reduced-motion 은 globals.css 에서 즉시 완료 처리.
 */
 
@@ -19,7 +19,7 @@ export default function Hero() {
       className="flex min-h-screen items-center px-6 pt-16 pb-16"
     >
       <div className="max-w-5xl mx-auto grid w-full gap-8 md:grid-cols-[auto_1fr] md:items-stretch md:gap-16">
-        {/* 왼쪽 — 이름과 사진 */}
+        {/* 왼쪽 - 이름과 사진 */}
         <div>
           <p className="eyebrow mb-5">Portfolio / 2026</p>
 
@@ -69,7 +69,7 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* 오른쪽 — 소개 */}
+        {/* 오른쪽 - 소개 */}
         <div className="flex min-w-0 flex-col items-start md:h-full md:justify-center">
           <p className="text-[0.95rem] sm:text-base leading-relaxed max-w-2xl">
             <span className="text-muted">
@@ -84,7 +84,7 @@ export default function Hero() {
             </span>
           </p>
 
-          {/* 소개를 읽고 바로 코드로 넘어갈 수 있게 — 상단바 아이콘과 같은 곳을 가리킨다 */}
+          {/* 소개를 읽고 바로 코드로 넘어갈 수 있게 - 상단바 아이콘과 같은 곳을 가리킨다 */}
           <a
             href={contact.github}
             target="_blank"

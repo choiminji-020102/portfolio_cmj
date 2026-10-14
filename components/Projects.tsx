@@ -1,7 +1,7 @@
 /*
   프로젝트 카드 그리드.
 
-  구조를 다섯 덩어리로 고정한다 — 커버 / 분류·기간 / 제목·배지 / 요약 / 담당·결과 / 스택·링크.
+  구조를 다섯 덩어리로 고정한다 - 커버 / 분류·기간 / 제목·배지 / 요약 / 담당·결과 / 스택·링크.
   카드마다 같은 자리에 같은 정보가 있어야 프로젝트끼리 비교가 된다.
 
   상세 페이지 진입은 카드 전체를 덮는 링크 레이어가 받는다. 커버에 뜨는
@@ -10,7 +10,7 @@
   담당·결과 블록이 이 카드의 핵심이다. 5개 중 3개가 팀 작업이라
   "무엇을 맡았고 어디까지 갔나"가 요약 산문에 묻히면 카드가 제 역할을 못 한다.
 
-  커버는 2:1 (권장 1280×640) — public/covers/ 에 넣고 thumbnail 에 경로를 적는다.
+  커버는 2:1 (권장 1280×640) - public/covers/ 에 넣고 thumbnail 에 경로를 적는다.
 */
 import Image from "next/image";
 import Link from "next/link";
@@ -41,7 +41,7 @@ export default function Projects() {
                   : ""
               }`}
             >
-              {/* 커버 — 없으면 분류 라벨 플레이스홀더 */}
+              {/* 커버 - 없으면 분류 라벨 플레이스홀더 */}
               <div className="relative aspect-[2/1] overflow-hidden border-b border-line bg-gradient-to-br from-tide/10 to-deep/5">
                 {card.thumbnail ? (
                   <Image
@@ -73,7 +73,7 @@ export default function Projects() {
                   </span>
                 )}
 
-                {/* hover·포커스 시 덧씌워지는 안내 — DOM 뒤라 위 배지를 덮는다.
+                {/* hover·포커스 시 덧씌워지는 안내 - DOM 뒤라 위 배지를 덮는다.
                     실제 클릭은 카드 전체 레이어가 받는다 */}
                 {detailHref && (
                   <div
@@ -110,7 +110,7 @@ export default function Projects() {
                   {card.summary}
                 </p>
 
-                {/* 담당 · 결과 — 모든 카드에서 같은 자리, 같은 형식 */}
+                {/* 담당 · 결과 - 모든 카드에서 같은 자리, 같은 형식 */}
                 {(card.role || card.outcome) && (
                   <dl className="mt-5 space-y-1.5 border-y border-line py-4">
                     {card.role && (
@@ -161,7 +161,7 @@ export default function Projects() {
                 <Link
                   href={detailHref}
                   aria-label={`${card.title} 자세히 보기`}
-                  /* 카드가 overflow-hidden이라 바깥으로 나간 outline은 잘린다 — 안쪽으로 그린다 */
+                  /* 카드가 overflow-hidden이라 바깥으로 나간 outline은 잘린다 - 안쪽으로 그린다 */
                   className="absolute inset-0 rounded-2xl focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-tide"
                 />
               )}

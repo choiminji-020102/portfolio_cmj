@@ -3,9 +3,10 @@
   월간지(lib/projects.ts)는 문제·기능·챌린지·다이어그램의 깊은 구조를 쓰고,
   이쪽은 스크린샷 갤러리 + 기능 불릿 + 트러블슈팅의 가벼운 구조를 쓴다.
 
-  screenshots 가 비어 있으면 갤러리는 플레이스홀더를 보여준다 — 자료가 오면 채운다.
+  screenshots 가 비어 있으면 갤러리는 플레이스홀더를 보여준다 - 자료가 오면 채운다.
 */
 import type { CodeLang } from "./highlight";
+import { eventChart, layerChart, msaChart, oauthChart, scheduleChart, uploadChart } from "./webCharts";
 
 export interface Trouble {
   title: string;
@@ -15,14 +16,14 @@ export interface Trouble {
 
 /* 해결책을 제목+불릿으로 쪼갠 블록 (챗봇처럼 해결이 여러 갈래일 때) */
 export interface SolutionBlock {
-  /* 원문에 소제목이 없으면 비운다 — 없는 제목을 지어내지 않는다 */
+  /* 원문에 소제목이 없으면 비운다 - 없는 제목을 지어내지 않는다 */
   title?: string;
   points: string[];
   /* 불릿을 코드 앞에 둔다 (원문이 목록 → 코드 순서인 경우) */
   pointsFirst?: boolean;
-  /* 블록을 닫는 문단 — 불릿이 아니라 서술로 끝나는 원문을 위해 */
+  /* 블록을 닫는 문단 - 불릿이 아니라 서술로 끝나는 원문을 위해 */
   note?: string;
-  /* 제목 바로 아래 붙는 그림 — 원문에서 소제목 다음에 오던 자리를 그대로 지킨다 */
+  /* 제목 바로 아래 붙는 그림 - 원문에서 소제목 다음에 오던 자리를 그대로 지킨다 */
   figure?: {
     src: string;
     width: number;
@@ -34,13 +35,17 @@ export interface SolutionBlock {
   code?: string;
   /* code 의 언어. 주지 않으면 색을 입히지 않는다 (계산식·출력 예시용) */
   lang?: CodeLang;
-  /* "side" — 코드와 그림을 좌우로 나란히, 그림 높이를 코드에 맞춘다.
+  /* "side" - 코드와 그림을 좌우로 나란히, 그림 높이를 코드에 맞춘다.
      세로로 긴 그림(그래프 구조도)이 혼자 커지는 것을 막는다.
      기본(미지정)은 그림 → 코드 세로 배치 */
   layout?: "side";
+  /* 코드·그림 대신 전용 컴포넌트를 끼운다 - 표준 블록으로 담기 어려운 구도용 */
+  /* Mermaid 도식 - 표준 블록 위에 그림 한 장을 끼운다 */
+  chart?: string;
+  custom?: "trend-prompt" | "hashtag-prompt" | "backend-chain" | "jwt-tokens";
 }
 
-/* 풀버전 상세 — 문서 순서 그대로 섞이는 블록들 */
+/* 풀버전 상세 - 문서 순서 그대로 섞이는 블록들 */
 export type TroubleBlock =
   | { type: "sub"; text: string } // 굵은 소제목 (1. 2. 등)
   | { type: "text"; text: string } // 문단
@@ -60,22 +65,22 @@ export interface TroubleDetail {
   blocks: TroubleBlock[];
 }
 
-/* 트러블슈팅·기술적 의사결정 — 슬림(문제→해결→효과) + 풀버전(details) */
+/* 트러블슈팅·기술적 의사결정 - 슬림(문제→해결→효과) + 풀버전(details) */
 export interface TroubleItem {
   title: string;
-  /* 표(table)가 문제와 원인을 다 담는 항목은 두 줄을 비운다 — 같은 말을 두 번 쓰지 않는다 */
+  /* 표(table)가 문제와 원인을 다 담는 항목은 두 줄을 비운다 - 같은 말을 두 번 쓰지 않는다 */
   problem?: string;
   solution?: string;
   effect: string;
   tags?: string[];
   tech?: string[]; // 풀버전 상단 기술 스택
   diagram?: "route"; // 곁들일 다이어그램
-  /* 문제·해결 자리를 대신하는 표 — 서랍에 넣지 않고 본문에 펼쳐둔다 */
+  /* 문제·해결 자리를 대신하는 표 - 서랍에 넣지 않고 본문에 펼쳐둔다 */
   table?: { head: string[]; rows: string[][] };
   details?: TroubleDetail[]; // 아코디언 풀버전
 }
 
-/* 핵심 AI 기능 — 문제 → 해결 → 수치 구조.
+/* 핵심 AI 기능 - 문제 → 해결 → 수치 구조.
    단순 항목은 problem/solution(문단), 복합 항목은 problemList/solutionBlocks 사용 */
 export interface AiFeature {
   name: string;
@@ -91,7 +96,7 @@ export interface AiFeature {
   image?: string; // 관련 앱 스크린샷 (영상 poster로도 사용)
   video?: string; // 시연 영상
   diagram?: "rag"; // 구조 다이어그램 종류
-  /* 항목 전체에 걸리는 표 (후보 비교 등) — 트러블에 억지로 끼우지 않고 본문에 펼친다.
+  /* 항목 전체에 걸리는 표 (후보 비교 등) - 트러블에 억지로 끼우지 않고 본문에 펼친다.
      note 는 표를 받아 닫는 문장 */
   table?: {
     label?: string;
@@ -99,7 +104,7 @@ export interface AiFeature {
     rows: string[][];
     note?: string;
   };
-  /* 본문 아래 풀폭 설명 그림 — 글로 풀면 길어지는 좌표계·파이프라인 구조를 대신한다.
+  /* 본문 아래 풀폭 설명 그림 - 글로 풀면 길어지는 좌표계·파이프라인 구조를 대신한다.
      오른쪽 사이드에 붙는 image(240px)와 달리 본문 폭을 다 쓴다 */
   figures?: {
     src: string;
@@ -108,14 +113,18 @@ export interface AiFeature {
     alt: string;
     caption?: string;
   }[];
+  /** 문제·해결 아래에 같은 단계 카드로 붙는 결과 문단 */
+  result?: string;
+  /** result 카드 라벨. 기본값 '결과' */
+  resultLabel?: string;
   troubles?: TroubleItem[]; // 트러블슈팅·기술적 의사결정
   /** troubles 섹션 라벨. 기본값 '트러블슈팅 · 기술적 의사결정' */
   troublesLabel?: string;
-  /** 이 항목을 다룬 외부 글 — 하단 목록과 별개로, 읽는 자리에서 바로 넘어갈 수 있게 */
+  /** 이 항목을 다룬 외부 글 - 하단 목록과 별개로, 읽는 자리에서 바로 넘어갈 수 있게 */
   writeups?: { title: string; href: string }[];
 }
 
-/* 여러 절로 나뉘는 구현 상세 — AI / 백엔드 / 트러블슈팅처럼
+/* 여러 절로 나뉘는 구현 상세 - AI / 백엔드 / 트러블슈팅처럼
    같은 카드 모양을 쓰되 큰 제목으로 갈라야 하는 묶음 */
 export interface FeatureGroup {
   label: string;
@@ -131,37 +140,37 @@ export interface LightProject {
   title: string;
   badge: string;
   period: string;
-  /* 진행 상태 — 메타 줄 세 번째 칸. 월간지 상세와 같은 자리를 쓴다 */
+  /* 진행 상태 - 메타 줄 세 번째 칸. 월간지 상세와 같은 자리를 쓴다 */
   status?: string;
   teamSize: string;
-  /** 제목 바로 아래 한 줄 — 스크롤 없이 역할이 잡히게 한다 (요약보다 앞) */
+  /** 제목 바로 아래 한 줄 - 스크롤 없이 역할이 잡히게 한다 (요약보다 앞) */
   tagline?: string;
   summary: string;
-  /** 요약이 여러 문단일 때 이어지는 나머지 — summary 는 메타 description 에도 쓰이므로 첫 문단만 담는다 */
+  /** 요약이 여러 문단일 때 이어지는 나머지 - summary 는 메타 description 에도 쓰이므로 첫 문단만 담는다 */
   summaryMore?: string[];
   stack: string[];
   github?: string;
   homepage?: string;
   /** homepage 버튼 라벨. 기본값 '홈페이지' */
   homepageLabel?: string;
-  /** 시연 영상 — GitHub 버튼 옆에 나란히. 상단에서 바로 결과물로 진입하는 통로 */
+  /** 시연 영상 - GitHub 버튼 옆에 나란히. 상단에서 바로 결과물로 진입하는 통로 */
   demo?: string;
   /** demo 버튼 라벨. 기본값 '시연 영상' */
   demoLabel?: string;
-  /** 발표자료 PDF — 새 탭에서 열린다 (public/ 아래 경로) */
+  /** 발표자료 PDF - 새 탭에서 열린다 (public/ 아래 경로) */
   slides?: string;
   /** slides 버튼 라벨. 기본값 '발표자료' */
   slidesLabel?: string;
   screenshots: string[];
-  /** 과제 개요 — 대상·클래스·데이터·태스크 같은 사실 항목 */
+  /** 과제 개요 - 대상·클래스·데이터·태스크 같은 사실 항목 */
   overview?: { label: string; value: string }[];
   /** overview 섹션 라벨. 기본값 '과제 개요' */
   overviewLabel?: string;
-  /** 작업 타임라인 — 시점별로 무엇을 만들었는지 */
+  /** 작업 타임라인 - 시점별로 무엇을 만들었는지 */
   timeline?: { when: string; what: string }[];
   /** 타임라인 아래 붙는 단서 문장 */
   timelineNote?: string;
-  /** 과제 개요 아래 참고 이미지 — 검출 대상이 어떻게 생겼는지 보여준다 */
+  /** 과제 개요 아래 참고 이미지 - 검출 대상이 어떻게 생겼는지 보여준다 */
   overviewFigures?: {
     src: string;
     width: number;
@@ -169,28 +178,28 @@ export interface LightProject {
     alt: string;
     /** 이미지에 라벨된 구조물 */
     caption?: string;
-    /** caption 이 이미지 라벨이 아니라 과제의 결론·목표를 진술하는 문장일 때 —
+    /** caption 이 이미지 라벨이 아니라 과제의 결론·목표를 진술하는 문장일 때 -
         본문 크기로 키운다. 나머지 캡션(구조물 이름 등)은 작은 라벨 그대로 둔다 */
     captionEmphasis?: boolean;
   }[];
   /** overviewFigures 라벨. 기본값 '참고 이미지' */
   overviewFiguresLabel?: string;
-  /** 참고 이미지의 성격을 밝히는 문장 — 프로젝트 데이터로 오해되지 않게 한다 */
+  /** 참고 이미지의 성격을 밝히는 문장 - 프로젝트 데이터로 오해되지 않게 한다 */
   overviewFiguresNote?: string;
   /** 배경 섹션 라벨. 기본값 '제안 배경' */
   backgroundLabel?: string;
-  /** 왜 만들었나 — 문제 배경, 리드 1줄(위기 진술) */
+  /** 왜 만들었나 - 문제 배경, 리드 1줄(위기 진술) */
   background?: string;
-  /** 제안 배경 — 리드 2줄(위기가 낳은 결과, 화살표로 연결) */
+  /** 제안 배경 - 리드 2줄(위기가 낳은 결과, 화살표로 연결) */
   backgroundEffect?: string;
-  /** 제안 배경 — 시작점(폐업 양극화)을 보여주는 그래프 이미지 */
+  /** 제안 배경 - 시작점(폐업 양극화)을 보여주는 그래프 이미지 */
   backgroundChart?: {
     src: string;
     width: number;
     height: number;
     alt: string;
   };
-  /** 제안 배경 — 문제(폐업 가속)가 갈라지는 원인 갈래 */
+  /** 제안 배경 - 문제(폐업 가속)가 갈라지는 원인 갈래 */
   backgroundCauses?: {
     index: string;
     title: string;
@@ -207,30 +216,50 @@ export interface LightProject {
     };
     /** 이미지 대신 HTML로 그리는 실태조사 인용 카드 (선택) */
     surveyCard?: { title: string; quote: string; source?: string };
-    /** 이미지 대신 HTML로 그리는 가로 막대그래프 (선택) — label 있는 세그먼트만 범례로 표시 */
+    /** 이미지 대신 HTML로 그리는 가로 막대그래프 (선택) - label 있는 세그먼트만 범례로 표시 */
     barChart?: { segments: { value: number; label?: string }[] };
   }[];
-  /** 제안 배경 — 프로젝트의 개인적 출발점(계기) */
+  /** 제안 배경 - 프로젝트의 개인적 출발점(계기) */
   backgroundOrigin?: string;
-  /** 제안 배경 — 우리가 세운 목표 */
+  /** 제안 배경 - 우리가 세운 목표 */
   backgroundGoal?: string;
-  /** 배경 안에 펼치는 표 — 기존 대안과 그 한계처럼 배경의 근거가 표인 경우 */
+  /** 배경 안에 펼치는 표 - 기존 대안과 그 한계처럼 배경의 근거가 표인 경우 */
   backgroundTable?: { label?: string; head: string[]; rows: string[][] };
-  /** 배경을 닫는 문단들 — 표 아래로 이어지는 결론 */
+  /** 배경을 닫는 문단들 - 표 아래로 이어지는 결론 */
   backgroundClosing?: string[];
-  /** 배경 마지막에 짚는 기능 축 — 담당 항목은 mine 으로 표시한다 */
-  backgroundScope?: { label: string; text: string; mine?: boolean }[];
+  /** 배경 마지막에 짚는 기능 축 - 담당 항목은 mine 으로 표시한다 */
+  backgroundScope?: {
+    label: string;
+    text: string;
+    mine?: boolean;
+    /* 박스 안에 보여 줄 기능 목록 - 발표자료의 축별 설명 */
+    points?: string[];
+  }[];
+  /** 기능 소개 - 발표자료의 "기능 한눈에 보기" 슬라이드. **굵게** 표기를 지원한다 */
+  featureOverview?: {
+    label: string;
+    title: string;
+    subtitle: string;
+    left: { heading: string; items: string[] };
+    right: {
+      heading: string;
+      badge: string;
+      steps: { key: string; text: string }[];
+    };
+  };
   /** 팀 프로젝트에서 본인이 담당한 역할 (리드 문장) */
   myRole?: string;
   /** myRole 섹션 라벨. 기본값 '내가 맡은 역할' */
   myRoleLabel?: string;
-  /** 내가 맡은 역할 — 담당 축(영역) */
+  /** 내가 맡은 역할 - 담당 축(영역) */
   myRoleAreas?: { title: string; desc: string }[];
-  /** 내가 맡은 역할 — 작업 범위(순서) */
+  /** 내가 맡은 역할 - 작업 범위(순서) */
   myRolePipeline?: string[];
-  /** 내가 맡은 역할 — 구조·흐름 다이어그램 (mermaid 원문) */
-  myRoleDiagrams?: { caption?: string; chart: string }[];
-  /** 결과물 — "무엇을 만들었나"를 화면으로 먼저 보여주는 구간.
+  /** 내가 맡은 역할 - 구조·흐름 다이어그램 (mermaid 원문) */
+  myRoleDiagrams?: { caption?: string; legend?: string; chart: string }[];
+  /** true 면 결과물을 담당 범위보다 앞(배경 바로 뒤)에 둔다. 기본은 사용 기술 뒤 */
+  showcaseFirst?: boolean;
+  /** 결과물 - "무엇을 만들었나"를 화면으로 먼저 보여주는 구간.
       코드·모델 배치 같은 기술 상세보다 앞에 온다.
       note 는 캡처 앞(리드 문장 아래)에 놓인다 */
   showcase?: {
@@ -256,7 +285,7 @@ export interface LightProject {
   aiFeatures?: AiFeature[];
   /** aiFeatures 섹션 라벨. 기본값 '핵심 AI 기능' */
   aiFeaturesLabel?: string;
-  /** 절이 여러 개로 갈리는 구현 상세 — aiFeatures 와 같은 카드를 큰 제목으로 묶는다 */
+  /** 절이 여러 개로 갈리는 구현 상세 - aiFeatures 와 같은 카드를 큰 제목으로 묶는다 */
   featureGroups?: FeatureGroup[];
   features: string[];
   /** features 섹션 라벨. 기본값 '그 외 기능' */
@@ -268,18 +297,18 @@ export interface LightProject {
   /** 활용한 공공데이터·외부 데이터 */
   dataSources?: string[];
   troubles?: Trouble[];
-  /** 사용 기술 — 구분별 표. 회고 바로 앞, 본문을 닫는 자리에 온다
+  /** 사용 기술 - 구분별 표. 회고 바로 앞, 본문을 닫는 자리에 온다
       (상단 '과제 개요'(overview)와 달리 문서 후반의 기술 정리용) */
   techStack?: { label: string; value: string }[];
   /** techStack 섹션 라벨. 기본값 '사용 기술' */
   techStackLabel?: string;
-  /** 마무리 회고 — 결과가 아니라 무엇이 남았는지 */
+  /** 마무리 회고 - 결과가 아니라 무엇이 남았는지 */
   closing?: string[];
   /** 회고를 갈래로 나눠 쓰는 경우 (잘한 점 / 아쉬운 점 / 더 해본다면) */
   closingGroups?: { title: string; points: string[] }[];
   /** closing 섹션 라벨. 기본값 '마무리' */
   closingLabel?: string;
-  /** 작업 중 정리한 외부 글(기술 블로그 등) — 본문에서 덜어낸 상세의 근거 */
+  /** 작업 중 정리한 외부 글(기술 블로그 등) - 본문에서 덜어낸 상세의 근거 */
   writeups?: { title: string; href: string }[];
   /** writeups 섹션 라벨. 기본값 '작업 기록' */
   writeupsLabel?: string;
@@ -289,17 +318,18 @@ export interface LightProject {
 
 export const lightProjects: LightProject[] = [
   /*
-    다 맡케팅 상세 — files/다맡케팅-포트폴리오.md 가 바탕이지만 절 순서를 다시 짰다.
-    읽는 사람이 스택을 먼저 확인하고 결과물을 본 뒤 기술 상세로 들어가도록:
-      1 배경 · 2 담당 범위 · 3 사용 기술 · 4 결과물 · 5 AI · 6 백엔드 · 7 트러블슈팅 · 8 회고.
-    원문 5절(프론트엔드)은 화면 캡처가 본문이라 4절 결과물로 흡수했다.
+    다 맡케팅 상세 - files/다맡케팅-포트폴리오.md 가 바탕이지만 절 순서를 다시 짰다.
+    읽는 사람이 무엇을 만들었는지 화면으로 먼저 보고, 아키텍처와 스택을 확인한 뒤 기술 상세로 들어가도록:
+      1 배경 · 2 결과물 · 3 담당 아키텍처 및 처리 흐름 · 4 사용 기술 · 5 AI · 6 백엔드 · 7 트러블슈팅 · 8 회고.
+    (showcaseFirst: true 로 결과물을 담당 아키텍처 및 처리 흐름 앞에 둔다)
+    원문 5절(프론트엔드)은 화면 캡처가 본문이라 결과물로 흡수했다.
     캡처 4장과 demo.mp4 는 팀 시연 영상에서 뽑아 public/damatketing/ 에 둔다.
   */
   {
     slug: "damatketing",
     title: "다 맡케팅",
     badge: "KT AIVLE · 대상",
-    period: "2025.07.07 — 2025.08.29 (8주)",
+    period: "2025.07.07 - 2025.08.29 (8주)",
     teamSize: "7명 (AI/백엔드 5, AI/프론트 2)",
     tagline:
       "7인 팀 프로젝트에서 SNS 마케팅 도메인을 AI 파이프라인부터 화면까지 담당",
@@ -336,77 +366,155 @@ export const lightProjects: LightProject[] = [
       ],
     },
     backgroundClosing: [
-      "“콘텐츠를 만드는 것”과 “그걸 채널에 올려 성과를 보는 것”이 분리되어 있다는 게 핵심 문제였습니다. 그래서 광고 영상 생성 → SNS 게시 → 성과 분석까지 하나의 흐름으로 잇는 원스톱 플랫폼을 만들기로 했습니다.",
-      "서비스는 세 개의 기능 축으로 구성되며, 그중 2번 SNS 게시글 관리 전 구간을 담당했습니다.",
+      "“콘텐츠를 만드는 것”과 “그걸 채널에 올려 성과를 보는 것”이 분리되어 있다는 게 핵심 문제였습니다.\n그래서 광고 영상 생성 → SNS 게시 → 성과 분석까지 하나의 흐름으로 잇는 원스톱 플랫폼을 만들기로 했습니다.",
+      "서비스는 세 개의 기능 축으로 구성되며, 그중 2번 SNS 게시물 관리 전 구간을 담당했습니다.",
     ],
     backgroundScope: [
-      { label: "1", text: "홍보 영상(숏츠) 자동 제작" },
-      { label: "2", text: "SNS 게시글 관리", mine: true },
-      { label: "3", text: "성과 분석 및 리포트 작성" },
+      {
+        label: "1",
+        text: "홍보 영상(숏츠) 자동 제작",
+        points: [
+          "사용자 입력 기반 시나리오 자동 제작",
+          "제품 외관 일관성 유지",
+          "음악·편집 포함 완성형 영상 제공",
+        ],
+      },
+      {
+        label: "2",
+        text: "SNS 게시물 관리",
+        mine: true,
+        points: [
+          "업로드할 콘텐츠 분석",
+          "트렌드를 반영한 게시물 생성",
+          "플랫폼별 해시태그 생성",
+          "예약 업로드 · 자동 게시",
+        ],
+      },
+      {
+        label: "3",
+        text: "성과 분석 및 리포트 작성",
+        points: [
+          "SNS 반응 데이터 수집 (조회수·좋아요·댓글)",
+          "댓글 감성 분석과 주요 키워드 추출",
+          "광고 효과 평가와 맞춤형 개선 전략 추천",
+          "AI 기반 성과 리포트 제공",
+        ],
+      },
     ],
-    myRoleLabel: "담당 범위",
+    featureOverview: {
+      label: "기능 소개",
+      title: "SNS 게시물 관리",
+      subtitle: "클릭 한 번으로, 광고 영상 올리기",
+      left: {
+        heading: "3가지 SNS 플랫폼 연동기능",
+        items: [
+          "**OAuth 2.0**을 사용하여\n**Google API / Facebook Graph API**\n접근 권한 요청",
+          "게시물 **조회/업로드/삭제** 등\nSNS 통합 관리",
+        ],
+      },
+      right: {
+        heading: "제목 + 본문 + 해시태그 자동생성",
+        badge: "LangChain + LangGraph 기반 Agent 구조",
+        steps: [
+          { key: "Content", text: "사용자 **콘텐츠 분석**하여 게시물의 주제, 분위기, 핵심 메시지 추출" },
+          { key: "Trend", text: "현재 업종, 위치, 플랫폼 정보를 바탕으로 최신 SNS **트렌드 분석**" },
+          { key: "Post", text: "콘텐츠, 트렌드 정보를 종합하여 SNS에 게시될 **제목과 본문 생성**" },
+          { key: "HashTag", text: "플랫폼별 노출과 참여를 고려한 **해시태그 생성**" },
+        ],
+      },
+    },
+    showcaseFirst: true,
+    myRoleLabel: "담당 아키텍처 및 처리 흐름",
     myRole:
-      "SNS 게시글 관리 축 하나를 FastAPI 에이전트 · Spring Boot 서비스 · React 화면의 세 계층에 걸쳐 맡았습니다. 계층별로 사람이 나뉘지 않아 프롬프트 설계부터 API 계약, 화면 상태 관리까지 하나로 이어집니다.",
+      "SNS 게시물 관리 축 하나를 FastAPI 에이전트 · Spring Boot 서비스 · React 화면의 세 계층에 걸쳐 맡았습니다.\n에이전트 응답 형식을 정하는 일부터 화면에 표시하는 일까지 직접 다뤄, 계층 사이에서 형식이 어긋나는 문제는 양쪽을 함께 보며 고칠 수 있었습니다.",
     myRoleDiagrams: [
       {
-        chart: `graph LR
-    subgraph FE["Frontend (React)"]
+        legend: "──▶ API 호출    ┈┈▶ 이벤트 (비동기)",
+        chart: `%%{init: {"theme":"base","themeVariables":{"fontFamily":"IBM Plex Sans KR, sans-serif","fontSize":"19px","primaryColor":"#ffffff","primaryTextColor":"#1a132f","primaryBorderColor":"#c9c7d0","lineColor":"#4d6d9f","clusterBkg":"#ffffff","clusterBorder":"#c9c7d0"},"flowchart":{"curve":"linear","subGraphTitleMargin":{"top":12,"bottom":12},"padding":18,"nodeSpacing":30,"rankSpacing":70}}}%%
+graph LR
+    subgraph FE["🖥️ Frontend (React)"]
         A[SNS 계정 연동]
-        B[게시글 생성]
-        C[게시글 관리]
+        B[게시물 생성]
+        C[게시물 관리]
     end
-    subgraph BE["Backend (Spring Boot)"]
+    subgraph BE["⚙️ Backend (Spring Boot)"]
+        GW[🔐 API Gateway<br/>JWT 검증]
         D[sns-service<br/>OAuth · 게시 · 채널]
     end
-    subgraph AI["AI Engine (FastAPI)"]
-        E[게시글 생성 Agent<br/>LangGraph]
+    subgraph AI["🤖 AI Engine (FastAPI)"]
+        E["게시물 생성 Agent<br/>(LangGraph)"]
     end
-    subgraph EXT["External"]
-        F[YouTube Data API]
-        G[OpenAI API]
+    subgraph INFRA["🗄️ Infrastructure"]
+        S3[🪣 AWS S3<br/>미디어 저장]
+        K[📨 Kafka<br/>게시 이벤트]
     end
-    A --> D
-    B --> D
-    C --> D
-    D --> E
-    D --> F
-    E --> G`,
+    subgraph EXT["🌐 External"]
+        F[▶️ YouTube Data API]
+        G[🧠 OpenAI API]
+    end
+    FE --> GW
+    GW --> D
+    D ---->|영상 업로드| F
+    D -->|미디어| S3
+    D -.->|이벤트 발행| K
+    D <-->|생성 요청 · 결과 반환| E
+    E -->|LLM 호출| G
+    classDef fe fill:#e8f0fa,stroke:#4d6d9f,stroke-width:1.5px,color:#1a132f
+    classDef gw fill:#eef2f8,stroke:#8aa0c4,stroke-width:1.5px,color:#1a132f
+    classDef core fill:#c7d6ee,stroke:#2f4a73,stroke-width:2.5px,color:#1a132f
+    classDef ai fill:#e3f1f5,stroke:#61a4bc,stroke-width:1.5px,color:#1a132f
+    classDef infra fill:#fbf0dc,stroke:#c99a3b,stroke-width:1.5px,color:#1a132f
+    classDef ext fill:#fbe7ea,stroke:#cf6f7b,stroke-width:1.5px,color:#1a132f
+    class A,B,C fe
+    class GW gw
+    class D core
+    class E ai
+    class S3,K infra
+    class F,G ext
+    style FE fill:#f6f9fd,stroke:#4d6d9f,stroke-dasharray:4 3
+    style BE fill:#f3f6fb,stroke:#3a5478,stroke-dasharray:4 3
+    style AI fill:#f4fafc,stroke:#61a4bc,stroke-dasharray:4 3
+    style INFRA fill:#fdf8ee,stroke:#c99a3b,stroke-dasharray:4 3
+    style EXT fill:#fdf4f5,stroke:#cf6f7b,stroke-dasharray:4 3`,
       },
       {
         caption: "전체 처리 흐름",
-        chart: `sequenceDiagram
+        legend: "━▶ 요청 · 처리    ┈▶ 응답",
+        chart: `%%{init: {"theme":"base","themeVariables":{"fontFamily":"IBM Plex Sans KR, sans-serif","fontSize":"16px","primaryColor":"#ffffff","primaryTextColor":"#1a132f","primaryBorderColor":"#4d6d9f","lineColor":"#4d6d9f","actorBkg":"#e8f0fa","actorBorder":"#4d6d9f","actorTextColor":"#1a132f","actorLineColor":"#c9c7d0","loopTextColor":"#1a132f","signalColor":"#1a132f","signalTextColor":"#1a132f","sequenceNumberColor":"#ffffff","labelBoxBkgColor":"#e8f0fa","labelBoxBorderColor":"#4d6d9f","labelTextColor":"#1a132f","noteBkgColor":"#ffffff","noteBorderColor":"#c9c7d0","noteTextColor":"#1a132f"},"sequence":{"mirrorActors":false,"actorMargin":60,"messageFontSize":17,"noteFontSize":17,"actorFontSize":18,"boxMargin":12,"messageMargin":38}}}%%
+sequenceDiagram
     autonumber
-    actor U as 사용자
-    participant BE as sns-service
-    participant AI as FastAPI Agent
-    participant YT as YouTube
-    participant KF as Kafka
+    participant U as 👤 사용자
+    participant BE as ⚙️ sns-service
+    participant AI as 🤖 FastAPI Agent
+    participant YT as ▶️ YouTube
+    participant DB as 🗄️ DB
+    participant KF as 📨 Kafka
 
-    rect rgb(243,240,255)
-    Note over U,AI: 1단계 · AI 게시글 생성
-    U->>BE: 콘텐츠 선택 + 키워드/업종/위치 입력
+    rect rgb(245,249,252)
+    Note over U,AI: STEP 01 · AI 게시물 생성<br/>콘텐츠 선택 → 분석 · 생성 → 결과 반환
+    U->>BE: 콘텐츠 선택 + 키워드 입력<br/>업종 · 위치: 매장 기본값
     BE->>BE: S3 Presigned URL 발급
-    BE->>AI: 이미지 URL + 키워드 + 업종/위치/플랫폼
-    AI->>AI: 콘텐츠 분석 → 트렌드 → 본문 → 해시태그
+    BE->>AI: 이미지 URL + 생성 정보<br/>키워드 · 업종 · 위치 · 플랫폼
+    Note over AI: 콘텐츠 분석<br/>↓ 트렌드 분석<br/>↓ 본문 생성<br/>↓ 해시태그 생성
     AI-->>BE: 제목 · 본문 · 해시태그
     BE-->>U: 생성 결과 (편집 가능)
     end
 
-    rect rgb(255,241,242)
-    Note over U,KF: 2단계 · 게시 및 업로드
+    rect rgb(247,248,252)
+    Note over U,KF: STEP 02 · 게시 및 업로드<br/>게시 요청 → YouTube 업로드 → 저장 · 이벤트 발행
     U->>BE: 즉시 게시 또는 예약 게시
     BE->>YT: 영상 업로드 (+ publishAt)
     YT-->>BE: videoId
-    BE->>BE: 게시글 메타데이터 DB 저장
-    BE->>KF: 게시글 생성 이벤트 발행
-    BE-->>U: 게시 완료
+    BE->>DB: 게시물 메타데이터 저장
+    BE->>KF: 게시물 생성 이벤트 발행
+    BE-->>U: 게시(예약) 등록 완료
     end`,
       },
     ],
     showcase: {
       label: "결과물",
       intro:
-        "담당한 SNS 도메인의 화면 전반을 React 로 구현하고 Redux 로 상태를 관리했습니다. 계정을 연동하고, AI 로 게시글을 만들고, 플랫폼에 올려 관리하기까지가 한 흐름으로 이어집니다.",
+        "담당한 SNS 도메인의 화면 전반을 React로 구현하고 Redux로 상태를 관리했습니다. SNS 계정 연동(OAuth), AI 게시물 작성(제목·본문·해시태그), 즉시·예약 게시, 게시물 조회·수정·삭제까지, 사용자가 거치는 전 과정을 다룹니다.",
       shots: [
         {
           src: "/damatketing/sns-connect-page.png",
@@ -420,8 +528,8 @@ export const lightProjects: LightProject[] = [
           width: 1400,
           height: 2432,
           column: 2,
-          title: "새 게시물 업로드 — 네 단계 한 화면",
-          desc: "① 콘텐츠 선택 → ② AI 게시글 작성 → ③ 게시 옵션 → ④ 플랫폼별 미리보기까지 한 페이지에서 끝납니다. 제목·본문·해시태그를 한 번에 만드는 버튼과 해시태그만 다시 뽑는 버튼을 나란히 두었고, 게시 시점에서 예약 게시를 고를 수 있습니다.",
+          title: "새 게시물 업로드 - 네 단계 한 화면",
+          desc: "① 콘텐츠 선택 → ② AI 게시물 작성 → ③ 게시 옵션 → ④ 플랫폼별 미리보기까지 한 페이지에서 끝납니다. 제목·본문·해시태그를 한 번에 만드는 버튼과 해시태그만 다시 뽑는 버튼을 나란히 두었고, 게시 시점에서 예약 게시를 고를 수 있습니다.",
         },
         {
           src: "/damatketing/post-manage-page.png",
@@ -434,18 +542,18 @@ export const lightProjects: LightProject[] = [
     },
     featureGroups: [
       {
-        label: "AI — 게시글 생성 에이전트",
+        label: "기술 소개 - AI 게시물 생성 에이전트",
         items: [
           {
-            name: "5.1 왜 단일 프롬프트가 아니라 그래프인가",
+            name: "6.1 왜 단일 프롬프트가 아니라 그래프인가",
             tagline:
-              "게시글 생성은 성격이 다른 네 가지 일이 섞여 있습니다 — 이미지를 읽는 일, 외부 트렌드를 끌어오는 일, 문장을 쓰는 일, 규칙에 맞춰 태그를 고르는 일. 이걸 한 번의 호출로 처리하면 어느 단계가 잘못됐는지 짚어낼 수 없고, 일부만 다시 실행하는 것도 불가능합니다.",
+              "게시물 생성에는 성격이 다른 네 단계가 있습니다. 이미지 분석, 트렌드 분석, 본문 작성, 해시태그 선정입니다. 한 번의 호출로 처리하면 단계별 결과를 분리해 검증하기 어렵고, 특정 단계만 다시 실행하기도 어렵습니다.",
             problemLabel: "택한 구조",
             problem:
-              "역할 단위로 노드를 나누고 LangGraph StateGraph 로 연결했습니다. 그 결과 단계별로 모델과 temperature 를 다르게 배치할 수 있었고, 해시태그만 재생성하는 API 를 별도 노드 조합으로 만들 수 있었습니다. 각 노드는 하나의 책임만 지고, 앞 단계의 구조화된 출력이 다음 단계의 입력이 됩니다.",
+              "역할 단위로 노드를 나누고 LangGraph StateGraph로 연결했습니다. 그 결과 단계별로 모델과 temperature를 다르게 배치할 수 있었고, 해시태그만 재생성하는 API도 필요한 노드만 조합해 만들 수 있었습니다. 각 노드는 하나의 책임을 갖고, 앞 단계의 구조화된 출력이 다음 단계의 입력으로 전달됩니다.",
             solutionLabel: "구현",
             solutionBlocks: [
-              // 코드(좌)와 렌더된 그래프(우)를 나란히 — 세로로 긴 그림이라 코드 높이에 맞춘다
+              // 코드(좌)와 렌더된 그래프(우)를 나란히 - 세로로 긴 그림이라 코드 높이에 맞춘다
               {
                 title: "그래프 구성",
                 layout: "side",
@@ -466,38 +574,40 @@ workflow.add_edge("hashtag_generator", END)`,
                   src: "/damatketing/sns-post-graph.png",
                   width: 180,
                   height: 531,
-                  alt: "SNS 게시글 생성 그래프 구조",
+                  alt: "SNS 게시물 생성 그래프 구조",
                 },
                 points: [
-                  "LangGraph 를 택한 이유는 상태를 명시적으로 관리할 수 있어서입니다. Pydantic 모델로 State 를 정의해두면 각 노드가 무엇을 받아 무엇을 채우는지가 타입으로 드러나고, 중간 산출물을 그대로 검증·디버깅할 수 있습니다. 단순 체인으로 이었다면 중간에 무엇이 어떻게 넘어가는지 추적하기 어려웠을 겁니다.",
+                  "각 노드 안에서는 LangChain의 ChatOpenAI, 프롬프트 템플릿, 출력 파서로 모델을 호출하고, 노드 사이의 연결은 LangGraph의 StateGraph가 맡습니다. 노드는 State를 받아 State를 반환하는 일반 함수로 구현했습니다. 따라서 그래프 실행과 별개로 개별 노드를 직접 호출할 수 있고, 해시태그 재생성 API에서는 트렌드 분석과 해시태그 노드만 직접 실행했습니다.",
                 ],
               },
               {
                 title: "State 정의",
                 code: `class SNSPostState(BaseModel):
-    # 입력
+    # ── 입력 (요청으로 들어오는 값) ──
     content_data: str
     sns_platform: Literal["instagram", "facebook", "youtube"]
     business_type: str
     user_keywords: List[str] = Field(default_factory=list)
     location: Optional[str] = None
 
-    # 중간 생성물
+
+    # ── 중간 생성물 (노드가 차례로 채우는 값) ──
     content_summary: Optional[ContentData] = None
     trend_analysis: Optional[TrendData] = None
     generated_post: Optional[PostData] = None
     hashtags: List[str] = Field(default_factory=list)`,
                 lang: "python",
                 points: [
-                  "상태 갱신은 state.model_copy(update={...}) 로 처리해 이전 상태를 훼손하지 않도록 했습니다.",
+                  "Pydantic 모델로 State를 정의해 입력과 중간 산출물을 필드로 명시했습니다. 각 노드는 앞 단계의 결과를 읽어 자신의 필드를 채우기 때문에, 노드별 출력과 검증 결과를 확인하며 문제가 발생한 단계를 좁힐 수 있었습니다.",
+                  "상태 갱신은 state.model_copy(update={...})로 처리해, 기존 상태 객체를 직접 변경하지 않고 변경 사항을 반영한 새로운 상태 객체를 생성하도록 했습니다.",
                 ],
               },
             ],
           },
           {
-            name: "5.2 노드별 역할과 모델 배치",
+            name: "6.2 노드별 역할과 모델 배치",
             tagline:
-              "작업 성격에 따라 모델과 temperature 를 다르게 뒀습니다. 전 구간에 상위 모델을 쓰면 비용과 응답 시간이 커지고, 전 구간에 경량 모델을 쓰면 트렌드 분석의 품질이 떨어졌습니다.",
+              "작업 성격에 따라 모델과 temperature를 다르게 배치했습니다. 모든 단계에 상위 모델을 사용하면 비용과 응답 시간이 증가하고, 모든 단계에 경량 모델을 사용하면 맥락이 복잡한 트렌드 분석에서 품질을 확보하기 어려웠습니다.",
             table: {
               head: ["노드", "역할", "모델", "temp", "선택 이유"],
               rows: [
@@ -506,155 +616,195 @@ workflow.add_edge("hashtag_generator", END)`,
                   "이미지에서 주제·분위기·타겟 추출",
                   "gpt-4o-mini",
                   "0.3",
-                  "정형 추출 작업, 편차를 줄여야 함",
+                  "정형 정보 추출 중심이라 일관성 우선",
                 ],
                 [
                   "trend_analyzer",
                   "업종·지역·시기별 트렌드 8개 범주 도출",
                   "gpt-4o",
                   "0.7",
-                  "폭넓은 지식과 발상이 필요한 유일한 단계",
+                  "다양한 맥락을 고려한 후보 생성이 필요한 단계",
                 ],
                 [
                   "post_generator",
                   "제목·본문 생성",
                   "gpt-4o-mini",
                   "0.5",
-                  "앞 단계 입력이 충분해 경량 모델로 충분",
+                  "구조화된 입력을 받아 생성하므로 경량 모델로 충분",
                 ],
                 [
                   "hashtag_generator",
                   "플랫폼별 해시태그 생성",
                   "gpt-4o-mini",
                   "0.7",
-                  "다양성은 필요하나 후처리로 통제 가능",
+                  "다양성이 필요하지만 후처리로 형식·개수를 통제",
                 ],
               ],
             },
           },
           {
-            name: "5.3 트렌드 분석 — 맥락을 강제하는 프롬프트",
+            name: "6.3 트렌드 분석 - 맥락을 강제하는 프롬프트",
             tagline:
-              "“최신 트렌드를 반영해줘”라고만 하면 LLM 은 어느 업종에나 통하는 뻔한 답을 냅니다. 현재 날짜·업종·매장 위치·대상 플랫폼을 컨텍스트로 주입하고, 출력을 8개 범주로 강제해 매장 맥락에 밀착한 결과를 유도했습니다.",
+              "“트렌드를 반영해줘”라고만 하면 업종·지역·플랫폼과 무관한 일반적인 결과가 나오기 쉬웠습니다. 현재 날짜·업종·매장 위치·대상 플랫폼을 컨텍스트로 주입하고, 출력을 8개 범주로 구조화해 매장 맥락을 반영하도록 유도했습니다.\n범주를 나누는 것 자체를 프롬프트 제약으로 사용했습니다. 자유 서술로 두는 대신 관점을 분리해 각 범주를 빠짐없이 고려하도록 유도했습니다.",
             solutionLabel: "출력 강제",
             solutionBlocks: [
               {
-                title: "출력 형식",
-                code: `[출력 형식]
-{
-    "keywords": ["..."],        # 트렌딩 키워드
-    "hashtags": ["..."],        # 인기 해시태그
-    "memes": ["..."],           # 최신 밈
-    "current_issues": ["..."],  # 시사 이슈
-    "popular_topics": ["..."],  # 인기 주제
-    "business_trend": ["..."],  # 업종 트렌드
-    "season_trend": ["..."],    # 계절 트렌드
-    "location_trend": ["..."]   # 지역 트렌드
-}`,
-                lang: "json",
-                points: [
-                  "범주를 나눈 것 자체가 장치입니다. 자유 서술로 두면 한두 방향으로 쏠리는데, 칸을 만들어두면 각 관점을 빠짐없이 채웁니다.",
-                ],
-              },
-              {
-                title: "실제 출력 예시 (의류 쇼핑몰 / 서울 잠실 / 8월)",
-                code: `"keywords": ['맨투맨', '의류 쇼핑몰', '패션', '젊은 세대', '캐주얼 스타일']
-"season_trend": ['가을 맞이 패션템', '편안하고 따뜻한 의류']
-"location_trend": ['잠실의 패션 이벤트', '서울에서 즐기는 캐주얼 패션']`,
-                lang: "json",
+                custom: "trend-prompt",
                 points: [],
               },
             ],
           },
           {
-            name: "5.4 API 구성 — 부분 실행 지원",
+            name: "6.4 API 구성 - 부분 실행 지원",
             tagline:
-              "노드를 책임 단위로 나눠둔 덕에, 전체 파이프라인을 돌리지 않고 필요한 구간만 실행하는 API 를 만들 수 있었습니다. 사용자가 본문은 마음에 드는데 해시태그만 다시 뽑고 싶은 경우가 있어, 해시태그 전용 엔드포인트를 따로 열었습니다.",
+              "사용자가 본문은 유지한 채 해시태그만 다시 생성할 수 있도록 해시태그 전용 엔드포인트를 분리했습니다.",
             table: {
               head: ["엔드포인트", "기능", "실행 노드"],
               rows: [
                 [
                   "POST /sns-post/agent/post",
-                  "게시글 + 해시태그 전체 생성",
+                  "게시물 + 해시태그 전체 생성",
                   "4개 노드 전체",
                 ],
                 [
                   "POST /sns-post/agent/tag",
-                  "기존 게시글 기준 해시태그만 재생성",
-                  "trend_analyzer → hashtag_generator",
+                  "기존 게시물 기준 해시태그만 재생성",
+                  "2개 노드 (trend_analyzer → hashtag_generator)",
                 ],
               ],
-              note: "/tag 는 이미 작성된 제목·본문을 입력으로 받아 임시 State 를 구성한 뒤 두 노드만 직접 호출합니다. 이미지 분석과 본문 생성을 건너뛰므로 응답이 빠르고 API 호출 비용도 절반 이하로 줄었습니다.",
+              note: "/tag는 기존 제목·본문을 입력으로 받아 필요한 State를 구성한 뒤, trend_analyzer와 hashtag_generator만 직접 실행합니다.\n효과 - 이미지 분석과 본문 생성 단계를 건너뛰어 LLM 호출이 2회로 줄어듭니다.",
             },
           },
           {
-            name: "5.5 해시태그 최적화",
+            name: "6.5 플랫폼별 해시태그 생성 정책",
             tagline:
-              "플랫폼마다 해시태그 노출 알고리즘이 다릅니다. 과다 사용하면 스팸으로 분류되거나(Instagram), 아예 전부 무시됩니다(YouTube 는 15개 초과 시). 자료 조사를 거쳐 권장 개수와 우선순위 규칙을 정하고 프롬프트에 명시했습니다.",
-            table: {
-              head: ["플랫폼", "권장 개수", "우선순위 (중요 → 덜 중요)"],
-              rows: [
-                [
-                  "Instagram",
-                  "7~11개",
-                  "핵심 콘텐츠 키워드 → 세분화/타겟(지역·속성) → 트렌드/인기 → 브랜드",
+              "플랫폼마다 해시태그 사용 방식과 정책이 달라 플랫폼별 생성 규칙을 분리했습니다. 과다 사용하면 스팸으로 분류되거나(Instagram), 아예 전부 무시됩니다(YouTube는 15개 초과 시). 자료 조사를 거쳐 권장 개수와 우선순위 규칙을 정했습니다.",
+            solutionLabel: "프롬프트 규칙",
+            solutionBlocks: [
+              {
+                custom: "hashtag-prompt",
+                points: [
+                  "입력이 비었을 때의 처리도 규칙에 넣었습니다. 매장 위치가 없는데 지역 태그를 만들면 엉뚱한 지역이 붙기 때문에, location이 비어 있으면 지역 태그를 생성하지 않도록 명시했습니다.",
                 ],
-                [
-                  "Facebook",
-                  "2~3개",
-                  "캠페인/이벤트 → 개인·커뮤니티 → 키워드+지역",
-                ],
-                [
-                  "YouTube",
-                  "3~5개",
-                  "영상 주제 → 트렌드/빅키워드(#Shorts 등) → 세분화 타겟 → 브랜드/채널",
-                ],
-              ],
-              note: "입력이 비었을 때의 처리도 규칙에 넣었습니다. 매장 위치가 없는데 지역 태그를 만들면 엉뚱한 지역이 붙기 때문에, location 이 비어 있으면 지역 태그를 생성하지 않도록 명시했습니다.",
-            },
+                note: "프롬프트는 생성 방향을 유도하고, 최종 개수·형식·중복 여부는 코드에서 검증합니다.",
+              },
+            ],
           },
         ],
       },
       {
-        label: "백엔드 — SNS 연동 및 게시",
+        label: "기술 소개 - 웹서비스 적용 기술",
         items: [
           {
-            name: "6.1 확장을 고려한 연동 구조",
-            problemLabel: "구조",
-            problem:
-              "팀 컨벤션인 헥사고날 구조(adapter.in / application / adapter.out)에 맞춰 계층을 분리하고, 플랫폼별 API 구현을 adapter.out 어댑터에 두어 외부 API 의존이 도메인으로 새어 들어오지 않도록 했습니다. 플랫폼 구분은 SnsType enum 으로 두어 플랫폼이 늘어날 때 추가 지점이 한곳에 모이도록 했습니다.",
-          },
-          {
-            name: "6.2 OAuth 2.0 연동과 CSRF 방어",
-            tagline:
-              "인가 코드 방식으로 Google API 접근 권한을 받되, 콜백이 정상 요청인지 검증하기 위해 state 파라미터를 서버에서 발급·소비하도록 구현했습니다.",
-            solutionLabel: "구현",
+            name: "7.1 MSA 아키텍처 - 서비스 분리 이유",
+            problemLabel: "이유",
+            problemList: [
+              "**AI 기능의 독립성**: AI 서버를 Spring 서비스와 분리해, 모델 · 프롬프트 · 에이전트 변경이 비즈니스 서비스에 영향을 주지 않도록 구성",
+              "**배포 영향 분리**: 변경된 서비스만 빌드 · 배포하는 CI/CD (paths-filter + matrix)로 변경 범위를 제한",
+              "**변경 주기 분리**: AI 기능의 빠른 실험과 비즈니스 서비스의 배포 주기를 분리",
+              "**도메인 경계 명확화**: 서비스별로 업무 책임을 나눠 변경 범위를 한정",
+            ],
+            solutionLabel: "구조",
             solutionBlocks: [
               {
-                code: `public String issue(Long userId, Long storeId) {
-    String raw = userId + ":" + storeId + ":" + UUID.randomUUID();
-    String state = Base64.getUrlEncoder().withoutPadding()
-            .encodeToString(raw.getBytes(StandardCharsets.UTF_8));
-    repository.save(OAuthStateEntity.builder()
-            .state(state).userId(userId).storeId(storeId)
-            .expiresAt(Instant.now().plusSeconds(600)).build());
-    return state;
-}`,
-                lang: "java",
-                points: [
-                  "10분 TTL — 오래된 state 가 재사용되지 않도록 만료 시각을 함께 저장",
-                  "일회성 소비 — 검증 직후 삭제해 재사용을 원천 차단",
-                  "사용자·매장 식별자 바인딩 — 콜백 시점에 어떤 매장의 연동인지 복원",
-                ],
-                note: "토큰은 별도 서비스에서 관리하며, API 호출 직전 ensureValidToken() 으로 만료를 확인하고 필요하면 refresh token 으로 갱신합니다.",
+                points: [],
+                chart: msaChart,
+                note: "AI 기능은 모델 · 프롬프트 · 에이전트의 변경 주기가 비즈니스 서비스와 달라 독립 서비스로 분리했습니다. 비즈니스 서비스는 도메인 책임을 기준으로 경계를 나누고, 서비스별 독립 배포가 가능하도록 구성했습니다.",
               },
             ],
           },
           {
-            name: "6.3 영상 업로드와 예약 게시",
-            solutionLabel: "구현",
+            name: "7.2 Kafka 기반 서비스 간 연동",
+            solutionLabel: "구조",
             solutionBlocks: [
               {
+                points: [],
+                chart: eventChart,
+                note:
+                  "게시물 메타데이터가 필요한 analytics-service와는 Kafka를 통해 연동했습니다. sns-service는 post.created · post.deleted 이벤트로 상태 변화를 전달하고, 필요한 경우 post-info 요청·응답으로 상세 게시물 정보를 제공합니다. 다른 서비스가 SNS 도메인 DB를 직접 조회하지 않도록 해 서비스 간 결합도를 낮추고 MSA 경계를 유지했습니다.",
+              },
+            ],
+          },
+          {
+            name: "7.3 Secure Coding - JWT + Refresh Token Rotation + Redis",
+            tagline:
+              "Access Token은 짧은 TTL로 운영하고, 폐기된 Access Token의 jti를 Redis에 등록해 Gateway에서 차단합니다. Refresh Token은 Rotation 방식으로 재발급 시 기존 토큰을 폐기합니다.",
+            solutionLabel: "토큰 관리",
+            solutionBlocks: [
+              { points: [], custom: "jwt-tokens" },
+              {
+                title: "토큰 수명 · 보관 전략",
+                points: [
+                  "Access (JWT) - 짧은 TTL",
+                  "Refresh Token - UUID 기반 opaque token, Redis 저장 및 Rotation",
+                  "짧은 Access TTL - 자동 재발급으로 사용자 경험을 유지하면서, 탈취된 토큰의 사용 가능 시간을 제한",
+                ],
+              },
+              {
+                title: "Access 블랙리스트",
+                points: [
+                  "폐기된 Access jti 등록 - 로그아웃 · 재발급 시 기존 Access의 jti를 Redis 블랙리스트에 등록",
+                  "Gateway 검증 - 요청마다 서명 · 만료 · jti 블랙리스트 여부를 검증하고, 모두 통과해야 허용",
+                ],
+              },
+              {
+                title: "Refresh Token Rotation",
+                points: [
+                  "Rotation - 새 Refresh Token을 발급한 뒤 기존 Refresh Token을 삭제",
+                  "일회성 사용 - 사용한 Refresh Token은 다시 사용할 수 없도록 처리해 동일 토큰의 재사용을 방지",
+                ],
+              },
+            ],
+          },
+          {
+            name: "7.4 외부 플랫폼 연동 추상화",
+            solutionLabel: "구조",
+            solutionBlocks: [
+              {
+                points: [],
+                chart: layerChart,
+                note:
+                  "헥사고날 구조(adapter.in / application / adapter.out)에 맞춰 외부 플랫폼 API 구현을 adapter.out으로 격리했습니다. SnsType과 EnumMap으로 플랫폼별 구현체를 선택하고, 각 구현체가 supportSnsType()으로 지원 플랫폼을 정의하도록 구성했습니다. 새로운 플랫폼 추가 시 기존 비즈니스 로직의 변경을 최소화할 수 있습니다.",
+              },
+            ],
+          },
+          {
+            name: "7.5 OAuth 2.0 연동과 state 기반 CSRF 방어",
+            tagline:
+              "Google OAuth 연동 과정에서 authorization response의 위조를 방지하기 위해, 서버에서 일회성 state를 발급 · 검증 · 소비하도록 구현했습니다.",
+            solutionLabel: "구현",
+            solutionBlocks: [
+              { points: [], chart: oauthChart },
+              {
+                title: "콜백에서 state 검증 후 소비",
+                code: `public Pair<Long, Long> consume(String state) {
+    OAuthStateEntity e = repository.findById(state)
+            .orElseThrow(() -> new IllegalStateException("invalid state"));
+    if (e.getExpiresAt().isBefore(Instant.now())) {
+        repository.deleteById(state);
+        throw new IllegalStateException("state expired");
+    }
+    repository.deleteById(state);   // 일회성 소비
+    return Pair.of(e.getUserId(), e.getStoreId());
+}`,
+                lang: "java",
+                points: [
+                  "서버 발급 state 검증 - DB에 발급 기록이 없는 state의 콜백은 거절",
+                  "10분 TTL - state에 만료 시각을 저장하고, 만료된 콜백은 삭제 후 거절",
+                  "일회성 소비 - 검증에 성공한 state는 즉시 삭제해 동일 state의 재사용을 방지",
+                  "연동 대상 매핑 - state에 연결된 userId · storeId를 조회해 연동 대상을 복원",
+                ],
+                note: "토큰 관리 - 토큰은 별도 서비스에서 관리하고, API 호출 전 만료 여부를 확인해 필요 시 refresh token으로 갱신합니다.",
+              },
+            ],
+          },
+          {
+            name: "7.6 대용량 영상 업로드와 예약 게시",
+            solutionLabel: "구현",
+            solutionBlocks: [
+              { points: [], chart: uploadChart },
+              {
+                title: "Resumable Upload + YouTube 예약 게시 구현",
                 code: `VideoStatus status = new VideoStatus();
 status.setPrivacyStatus("private");        // 예약 게시하려면 private + publishAt
 if (publishAt != null) {
@@ -665,17 +815,11 @@ uploader.setDirectUploadEnabled(false);    // Resumable
 uploader.setChunkSize(10 * 1024 * 1024);   // 10MB`,
                 lang: "java",
                 points: [
-                  "예약 게시 — 비공개로 선업로드한 뒤 publishAt 을 지정해 플랫폼 스케줄링에 위임",
-                  "대용량 처리 — S3 객체를 메모리에 적재하지 않고 스트리밍, 10MB 청크 Resumable 업로드로 중단 시 재개",
+                  "대용량 처리 - S3 객체를 메모리에 전체 적재하지 않고 스트림으로 읽어 YouTube Resumable Upload에 전달하고, 10MB 청크 단위로 업로드",
+                  "예약 게시 - 영상을 private으로 선업로드한 뒤 publishAt을 지정해 YouTube의 스케줄링에 위임",
                 ],
               },
             ],
-          },
-          {
-            name: "6.4 서비스 간 연동",
-            problemLabel: "구조",
-            problem:
-              "게시글 메타데이터가 필요한 성과 분석 서비스와는 Kafka 이벤트로 통신했습니다. 다른 서비스가 SNS 도메인 DB 를 직접 조회하지 않게 해 MSA 경계를 유지했습니다.",
           },
         ],
       },
@@ -683,101 +827,85 @@ uploader.setChunkSize(10 * 1024 * 1024);   // 10MB`,
         label: "트러블슈팅",
         items: [
           {
-            name: "7.1 S3 Presigned URL 이 이미지로 인식되지 않던 문제",
+            name: "8.1 LLM JSON 출력 검증",
             problem:
-              "백엔드가 넘겨준 S3 Presigned URL 을 콘텐츠 분석 노드가 이미지로 처리하지 못하고 폴백으로 빠졌습니다. 확장자로 미디어 여부를 판별하고 있었는데, Presigned URL 은 쿼리스트링이 길게 붙고 경로에 확장자가 없는 경우가 있어 판별이 실패했습니다.",
-            solution:
-              "확장자 판별 앞에 신뢰 도메인 화이트리스트를 두어, 자사 CDN·S3 에서 온 URL 은 확장자와 무관하게 미디어로 처리하도록 했습니다.",
-            solutionBlocks: [
-              {
-                code: `if 'aivle.r-e.kr' in domain or 's3.amazonaws.com' in domain or 'cdn.aivle' in domain:
-    print("✅ AIVLE/S3 CDN 감지 - 미디어 파일로 처리")
-elif ext and ext not in IMAGE_EXTS:
-    ...  # 메타 요약으로 대체`,
-                lang: "python",
-                points: [],
-              },
-            ],
-          },
-          {
-            name: "7.2 LLM 이 JSON 형식을 지키지 않는 문제",
-            problem:
-              "“순수 JSON 만 반환하라”고 명시해도 코드블록으로 감싸거나 설명 문장을 덧붙이는 경우가 있어 파싱이 깨졌습니다.",
-            solution: "세 겹으로 방어했습니다.",
+              "LLM에게 JSON만 반환하도록 지시해도 코드블록이나 설명 문장이 포함되는 경우가 있어 JSON 파싱에 실패하고 다음 노드로 전달되지 않는 문제가 발생했습니다.",
+            solution: "LLM 출력의 불확실성을 고려해 3단계로 방어했습니다.",
             solutionBlocks: [
               {
                 pointsFirst: true,
                 points: [
-                  "시스템 프롬프트에 금지 사항을 구체적으로 명시 (마크다운 금지, 백틱 금지, 추가 필드 금지)",
-                  "1차 파싱 실패 시 정규식으로 JSON 블록만 추출하는 관대한 파서로 재시도",
-                  "그래도 실패하면 폴백 객체를 반환해 파이프라인이 멈추지 않도록 처리",
+                  "출력 제약 - 마크다운 · 백틱 · 추가 필드 등을 금지",
+                  "파싱 복구 - 일반 파싱 실패 시 정규식으로 JSON 영역을 추출해 재파싱",
+                  "폴백 처리 - 복구에도 실패하면 기본 객체를 생성해 파이프라인 중단 방지",
                 ],
                 code: `def _extract_json(text: str):
     try:
-        return json.loads(text)
+        return json.loads(text)                    # 일반 파싱
     except Exception:
         pass
-    m = re.search(r"\\{.*\\}", text, re.DOTALL)   # 관대한 추출
-    if m:
-        try:
-            return json.loads(m.group(0))
-        except Exception:
-            return None
-    return None`,
-                lang: "python",
-                note: "순차 그래프에서는 앞 노드가 죽으면 뒤 노드가 전부 죽습니다. 품질이 조금 낮은 결과라도 흐름을 잇는 편이 낫다고 판단해, 이미지 분석에 실패해도 업종·키워드 기반의 최소 요약을 만들어 다음 노드로 넘겼습니다.",
-              },
-            ],
-          },
-          {
-            name: "7.3 해시태그 규칙을 프롬프트만으로는 못 지키는 문제",
-            problem:
-              "프롬프트에 개수 제한과 형식을 명시해도 LLM 이 종종 어겼습니다. 개수를 초과하거나, # 을 붙이거나, 이모지·공백이 섞이거나, 표기만 다른 중복 태그가 나왔습니다.",
-            solution:
-              "프롬프트로 유도하고 코드로 강제하는 이중 구조로 바꿨습니다. LLM 출력은 신뢰하지 않고 후처리 단계를 반드시 거치게 했습니다.",
-            solutionBlocks: [
-              {
-                code: `def _normalize_hashtags(raw):
-    for t in raw or []:
-        t = re.sub(r"\\s+", "", t)          # 공백 제거
-        t = re.sub(r"[^\\w#가-힣]", "", t)   # 이모지·특수문자 제거
-        if not t.startswith("#"):
-            t = f"#{t}"
-        norm.append(t.lower())             # 표기 통일 후 중복 제거
+    m = re.search(r"\\{.*\\}", text, re.DOTALL)     # JSON 영역만 추출해 재파싱
     ...
 
-def _cap_by_platform(tags, platform):
-    limits = {"instagram": (7, 11), "facebook": (2, 3), "youtube": (3, 5)}
-    lo, hi = limits.get(platform, (3, 5))
-    return tags[:hi]                       # 플랫폼 한도 강제`,
+data = _extract_json(response.content)
+if not data:
+    raise ValueError("JSON 파싱 실패")
+content = ContentData(**data)
+...
+except Exception:
+    fb = _fallback_content(state, ...)             # 업종 · 키워드 기반 기본 객체
+    return state.model_copy(update={"content_summary": fb})`,
+                lang: "python",
+                note: "순차 그래프에서는 앞 단계의 실패가 후속 단계의 실행 중단으로 이어질 수 있습니다. 따라서 품질이 일부 낮아지더라도 파이프라인을 계속 실행하는 것을 우선해, 이미지 분석 실패 시 업종 · 키워드 기반의 최소 요약을 생성해 다음 노드로 전달했습니다.",
+              },
+            ],
+          },
+          {
+            name: "8.2 해시태그 규칙 검증",
+            problem:
+              "프롬프트에 개수와 형식을 명시해도 LLM이 항상 일관되게 지키지는 못했습니다.\n개수 초과, # 표기 불일치, 이모지·공백 포함, 대소문자만 다른 중복 태그가 발생했습니다.",
+            solution:
+              "LLM은 생성, 코드는 검증과 정규화를 담당하도록 책임을 분리했습니다.\nLLM 출력을 그대로 사용하지 않고 후처리 단계에서 형식과 플랫폼별 규칙을 강제했습니다.",
+            solutionBlocks: [
+              {
+                code: `def normalize_hashtags(raw):
+    norm = []
+    for t in raw or []:
+        t = re.sub(r"\\s+", "", t)
+        t = re.sub(r"[^\\w#가-힣]", "", t)
+        if not t.startswith("#"):
+            t = f"#{t}"
+        t = t.lower()
+        if t not in norm:
+            norm.append(t)
+    return norm`,
                 lang: "python",
                 points: [],
-                note: "이 경험에서 LLM 출력에 대한 검증은 프롬프트가 아니라 코드의 책임이라는 걸 배웠습니다.",
+              },
+              {
+                code: `limits = {
+    "instagram": (7, 11),
+    "facebook": (2, 3),
+    "youtube": (3, 5),
+}
+lo, hi = limits.get(platform, (3, 5))
+return tags[:hi]`,
+                lang: "python",
+                points: [],
+                note: "LLM 출력은 항상 규칙을 보장할 수 없기 때문에, 플랫폼별 제약은 코드에서 최종 검증하도록 설계했습니다.",
               },
             ],
           },
           {
-            name: "7.4 예약 게시를 어떻게 처리할 것인가",
+            name: "8.3 예약 게시와 스케줄러 설계",
             problemLabel: "고민",
             problem:
-              "예약 시각에 맞춰 게시하려면 서버에 스케줄러를 두는 방식이 일반적입니다. 하지만 그러면 예약 시각에 서버가 내려가 있을 경우 게시가 통째로 누락됩니다. 재시도 로직과 중복 게시 방지까지 직접 관리해야 했습니다.",
+              "애플리케이션에서 예약 게시를 직접 처리한다면 서버에서 스케줄러가 작업을 실행해야 합니다. 하지만 서버 장애나 배포가 예약 시각과 겹치면 실행이 누락될 수 있고, 이를 보완하려면 재시도와 중복 게시 방지까지 직접 관리해야 했습니다.",
             solution:
-              "YouTube Data API 가 예약 공개를 지원한다는 점을 활용해, 영상을 비공개로 먼저 올려두고 공개 시각만 지정하는 방식으로 전환했습니다. 예약 이후의 책임을 플랫폼에 넘긴 셈입니다.",
-            troublesLabel: "결과",
-            troubles: [
-              {
-                title: "스케줄러를 만들지 않는 쪽을 택했다",
-                effect:
-                  "서버 가용성과 무관하게 예약이 보장되고, 스케줄러·재시도·중복 방지 로직이 전부 불필요해졌습니다. 다만 플랫폼이 예약 기능을 지원하지 않는 경우에는 쓸 수 없어, 향후 Instagram·Facebook 확장 시에는 별도 방식이 필요합니다.",
-              },
-            ],
-          },
-          {
-            name: "7.5 OAuth 콜백 응답 형식",
-            problem:
-              "연동 완료 후 콜백이 JSON 을 반환하고 있어, 팝업 창에 원시 JSON 이 그대로 노출됐습니다. 사용자는 연동이 성공한 건지 알 수 없었습니다.",
-            solution:
-              "콜백 응답을 HTML 템플릿으로 바꿔 성공·실패 화면을 렌더링하도록 수정했습니다. 템플릿 로딩이 실패하는 경우를 대비해 인라인 fallback HTML 도 함께 두었습니다.",
+              "YouTube Data API가 예약 공개를 지원한다는 점을 활용해, 영상을 비공개로 먼저 업로드하고 publishAt으로 공개 시각을 지정하는 방식으로 전환했습니다. 애플리케이션에서 실행 시점을 관리하는 대신, 예약 시각의 공개 전환을 YouTube에 위임했습니다.",
+            solutionBlocks: [{ points: [], chart: scheduleChart }],
+            result:
+              "예약 시각의 공개 실행을 YouTube가 담당하도록 해 애플리케이션의 스케줄러·재시도·중복 실행 방지 로직을 별도로 구현할 필요가 없어졌습니다. 다만 플랫폼별 예약 API 지원 여부에 따라 확장 시 별도의 스케줄링 전략이 필요합니다.",
           },
         ],
       },
@@ -804,25 +932,24 @@ def _cap_by_platform(tags, platform):
       {
         title: "잘한 점",
         points: [
-          "책임 단위로 노드를 분리한 판단. 덕분에 단계별로 모델을 다르게 배치해 비용을 통제할 수 있었고, 해시태그만 재생성하는 API 도 노드 조합만으로 만들 수 있었습니다. 특정 단계의 품질이 떨어질 때 그 노드만 손보면 되어 개선도 수월했습니다.",
-          "LLM 출력을 코드로 검증하는 습관을 얻었습니다. 프롬프트는 유도일 뿐 보장이 아니라는 전제로 후처리를 설계하게 됐습니다.",
-          "예약 게시처럼 직접 만들지 않는 선택이 더 나은 경우가 있다는 것을 경험했습니다.",
+          "책임 단위로 노드를 분리해 단계별 모델 배치와 부분적인 개선이 가능하도록 설계했습니다.",
+          "LLM 출력을 코드로 검증하며 프롬프트에만 의존하지 않는 후처리 구조를 경험했습니다.",
+          "플랫폼 기능을 직접 구현하기보다 활용할 수 있는 기능은 플랫폼에 위임하는 설계의 중요성을 경험했습니다.",
         ],
       },
       {
         title: "아쉬운 점",
         points: [
-          "Instagram·Facebook 연동 미완성 — 게시글·해시태그 생성 로직은 3개 플랫폼을 모두 지원하도록 만들었지만, 실제 계정 연동과 업로드는 YouTube 만 완료했습니다. 기간 내 우선순위 판단이었으나, 플랫폼별 노출 최적화를 설계해놓고 검증하지 못한 점이 아쉽습니다.",
-          "정량 지표 부재 — 생성 소요 시간, 게시 성공률 같은 지표를 측정하지 않은 채 진행했습니다. 개선 전후를 숫자로 비교할 수 없어 판단의 근거를 정성적으로만 남기게 됐습니다. 다음 프로젝트에서는 최소한의 계측을 먼저 붙이려 합니다.",
-          "에이전트 평가 체계 없음 — 생성 품질을 눈으로 확인하는 수준에 머물렀습니다. 정답 셋을 만들어두고 프롬프트 변경 시 회귀 검증을 하는 구조가 필요했습니다.",
+          "생성 시간·성공률·품질 등 정량적 평가 지표가 부족해 개선 전후를 수치로 비교하기 어려웠습니다.",
+          "LLM 생성 품질을 자동으로 검증하는 평가 체계가 부족했습니다.",
         ],
       },
       {
-        title: "더 해본다면",
+        title: "더 개선한다면",
         points: [
-          "트렌드 분석에 실시간 검색 도구를 붙여 LLM 내부 지식의 한계를 보완",
-          "조건부 엣지를 활용해, 콘텐츠 분석이 실패한 경우 다른 경로로 우회하는 그래프 설계",
-          "생성 결과에 대한 사용자 피드백을 수집해 프롬프트 개선에 반영하는 루프 구성",
+          "정답셋과 평가 지표를 구축해 모델·프롬프트 변경에 따른 품질을 자동 검증하겠습니다.",
+          "생성 시간·성공률·실패 원인을 수집해 개선 근거를 정량화하겠습니다.",
+          "실시간 검색 도구를 연결해 외부 최신 데이터로 트렌드 분석을 보강하겠습니다.",
         ],
       },
     ],
@@ -831,7 +958,7 @@ def _cap_by_platform(tags, platform):
     slug: "sodam",
     title: "소담소담",
     badge: "창업경진대회 · 우수상",
-    period: "2025.04 — 2025.06",
+    period: "2025.04 - 2025.07",
     teamSize: "팀 프로젝트 · AI 파트 담당",
     summary:
       "센서 없이, 앱의 AI 분석만으로 젖소를 관리하는 소규모 낙농가 전용 서비스입니다. 스마트팜 장비를 갖추기 어려운 농가도 공공데이터와 AI 모델만으로 질병을 진단하고 생산성을 예측할 수 있게 했고, 낙농 도메인에 특화한 RAG 챗봇 '소담이'를 설계·구현했습니다.",
@@ -853,7 +980,7 @@ def _cap_by_platform(tags, platform):
     slides: "/sodam/presentation.pdf",
     screenshots: ["/sodam/home.png"],
     backgroundLabel: "과제 배경",
-    background: "낙농업의 위기 — '소규모 농가가 버틸 수 없는 구조'",
+    background: "낙농업의 위기 - '소규모 농가가 버틸 수 없는 구조'",
     backgroundEffect: "소규모 젖소농가 폐업 속도 가속화",
     backgroundChart: {
       src: "/sodam/background-farm-decline.png",
@@ -866,7 +993,7 @@ def _cap_by_platform(tags, platform):
         index: "1",
         title: "ICT 스마트팜 도입의 높은 장벽",
         stat: "35.6%",
-        statLabel: "도입 시 겪은 어려움 1위 — 설치비용 확보",
+        statLabel: "도입 시 겪은 어려움 1위 - 설치비용 확보",
         barChart: {
           segments: [
             { value: 35.6, label: "설치비용 확보" },
@@ -880,7 +1007,7 @@ def _cap_by_platform(tags, platform):
         index: "2",
         title: "청년 후계자 부재 · 진입 어려움",
         stat: "31.7%",
-        statLabel: "청년·후계농 초기 정착 어려움 1위 — 영농 기술 습득 부족",
+        statLabel: "청년·후계농 초기 정착 어려움 1위 - 영농 기술 습득 부족",
         surveyCard: {
           title: "2024 낙농경영실태조사",
           quote:
@@ -921,7 +1048,7 @@ def _cap_by_platform(tags, platform):
         metric: "RAG · Query Routing",
         problemLabel: "기존 챗GPT를 그대로 쓸 때의 한계",
         problemList: [
-          "환각(Hallucination) — 낙농 전문 지식을 물으면 근거 없는 답을 지어냄",
+          "환각(Hallucination) - 낙농 전문 지식을 물으면 근거 없는 답을 지어냄",
           "질병·정책·시세 등 최신 낙농 정보를 반영하지 못함",
           "낙농 전문 용어를 일상 용어와 혼동",
         ],
@@ -1234,7 +1361,7 @@ result = chain.invoke({
           },
           {
             title:
-              "이표번호를 모르면 대화가 끊기던 소 정보 조회 — 단일 노드에서 상태 기반 서브그래프로",
+              "이표번호를 모르면 대화가 끊기던 소 정보 조회 - 단일 노드에서 상태 기반 서브그래프로",
             problem:
               "소 정보 조회가 단일 노드로 구현돼 있어, 질문에 12자리 이표번호가 없으면 안내 메시지만 남기고 대화가 종료됐다(코드 분기상 처리율 0%).",
             solution:
@@ -1259,7 +1386,7 @@ result = chain.invoke({
                   { type: "sub", text: "1. 이표번호가 없으면 대화가 그 자리에서 끊겼다" },
                   {
                     type: "code",
-                    code: `# ab1c23e — generate_farmdata_response (그래프 노드 라벨: generate_cow_info_answer)
+                    code: `# ab1c23e - generate_farmdata_response (그래프 노드 라벨: generate_cow_info_answer)
 ear_tag_number = extract_ear_tag_number(question)
 if not ear_tag_number:
     answer = "어떤 소에 대해 질문하시는지 12자리 이표번호(귀표번호)를 질문에 포함해 주세요."
@@ -1423,13 +1550,13 @@ def create_cow_info_graph():
                   },
                   {
                     type: "code",
-                    code: `# 1차 — 정규식으로 12자리 이표번호 추출
+                    code: `# 1차 - 정규식으로 12자리 이표번호 추출
 def extract_ear_tag_number(text: str) -> str | None:
     match = re.search(r'(\\d{12})', text)
     return match.group(1) if match else None
 
 
-# 2차 — select_cow_node: 이표번호 완전일치 또는 이름 부분매칭
+# 2차 - select_cow_node: 이표번호 완전일치 또는 이름 부분매칭
 ear_tag_number = extract_ear_tag_number(question)
 
 if ear_tag_number:
@@ -1441,7 +1568,7 @@ else:
         (cow for cow in cow_list if cow["name"] in question), None   # 이름 부분매칭
     )
 
-# 3차 — 실패 시 목록을 다시 제시해 흐름 유지
+# 3차 - 실패 시 목록을 다시 제시해 흐름 유지
 if not selected_cow:
     return show_cow_list_node(state)`,
                   },
@@ -1672,9 +1799,9 @@ return show_cow_list_node(state)      # 함수를 직접 호출`,
                   {
                     type: "list",
                     items: [
-                      "조회 방식 불일치 — 기본 정보는 필드 쿼리(.where(\"ear_tag_number\", ...)), 상세 정보는 문서 ID 접근(.document(ear_tag_number))이다. 문서 ID와 이표번호가 다른 데이터가 들어오면 기본 정보만 조회되고 상세 정보는 조용히 빈다.",
-                      "behavioral_info의 enum 폴백 누락 — Temperament(...) / MilkingBehavior(...) 변환에는 개별 try/except가 없다. 값이 깨져 있으면 바깥 try에 잡혀 상세 조회 전체가 None으로 실패한다. health_status와 동일한 개별 폴백이 필요하다.",
-                      "동기 DB 호출 — show_cow_list_node의 Firestore 호출이 동기라 이벤트 루프를 블로킹한다.",
+                      "조회 방식 불일치 - 기본 정보는 필드 쿼리(.where(\"ear_tag_number\", ...)), 상세 정보는 문서 ID 접근(.document(ear_tag_number))이다. 문서 ID와 이표번호가 다른 데이터가 들어오면 기본 정보만 조회되고 상세 정보는 조용히 빈다.",
+                      "behavioral_info의 enum 폴백 누락 - Temperament(...) / MilkingBehavior(...) 변환에는 개별 try/except가 없다. 값이 깨져 있으면 바깥 try에 잡혀 상세 조회 전체가 None으로 실패한다. health_status와 동일한 개별 폴백이 필요하다.",
+                      "동기 DB 호출 - show_cow_list_node의 Firestore 호출이 동기라 이벤트 루프를 블로킹한다.",
                     ],
                   },
                 ],
@@ -1837,7 +1964,7 @@ if len(raw_documents) == 0:
         metric: "테스트 정확도 96.8%",
         problemLabel: "럼피스킨병의 위협",
         problemList: [
-          "제1종 가축전염병으로 젖소에 치명적 — 유량 감소·유산·불임을 유발",
+          "제1종 가축전염병으로 젖소에 치명적 - 유량 감소·유산·불임을 유발",
           "젖소 발병률이 육우보다 5.4배 높아 조기 발견이 중요",
         ],
         solutionLabel: "소담소담 솔루션",
@@ -1845,8 +1972,8 @@ if len(raw_documents) == 0:
           {
             title: "데이터셋 (Training / Test · 공개 데이터 2종)",
             points: [
-              "Training set — Kaggle·Mendeley 럼피스킨 이미지(정상 700 + 럼피스킨 324) + Kaggle Cow Lumpy Disease(정상 515 + 럼피스킨 421), 약 2,000장",
-              "Test set — 두 데이터셋에서 정상·럼피스킨 각 50장씩 균형 있게 구성",
+              "Training set - Kaggle·Mendeley 럼피스킨 이미지(정상 700 + 럼피스킨 324) + Kaggle Cow Lumpy Disease(정상 515 + 럼피스킨 421), 약 2,000장",
+              "Test set - 두 데이터셋에서 정상·럼피스킨 각 50장씩 균형 있게 구성",
             ],
           },
           {
@@ -1881,7 +2008,7 @@ if len(raw_documents) == 0:
         solutionLabel: "소담소담 솔루션",
         solutionBlocks: [
           {
-            title: "왜 필요한가 — 데이터의 89.4% 공백",
+            title: "왜 필요한가 - 데이터의 89.4% 공백",
             points: [
               "체세포수(SCC)는 유방 건강을 나타내는 표준 지표지만, 별도 검사를 거쳐야 얻을 수 있다",
               "전체 착유 기록 732,660건 중 체세포수 측정값 보유는 77,372건(10.6%)뿐",
@@ -1889,7 +2016,7 @@ if len(raw_documents) == 0:
             ],
           },
           {
-            title: "서비스 로직 — 측정값이 있으면 예측하지 않는다",
+            title: "서비스 로직 - 측정값이 있으면 예측하지 않는다",
             points: [
               "체세포수 값 있음 → 기준값 기반 규칙 분기 (확정 판정)",
               "체세포수 값 없음 → 5개 지표 기반 ML 모델로 등급 예측 (추정 판정)",
@@ -1899,7 +2026,7 @@ if len(raw_documents) == 0:
           {
             title: "최종 모델",
             points: [
-              "Random Forest · 입력 5개 피처 — 착유량·전도율·유지방비율·유단백비율·산차수",
+              "Random Forest · 입력 5개 피처 - 착유량·전도율·유지방비율·유단백비율·산차수",
               "Accuracy 0.839 · Weighted F1 0.827",
               "타겟 등급 재설계와 피처 정제로 유방염 의심군 F1 0.41 → 0.49, macro F1 0.48 → 0.64 개선",
               "확신도는 predict_proba의 최대 클래스 확률을 사용",
@@ -1961,7 +2088,7 @@ if len(raw_documents) == 0:
                 ],
               },
               {
-                heading: "타겟(종속변수) — 4등급에서 3등급으로",
+                heading: "타겟(종속변수) - 4등급에서 3등급으로",
                 blocks: [
                   { type: "sub", text: "1. 임계값의 근거" },
                   {
@@ -1974,10 +2101,10 @@ if len(raw_documents) == 0:
                     rows: [
                       ["≤ 1×10⁵ (10만)", "매우 건강"],
                       ["≤ 3×10⁵ (30만)", "감염 없는 정상 범위"],
-                      ["≥ 5×10⁵ (50만)", "유방에 심한 자극 — 세균성 유방염 의심"],
+                      ["≥ 5×10⁵ (50만)", "유방에 심한 자극 - 세균성 유방염 의심"],
                     ],
                   },
-                  { type: "sub", text: "2. 1차 시도 — 4등급 분류" },
+                  { type: "sub", text: "2. 1차 시도 - 4등급 분류" },
                   {
                     type: "code",
                     code: `def categorize_scc(value):
@@ -2032,11 +2159,11 @@ if len(raw_documents) == 0:
                   {
                     type: "list",
                     items: [
-                      "클래스 불균형 — 정상:주의:염증:의심 ≈ 24:5:1:2",
-                      "중간 구간 경계의 모호성 — 주의(100~300)와 염증 가능성(300~500)은 센서 노이즈·개체 편차에 민감해 분리가 어려움",
+                      "클래스 불균형 - 정상:주의:염증:의심 ≈ 24:5:1:2",
+                      "중간 구간 경계의 모호성 - 주의(100~300)와 염증 가능성(300~500)은 센서 노이즈·개체 편차에 민감해 분리가 어려움",
                     ],
                   },
-                  { type: "sub", text: "3. 2차 설계 — 3등급으로 재분류" },
+                  { type: "sub", text: "3. 2차 설계 - 3등급으로 재분류" },
                   {
                     type: "text",
                     text: "문헌의 5×10⁵ 기준을 살리되, 실질적으로 동일한 조치(수의사 확인)가 필요한 2·3등급을 통합했다.",
@@ -2085,7 +2212,7 @@ if len(raw_documents) == 0:
                 ],
               },
               {
-                heading: "성능 최적화 — 피처 선정",
+                heading: "성능 최적화 - 피처 선정",
                 blocks: [
                   { type: "sub", text: "1. 제조사 필터링" },
                   {
@@ -2104,7 +2231,7 @@ if len(raw_documents) == 0:
                     type: "text",
                     text: "체세포수 결측치를 제거하고 나니 delaval 데이터는 사실상 전부 사라져 제조사 ID가 한 종류만 남았다. 변수로서 정보량이 0이므로 학습에서 제외하고, 단일 기기(agrirobotech) 기준 모델로 범위를 한정했다.",
                   },
-                  { type: "sub", text: "2. 변수 중요도 분석 — 1차 제거" },
+                  { type: "sub", text: "2. 변수 중요도 분석 - 1차 제거" },
                   {
                     type: "text",
                     text: "1차 학습(전체 변수 10개)의 Random Forest 변수 중요도.",
@@ -2138,7 +2265,7 @@ if len(raw_documents) == 0:
                     ],
                     caption: "1차 학습(전체 변수 10개) 변수 중요도",
                   },
-                  { type: "sub", text: "3. Ablation Study — 단계별 성능 변화" },
+                  { type: "sub", text: "3. Ablation Study - 단계별 성능 변화" },
                   {
                     type: "text",
                     text: "변수를 단계적으로 제거하며 성능 변화를 측정했다. (Random Forest 기준)",
@@ -2173,7 +2300,7 @@ if len(raw_documents) == 0:
                     caption:
                       "좌: 실험 2(8개 변수) · 우: 실험 3(3등급 재분류). 상위 4개 변수의 순위와 크기가 거의 변하지 않는다.",
                   },
-                  { type: "sub", text: "4. 최종 피처 5개 선정 — 2차 제거" },
+                  { type: "sub", text: "4. 최종 피처 5개 선정 - 2차 제거" },
                   {
                     type: "text",
                     text: "실험 3까지 남아 있던 8개 중 온도(0.005)·공기흐름값(0.007)·착유횟차(0.011)는 중요도 합계가 2.3%에 그쳤다. 상위 5개만으로 이미 전체 중요도의 97.6%가 설명되므로, 이 셋을 빼도 정보 손실이 크지 않다고 보고 2차로 제거했다.",
@@ -2217,7 +2344,7 @@ if len(raw_documents) == 0:
                       ["Tuned XGBoost (GridSearchCV)", "0.834", "0.816", "0.834", "0.822"],
                     ],
                   },
-                  { type: "sub", text: "GridSearchCV — 3-fold, 108개 조합 × 324 fits" },
+                  { type: "sub", text: "GridSearchCV - 3-fold, 108개 조합 × 324 fits" },
                   {
                     type: "code",
                     code: `Best Params: {
@@ -2252,7 +2379,7 @@ if len(raw_documents) == 0:
                     type: "text",
                     text: "데이터셋에 체세포수의 측정 단위(유즙 몇 mL 기준인지)가 명시되어 있지 않다. 문헌 기준(1mL당)을 가정해 등급을 나눴으나, 실서비스 적용 전 데이터 제공처 확인이 필수다. 단위가 다르면 임계값 전체를 재조정해야 한다.",
                   },
-                  { type: "sub", text: "2. 소수 클래스 Recall 0.39 — 아직 부족" },
+                  { type: "sub", text: "2. 소수 클래스 Recall 0.39 - 아직 부족" },
                   {
                     type: "text",
                     text: "유방염 의심 개체 10마리 중 4마리만 잡아낸다. 낙농 현장에서는 오탐(FP) 비용보다 미탐(FN) 비용이 크므로, Accuracy가 아니라 Recall을 우선 지표로 삼는 재튜닝이 필요하다.",
@@ -2301,9 +2428,9 @@ if len(raw_documents) == 0:
             title: "AI 회귀 모델 개발",
             points: [
               "모델: RandomForestRegressor (스케일러 적용)",
-              "입력 8개 피처 — 착유횟수·전도율·환경온도·유지방비율·유단백비율·농후사료섭취량·착유 측정월·착유 측정요일",
+              "입력 8개 피처 - 착유횟수·전도율·환경온도·유지방비율·유단백비율·농후사료섭취량·착유 측정월·착유 측정요일",
               "출력: 예측 착유량(L) + AI 확신도 + 모델 설명력",
-              "확신도는 RandomForest 각 트리 예측값의 변동계수(표준편차÷평균)를 0~100%로 환산 — 회귀에는 predict_proba가 없어 앙상블의 예측 분산을 불확실성 지표로 활용",
+              "확신도는 RandomForest 각 트리 예측값의 변동계수(표준편차÷평균)를 0~100%로 환산 - 회귀에는 predict_proba가 없어 앙상블의 예측 분산을 불확실성 지표로 활용",
               "모델 설명력 82.4% (MAE 3.41 · RMSE 4.94)",
             ],
           },
@@ -2313,40 +2440,40 @@ if len(raw_documents) == 0:
       },
     ],
     features: [
-      "센서 없는 AI 예측 6종 — 착유량·유방염·유성분 품질·사료 효율·분만·교배 타이밍. 이 중 착유량·유방염 2종은 공공데이터로 직접 학습해 서비스에 적용했고, 나머지 4종은 동일 파이프라인으로 입력 변수까지 설계",
-      "홈 대시보드 — 소 상태 요약(정상·주의·이상)과 전체 소 현황을 한 눈에 확인",
-      "이표번호로 젖소 등록 — 축산물이력제 공공데이터 연동으로 12자리 이표번호만 입력하면 자동 등록",
-      "10가지 상세 기록 관리 — 건강검진·백신·체중·치료·발정·인공수정·임신감정·분만·착유·사료급여",
+      "센서 없는 AI 예측 6종 - 착유량·유방염·유성분 품질·사료 효율·분만·교배 타이밍. 이 중 착유량·유방염 2종은 공공데이터로 직접 학습해 서비스에 적용했고, 나머지 4종은 동일 파이프라인으로 입력 변수까지 설계",
+      "홈 대시보드 - 소 상태 요약(정상·주의·이상)과 전체 소 현황을 한 눈에 확인",
+      "이표번호로 젖소 등록 - 축산물이력제 공공데이터 연동으로 12자리 이표번호만 입력하면 자동 등록",
+      "10가지 상세 기록 관리 - 건강검진·백신·체중·치료·발정·인공수정·임신감정·분만·착유·사료급여",
     ],
     differentiators: [
-      "젖소 전용 낙농 특화 — 기존 서비스는 축우 전반·시장 정보 제공 위주인 반면, 소담소담은 젖소에 특화된 유일한 관리 솔루션",
+      "젖소 전용 낙농 특화 - 기존 서비스는 축우 전반·시장 정보 제공 위주인 반면, 소담소담은 젖소에 특화된 유일한 관리 솔루션",
       "기록이 저장에 그치지 않고 AI 예측과 챗봇에 직접 활용됨",
       "이표번호 등록 없이도 즉시 사용 가능",
     ],
     dataSources: [
-      "축산물통합이력정보 API (축산물품질평가원) — 이표번호로 젖소 자동 등록",
-      "스마트팜 빅데이터 API (농림수산식품교육문화정보원) — 생산성 예측 모델",
-      "젖소 피부질병 오픈 이미지 (Kaggle) — 럼피스킨병 진단 모델 학습",
-      "낙농 전문기관 공개 지식 — RAG 챗봇 지식 베이스",
+      "축산물통합이력정보 API (축산물품질평가원) - 이표번호로 젖소 자동 등록",
+      "스마트팜 빅데이터 API (농림수산식품교육문화정보원) - 생산성 예측 모델",
+      "젖소 피부질병 오픈 이미지 (Kaggle) - 럼피스킨병 진단 모델 학습",
+      "낙농 전문기관 공개 지식 - RAG 챗봇 지식 베이스",
     ],
   },
   /*
-    삼성메디슨 인턴 — 파트 1 (2024.03~04, 하복부 초음파 다중 구조물 검출).
+    삼성메디슨 인턴 - 파트 1 (2024.03~04, 하복부 초음파 다중 구조물 검출).
     인턴 기간 중 사수가 바뀌며 담당 과제가 둘로 나뉜다. 파트 2(2024.05~08, 부인과
-    초음파 난포 검출 — 2D Follicle™)는 아래 samsung-medison-detection slug 로 있다.
+    초음파 난포 검출 - 2D Follicle™)는 아래 samsung-medison-detection slug 로 있다.
 
     아래 서술은 본인이 제공한 경력기술 문서를 유일한 출처로 삼는다.
-    문서에 없는 것은 이전 판에 있었더라도 넣지 않는다 — 날짜별 작업 타임라인,
+    문서에 없는 것은 이전 판에 있었더라도 넣지 않는다 - 날짜별 작업 타임라인,
     run 별 mAP 표, 추론 속도(ONNX/TensorRT) 실측치가 그렇게 빠졌다.
   */
   {
     slug: "samsung-medison",
-    title: "초음파 다중 구조물 검출 — 학습 데이터 구축 및 검증 도구 개발",
+    title: "초음파 다중 구조물 검출 - 학습 데이터 구축 및 검증 도구 개발",
     badge: "삼성메디슨 · 인턴",
-    period: "2024.03 — 2024.04",
+    period: "2024.03 - 2024.04",
     teamSize: "AI Vision 그룹 · 2개월",
     summary:
-      "하복부 초음파 영상에서 6개 구조물을 검출하는 과제를 맡았습니다. 두 달간 조건을 바꿔가며 학습을 반복했지만 전체 mAP 는 좁은 구간을 벗어나지 못했고, 클래스별 등락 방향은 run 마다 뒤집혔습니다.",
+      "하복부 초음파 영상에서 6개 구조물을 검출하는 과제를 맡았습니다. 두 달간 조건을 바꿔가며 학습을 반복했지만 전체 mAP는 좁은 구간을 벗어나지 못했고, 클래스별 등락 방향은 run 마다 뒤집혔습니다.",
     summaryMore: [
       "학습을 한 번 더 돌리는 대신, 조정과 결과 사이에 설명 가능한 상관이 없다는 점 자체를 문제로 봤습니다. 병목이 모델이 아니라 정답 데이터에 있다고 판단해 사내 임상의를 직접 찾아가 레이블을 함께 검토했고, GT 마스크가 실제 구조물 경계보다 과도하게 넓게 그려져 있으며 데이터 양도 부족해 현 상태로는 학습이 성립하지 않는다는 확인을 받았습니다. 같은 시기에 확인한 AGPL-3.0 라이선스 제약과 함께 보고했고, 해당 과제 라인은 중단됐습니다.",
       "두 달간 실제로 한 일은 모델을 학습시킨 것이 아니라 학습이 가능한 상태를 만드는 일이었습니다.",
@@ -2368,12 +2495,12 @@ if len(raw_documents) == 0:
       {
         label: "클래스",
         value:
-          "6종 — Terminal ileum · Psoas · Cecum · Iliac artery · Iliac vein · Appendix",
+          "6종 - Terminal ileum · Psoas · Cecum · Iliac artery · Iliac vein · Appendix",
       },
       {
         label: "데이터",
         value:
-          "초기 87개 폴더 (폴더 = 영상 1개, jpg 와 동명 txt 레이블 1:1 대응) → AVI 프레임 추출로 약 3만 장 규모 확장 (900×600)",
+          "초기 87개 폴더 (폴더 = 영상 1개, jpg와 동명 txt 레이블 1:1 대응) → AVI 프레임 추출로 약 3만 장 규모 확장 (900×600)",
       },
       { label: "태스크", value: "Object Detection → Instance Segmentation" },
       { label: "수행", value: "단독 수행 · 외국인 사수와 영어로 협업" },
@@ -2384,9 +2511,9 @@ if len(raw_documents) == 0:
     /*
       아래 세 파일을 public/samsung-medison/ 에 저장하면 바로 뜬다.
       파일이 없으면 빌드가 실패하므로 저장 전에는 주석을 풀지 말 것.
-        ref-appendix-iliac.png   — Appendix · Iliac artery · Iliac vein 라벨
-        ref-caecum-appendix.png  — Caecum · Appendix · Iliac vein 라벨
-        ref-cecum-ileum.png      — Cecum · Terminal ileum · Appendix 라벨
+        ref-appendix-iliac.png   - Appendix · Iliac artery · Iliac vein 라벨
+        ref-caecum-appendix.png  - Caecum · Appendix · Iliac vein 라벨
+        ref-cecum-ileum.png      - Cecum · Terminal ileum · Appendix 라벨
       width/height 는 원본 픽셀 크기에 맞춰 고칠 것 (지금 값은 비율 추정치).
     */
     /*
@@ -2426,7 +2553,7 @@ if len(raw_documents) == 0:
         problemLabel: "확인할 수 없던 것",
         problemList: [
           "정규화된 레이블 좌표가 실제 이미지 위 어디에 찍히는지",
-          "예측이 어디서 틀렸는지 — 위치인지 클래스인지. 지표 하나로는 구분되지 않는다",
+          "예측이 어디서 틀렸는지 - 위치인지 클래스인지. 지표 하나로는 구분되지 않는다",
           "좌표계를 변환할 때마다 결과가 맞는지 검산할 방법",
         ],
         solutionLabel: "만든 도구",
@@ -2441,19 +2568,19 @@ if len(raw_documents) == 0:
           {
             title: "GT / predict 비교",
             points: [
-              "정답 박스를 그린 GT 이미지와 YOLOv8 예측 결과를 cv2.hconcat 으로 가로 병합해 나란히 배치",
+              "정답 박스를 그린 GT 이미지와 YOLOv8 예측 결과를 cv2.hconcat으로 가로 병합해 나란히 배치",
               "bounding box · class name · 하단 파일명을 함께 표시해 어긋난 지점을 바로 짚을 수 있게 함",
             ],
           },
           {
             title: "Mask 렌더링",
             points: [
-              "Segmentation 전환 이후 cv2.polylines 로 폴리곤 좌표를 선으로 표시",
-              "변환된 레이블 txt 가 옳은 좌표를 따왔는지 검증하는 데도 같은 함수를 사용",
+              "Segmentation 전환 이후 cv2.polylines로 폴리곤 좌표를 선으로 표시",
+              "변환된 레이블 txt가 옳은 좌표를 따왔는지 검증하는 데도 같은 함수를 사용",
             ],
           },
         ],
-        troublesLabel: "이 도구들로 찾은 것 — 오류 2건",
+        troublesLabel: "이 도구들로 찾은 것 - 오류 2건",
         troubles: [
           {
             title: "증상과 원인이 달랐던 두 건",
@@ -2466,19 +2593,19 @@ if len(raw_documents) == 0:
                 ],
                 [
                   "마스크 모양은 정확한데 색상이 다르게 렌더링",
-                  "XML 의 id 가 실제 라벨링 순서와 다르게 기록됨",
+                  "XML의 id가 실제 라벨링 순서와 다르게 기록됨",
                 ],
               ],
             },
             effect:
-              "둘 다 학습 산출물 labels.jpg 를 역추적해서야 찾았다. 증상만 보고는 원인을 좁힐 수 없었고, 검증 도구가 없었다면 '학습 결과가 낮다'로 뭉뚱그려졌을 문제였다. 이후 각 단계의 결과를 시각적으로 확인한 뒤 다음으로 넘어가는 절차를 고정했다.",
+              "둘 다 학습 산출물 labels.jpg를 역추적해서야 찾았다. 증상만 보고는 원인을 좁힐 수 없었고, 검증 도구가 없었다면 '학습 결과가 낮다'로 뭉뚱그려졌을 문제였다. 이후 각 단계의 결과를 시각적으로 확인한 뒤 다음으로 넘어가는 절차를 고정했다.",
             tags: ["클래스 인덱스", "디버깅"],
             tech: ["YOLOv8", "OpenCV", "CVAT"],
           },
         ],
         writeups: [
           {
-            title: "[YOLOv8] .yaml 파일 클래스 구성 — 인덱스 매칭 오류",
+            title: "[YOLOv8] .yaml 파일 클래스 구성 - 인덱스 매칭 오류",
             href: "https://blog.naver.com/t3335150/223396924265",
           },
         ],
@@ -2492,7 +2619,7 @@ if len(raw_documents) == 0:
         problemList: [
           "원격 서버에 CUDA · conda · 가상환경 · PyTorch 및 필요 패키지를 직접 설치",
           "초기에 YOLOv9 로 시도했으나 s 모델이 미공개 상태(c, e 만 release)여서 YOLOv8 로 전환",
-          "데이터셋 설정에서 names 를 리스트로 주면 실제 라벨링 인덱스와 어긋나 dict 형태로 명시",
+          "데이터셋 설정에서 names를 리스트로 주면 실제 라벨링 인덱스와 어긋나 dict 형태로 명시",
         ],
         solutionLabel: "바꿔본 조건",
         solutionBlocks: [
@@ -2500,30 +2627,30 @@ if len(raw_documents) == 0:
             title: "전처리",
             points: [
               "초음파 영상은 노이즈와 음영으로 경계가 흐릿해, sharpen 함수를 구현하고 별도 데이터셋을 만들어 원본과 비교 학습",
-              "Mean / Median / Gaussian filter 와 Thresholding 도 노이즈 저감·영역 분리 방향으로 검토",
+              "Mean / Median / Gaussian filter와 Thresholding도 노이즈 저감·영역 분리 방향으로 검토",
             ],
           },
           {
             title: "모델 · 가중치",
             points: [
-              "yolov8s.pt 와 yolov8n.pt 를 비교",
-              "백본 후보로 EfficientNet 도 함께 검토",
+              "yolov8s.pt와 yolov8n.pt를 비교",
+              "백본 후보로 EfficientNet도 함께 검토",
             ],
           },
           {
             title: "하이퍼파라미터",
             points: [
-              "optimizer — Adam / AdamW / SGD / NAdam / RAdam / RMSProp",
-              "learning rate — 0.001 / 0.005 / 0.01, freeze layer — 1 / 3 / 10",
-              "augmentation — U-Net 논문 기준 shift · rotate · zoom · flip, YOLO-NAS 기준 gaussian noise",
+              "optimizer - Adam / AdamW / SGD / NAdam / RAdam / RMSProp",
+              "learning rate - 0.001 / 0.005 / 0.01, freeze layer - 1 / 3 / 10",
+              "augmentation - U-Net 논문 기준 shift · rotate · zoom · flip, YOLO-NAS 기준 gaussian noise",
             ],
           },
           {
             title: "클래스 구성",
             points: [
               "6개 구조물을 동시에 검출하는 것 자체가 문제인지 확인하기 위해, Appendix 만 분리한 단일 클래스 데이터셋을 별도로 구성해 학습",
-              "클래스 id 를 0으로 통일하고, 객체가 없는 이미지도 빈(0KB) txt 로 남겨야 배경 이미지로 학습이 성립하므로 레이블 파일을 지우지 않고 유지",
-              "데이터셋 경로가 바뀌므로 listing txt 도 함께 재생성",
+              "클래스 id를 0으로 통일하고, 객체가 없는 이미지도 빈(0KB) txt로 남겨야 배경 이미지로 학습이 성립하므로 레이블 파일을 지우지 않고 유지",
+              "데이터셋 경로가 바뀌므로 listing txt도 함께 재생성",
             ],
           },
         ],
@@ -2532,7 +2659,7 @@ if len(raw_documents) == 0:
           {
             title: "수치는 움직이는데 방향이 없었다",
             problem:
-              "전체 mAP 는 여러 run 에 걸쳐 0.14~0.25 구간을 벗어나지 않았고, 클래스별 등락 방향은 run 마다 뒤집혔다. 같은 학습에서 Iliac artery 가 0.127 → 0.439 로 급등하는 동안 Iliac vein 은 0으로 붕괴하는 식이었다.",
+              "전체 mAP는 여러 run에 걸쳐 0.14~0.25 구간을 벗어나지 않았고, 클래스별 등락 방향은 run 마다 뒤집혔다. 같은 학습에서 Iliac artery가 0.127 → 0.439 로 급등하는 동안 Iliac vein은 0으로 붕괴하는 식이었다.",
             solution:
               "run 별·클래스별 지표를 정리해, 조건을 바꾸면 수치가 움직이기는 하지만 방향이 일정하지 않다는 것을 확인했다. 클래스를 Appendix 하나로 줄인 데이터셋에서도 결과는 나아지지 않았다.",
             effect:
@@ -2549,9 +2676,9 @@ if len(raw_documents) == 0:
         ],
       },
       {
-        name: "3. Segmentation 전환 — 모델 서베이",
+        name: "3. Segmentation 전환 - 모델 서베이",
         tagline:
-          "Object detection 에서 instance segmentation 으로 태스크가 바뀌면서 쓸 모델을 정해야 했습니다. 논문 벤치마크의 정확도는 저마다 다른 도메인·다른 하드웨어에서 측정된 값이라 순위대로 고를 수 없었고, 아예 공개하지 않은 모델도 있었습니다. 그래서 이 과제에서 쓸 수 없는 조건을 먼저 걸러내는 방식으로 후보를 좁혔습니다.",
+          "Object detection에서 instance segmentation으로 태스크가 바뀌면서 쓸 모델을 정해야 했습니다. 논문 벤치마크의 정확도는 저마다 다른 도메인·다른 하드웨어에서 측정된 값이라 순위대로 고를 수 없었고, 아예 공개하지 않은 모델도 있었습니다. 그래서 이 과제에서 쓸 수 없는 조건을 먼저 걸러내는 방식으로 후보를 좁혔습니다.",
         metric: "YOLOv8-seg 채택",
         problemLabel: "이 과제에서 쓸 수 없는 조건",
         problemList: [
@@ -2566,12 +2693,12 @@ if len(raw_documents) == 0:
             [
               "STU-Net",
               "배제",
-              "CT 기반 TotalSegmentator 로 사전학습된 모델. 초음파는 노이즈가 지배적이라 전이 이점을 기대하기 어렵다고 판단",
+              "CT 기반 TotalSegmentator로 사전학습된 모델. 초음파는 노이즈가 지배적이라 전이 이점을 기대하기 어렵다고 판단",
             ],
             [
               "TU-Net (Transformer + U-Net)",
               "보류",
-              "초음파 segmentation 을 직접 다뤘으나 FPS·연산속도 미공개 → 탑재 판단 불가",
+              "초음파 segmentation을 직접 다뤘으나 FPS·연산속도 미공개 → 탑재 판단 불가",
             ],
             [
               "FastSAM",
@@ -2594,7 +2721,7 @@ if len(raw_documents) == 0:
               "bbox + seg 동시 지원, 기존 학습 환경 재사용 가능",
             ],
           ],
-          note: "남은 후보 중에서는 bbox 와 segmentation 을 동시에 지원하고 기존 학습 환경을 그대로 재사용할 수 있다는 점에서 YOLOv8-seg 를 택했습니다.",
+          note: "남은 후보 중에서는 bbox와 segmentation을 동시에 지원하고 기존 학습 환경을 그대로 재사용할 수 있다는 점에서 YOLOv8-seg를 택했습니다.",
         },
         writeups: [
           {
@@ -2611,7 +2738,7 @@ if len(raw_documents) == 0:
         problemLabel: "막힌 지점",
         problemList: [
           "제공받은 이미지는 이미 크롭된 상태(900×600)인데, 마스크 좌표는 원본(1280×720) 기준으로 기록되어 있었다",
-          "XML 의 name · id 태그가 지정 클래스명·실제 라벨링 인덱스와 다르게 기록되어 있었다",
+          "XML의 name · id 태그가 지정 클래스명·실제 라벨링 인덱스와 다르게 기록되어 있었다",
           "outside 표시가 붙은 어노테이션도 좌표 필드가 채워져 있고 그 값이 이미지 범위를 벗어나, 정규화하면 유효 범위(0~1)를 넘었다",
         ],
         solutionLabel: "변환 방식",
@@ -2631,18 +2758,18 @@ if len(raw_documents) == 0:
             points: [
               "중앙 크롭을 가정하고 계산했으나 맞지 않았다",
               "픽셀 단위로 shift 한 뒤 크롭 해상도로 재정규화했다",
-              "크롭은 종횡비를 바꾸는 조작이 아니라 여백을 잘라내는 조작이므로, 스케일링이 아닌 shift 로 처리해야 한다는 점을 이때 확인했다",
+              "크롭은 종횡비를 바꾸는 조작이 아니라 여백을 잘라내는 조작이므로, 스케일링이 아닌 shift로 처리해야 한다는 점을 이때 확인했다",
             ],
           },
           {
-            title: "방식 A — XML 파싱",
+            title: "방식 A - XML 파싱",
             points: [
               "XML 트리를 파싱해 클래스별 폴리곤 좌표를 추출하고, 크롭 좌표계로 변환한 뒤 정규화해 기록",
               "원본과 크롭본의 좌표 기준 차이 → shift 후 크롭 해상도로 재정규화",
               "정규화 기준 → X / image_width, Y / image_height",
               "name 태그가 지정 클래스명이 아닌 CVAT 작업물 명으로 기록됨 → re.sub 패턴 치환",
-              "id 가 실제 라벨링 순서와 불일치 → label 태그 순서에서 인덱스를 역참조",
-              "객체 단위 구분 → id 가 달라질 때마다 줄바꿈, 파일 쓰기 모드는 덮어쓰기로 통일",
+              "id가 실제 라벨링 순서와 불일치 → label 태그 순서에서 인덱스를 역참조",
+              "객체 단위 구분 → id가 달라질 때마다 줄바꿈, 파일 쓰기 모드는 덮어쓰기로 통일",
             ],
           },
           {
@@ -2651,7 +2778,7 @@ if len(raw_documents) == 0:
               src: "/samsung-medison/cvat-outside-attribute.svg",
               width: 680,
               height: 360,
-              alt: "outside 가 1이어도 좌표 필드는 채워져 있고, 그 값이 이미지 범위를 벗어나 정규화하면 1을 초과한다",
+              alt: "outside가 1이어도 좌표 필드는 채워져 있고, 그 값이 이미지 범위를 벗어나 정규화하면 1을 초과한다",
               caption: "outside 속성이 붙은 어노테이션의 좌표 문제",
             },
             points: [
@@ -2661,9 +2788,9 @@ if len(raw_documents) == 0:
             ],
           },
           {
-            title: "방식 B — 클래스별 txt 병합",
+            title: "방식 B - 클래스별 txt 병합",
             points: [
-              "XML 파싱 자체를 포기하고, CVAT 가 클래스별로 개별 출력하는 annotation txt 를 병합하는 방식(merge_separate_annote)으로 전환",
+              "XML 파싱 자체를 포기하고, CVAT가 클래스별로 개별 출력하는 annotation txt를 병합하는 방식(merge_separate_annote)으로 전환",
               "구조적으로 막히는 지점을 우회하는 대신 입력 자체를 바꿔 해결",
               "생성한 레이블은 mask 렌더링 함수로 확인한 뒤 학습에 투입",
             ],
@@ -2686,7 +2813,7 @@ if len(raw_documents) == 0:
         metric: "AVI → image → crop → annotation → train",
         problemLabel: "프레임별 크기 편차",
         problemList: [
-          "1개 AVI 는 약 500 프레임이고, 앞뒤에는 학습에 쓸 수 없는 무효 구간이 있다",
+          "1개 AVI는 약 500 프레임이고, 앞뒤에는 학습에 쓸 수 없는 무효 구간이 있다",
           "같은 영상 안에서도 프레임마다 유효 영상 영역의 크기가 달랐다",
           "프레임별로 개별 크롭하면 데이터 크기가 제각각이 되고, 고정 크기로 자르면 일부 프레임의 유효 영역이 잘려나간다",
         ],
@@ -2702,15 +2829,15 @@ if len(raw_documents) == 0:
           {
             title: "영상 단위 대표 크롭",
             points: [
-              "cv2.findContours 로 프레임마다 largest contour 를 찾고, boundingRect 로 사각형 좌표(startX, startY, boxW, boxH)를 산출",
-              "한 AVI 의 전 프레임에서 가장 많이 나온 좌표를 그 영상의 대표 크롭 값으로 채택해 모든 프레임에 동일하게 적용",
+              "cv2.findContours로 프레임마다 largest contour를 찾고, boundingRect로 사각형 좌표(startX, startY, boxW, boxH)를 산출",
+              "한 AVI의 전 프레임에서 가장 많이 나온 좌표를 그 영상의 대표 크롭 값으로 채택해 모든 프레임에 동일하게 적용",
               "크기뿐 아니라 위치까지 포함한 네 값을 묶어서 보므로, 프레임별 편차에는 흔들리지 않으면서 영상마다 다른 촬영 조건에는 각각 대응",
             ],
           },
           {
             title: "기록",
             points: [
-              "프레임별 사각형 좌표는 frame num / startX / startY / boxW / boxH 형식으로 txt 에 listing",
+              "프레임별 사각형 좌표는 frame num / startX / startY / boxW / boxH 형식으로 txt에 listing",
               "크롭 정보는 엑셀로 정리해 영상별 비교가 가능한 형태로 보관",
             ],
           },
@@ -2720,41 +2847,41 @@ if len(raw_documents) == 0:
             src: "/samsung-medison/pipeline-representative-crop.svg",
             width: 680,
             height: 356,
-            alt: "AVI 에서 프레임을 추출해 크롭, 어노테이션, 학습으로 이어지는 파이프라인과, 프레임별 유효 영역 좌표의 최빈값을 영상 전체의 대표 크롭 값으로 채택하는 방식",
+            alt: "AVI에서 프레임을 추출해 크롭, 어노테이션, 학습으로 이어지는 파이프라인과, 프레임별 유효 영역 좌표의 최빈값을 영상 전체의 대표 크롭 값으로 채택하는 방식",
             caption: "데이터 처리 파이프라인과 영상 단위 대표 크롭",
           },
         ],
         writeups: [
           {
-            title: "데이터 처리 파이프라인 — crop",
+            title: "데이터 처리 파이프라인 - crop",
             href: "https://blog.naver.com/t3335150/223427039001",
           },
         ],
       },
       {
-        name: "6. 병목의 재정의 — 모델이 아니라 정답 데이터",
+        name: "6. 병목의 재정의 - 모델이 아니라 정답 데이터",
         tagline:
           "지표가 오르지 않을 때 학습을 한 번 더 돌리는 대신, 어디가 막혔는지를 물었습니다.",
         metric: "조정과 결과 사이에 상관 없음",
         problemLabel: "관측",
         problemList: [
-          "여러 run 에서 전체 mAP 가 0.14~0.25 구간을 벗어나지 못함",
-          "클래스별 등락 방향이 run 마다 뒤바뀜 — Psoas ↑ ↔ Terminal ileum ↓, 다음 run 에서 역전",
-          "Iliac vein 은 여러 run 에서 0에 가까운 값",
-          "클래스를 Appendix 하나로 줄인 데이터셋에서도 개선되지 않음 — 클래스 수나 다중 구조물이라는 조건의 문제가 아님",
+          "여러 run에서 전체 mAP가 0.14~0.25 구간을 벗어나지 못함",
+          "클래스별 등락 방향이 run 마다 뒤바뀜 - Psoas ↑ ↔ Terminal ileum ↓, 다음 run에서 역전",
+          "Iliac vein은 여러 run에서 0에 가까운 값",
+          "클래스를 Appendix 하나로 줄인 데이터셋에서도 개선되지 않음 - 클래스 수나 다중 구조물이라는 조건의 문제가 아님",
           "조정과 결과 사이에 설명 가능한 상관이 없음",
         ],
         solutionLabel: "가설 → 검증 → 확인 → 결과",
         solutionBlocks: [
           {
-            title: "가설 — 조정하는 쪽이 아니라 기준이 되는 쪽",
+            title: "가설 - 조정하는 쪽이 아니라 기준이 되는 쪽",
             points: [
               "성능이 낮다는 것보다, 조정이 일관된 방향으로 반영되지 않는다는 점이 문제였다",
               "조정하는 쪽(모델·하이퍼파라미터)이 아니라 기준이 되는 쪽(정답 데이터)에 원인이 있을 가능성이 높다고 판단",
             ],
           },
           {
-            title: "검증 — 판단할 지식을 가진 사람을 직접 찾아감",
+            title: "검증 - 판단할 지식을 가진 사람을 직접 찾아감",
             points: [
               "초음파 영상에서 구조물 경계가 올바르게 그려졌는지는 임상 지식 없이 판단할 수 없었다",
               "사내 상주 임상의를 직접 찾아가 원본 영상과 레이블링 결과를 함께 검토해달라고 요청",
@@ -2762,7 +2889,7 @@ if len(raw_documents) == 0:
             ],
           },
           {
-            title: "확인 — 학습 성립 요건 자체를 못 맞추고 있었다",
+            title: "확인 - 학습 성립 요건 자체를 못 맞추고 있었다",
             points: [
               "GT 마스크가 실제 구조물 경계보다 과도하게 넓게 그려져 있었다",
               "외부 위탁 어노테이션이었으나 경계가 타이트하게 잡히지 않은 상태였다",
@@ -2771,10 +2898,10 @@ if len(raw_documents) == 0:
             ],
           },
           {
-            title: "결과 — 보고, 그리고 중단",
+            title: "결과 - 보고, 그리고 중단",
             points: [
               "정답 데이터 사안과 라이선스 제약 두 가지를 함께 정리해 보고",
-              "며칠 뒤 해당 과제 라인은 중단됐다 — 정답 데이터를 재구축하지 않는 한 진행 의미가 없다는 결론이었다",
+              "며칠 뒤 해당 과제 라인은 중단됐다 - 정답 데이터를 재구축하지 않는 한 진행 의미가 없다는 결론이었다",
             ],
           },
         ],
@@ -2783,7 +2910,7 @@ if len(raw_documents) == 0:
           {
             title: "성능·속도를 통과해도 제품에 못 들어가는 조건이 있었다",
             problem:
-              "도메인 적합성과 태스크 요건을 기준으로 YOLOv8-seg 를 채택해 학습까지 진행했는데, YOLOv8(Ultralytics)의 라이선스는 AGPL-3.0 이었다.",
+              "도메인 적합성과 태스크 요건을 기준으로 YOLOv8-seg를 채택해 학습까지 진행했는데, YOLOv8(Ultralytics)의 라이선스는 AGPL-3.0 이었다.",
             solution:
               "상용 의료기기 제품에 탑재하려면 소스 공개 의무가 발생하거나 별도의 상용 라이선스 취득이 필요하다는 점을 확인해, 성능·속도 요건과 무관하게 제품 탑재가 불가하다는 사실을 정답 데이터 사안과 함께 정리해 보고했다.",
             effect:
@@ -2805,7 +2932,7 @@ if len(raw_documents) == 0:
     writeups: [
       {
         title:
-          "[YOLOv8] .yaml 파일 클래스 구성 (3/27) — 클래스 인덱스 매칭 오류의 원인·증상·검증법",
+          "[YOLOv8] .yaml 파일 클래스 구성 (3/27) - 클래스 인덱스 매칭 오류의 원인·증상·검증법",
         href: "https://blog.naver.com/t3335150/223396924265",
       },
       {
@@ -2814,7 +2941,7 @@ if len(raw_documents) == 0:
       },
       {
         title:
-          "XML 파일을 txt로 변환 (4/15) — CVAT 어노테이션 파싱에서 규명한 이슈들",
+          "XML 파일을 txt로 변환 (4/15) - CVAT 어노테이션 파싱에서 규명한 이슈들",
         href: "https://blog.naver.com/t3335150/223416017978",
       },
       {
@@ -2822,7 +2949,7 @@ if len(raw_documents) == 0:
         href: "https://blog.naver.com/t3335150/223419636271",
       },
       {
-        title: "데이터 처리 파이프라인 — crop (4/21)",
+        title: "데이터 처리 파이프라인 - crop (4/21)",
         href: "https://blog.naver.com/t3335150/223427039001",
       },
       {
@@ -2834,20 +2961,20 @@ if len(raw_documents) == 0:
       "이 외에 ultralytics 오류 해결, thresholding, mAP 개념 등을 정리했습니다.",
   },
   /*
-    삼성메디슨 인턴 — 파트 2 (2024.05~08, 부인과 초음파 난포 검출 · 2D Follicle™ 팀).
+    삼성메디슨 인턴 - 파트 2 (2024.05~08, 부인과 초음파 난포 검출 · 2D Follicle™ 팀).
     파트 1 과제 중단 후 다른 사수의 팀으로 옮겨 맡은 과제. 본인이 제공한
     포트폴리오-삼성메디슨-part2 원고를 유일한 출처로 삼는다.
 
     이미지 6장은 원고에 첨부된 PNG(base64)를 public/samsung-medison-detection/ 에
     그대로 추출한 것. 원고에 인라인 SVG로 포함돼 있던 다이어그램 4장(GT 보정
     사례, 가려짐 반달 모양, histogram matching 단계, 축 대조 검증)도 같은 폴더에
-    SVG 그대로 옮겼다 — 색·구성은 원고 그대로이고 별도로 다시 그리지 않았다.
+    SVG 그대로 옮겼다 - 색·구성은 원고 그대로이고 별도로 다시 그리지 않았다.
   */
   {
     slug: "samsung-medison-detection",
-    title: "부인과 초음파 난포 검출 — 2D Follicle™",
+    title: "부인과 초음파 난포 검출 - 2D Follicle™",
     badge: "삼성메디슨 · 인턴",
-    period: "2024.05 — 2024.08 (4개월)",
+    period: "2024.05 - 2024.08 (4개월)",
     teamSize: "AI Vision 그룹 · 산부인과 AI 랩 · 2D Follicle™ 팀",
     summary:
       "하복부 초음파 다중 구조물 검출 과제가 중단된 뒤, 다른 사수의 팀으로 옮겨 부인과 초음파 AI 기능 개발에 참여했습니다. 2D Follicle™ 팀에서 난포 세그멘테이션 성능을 올리는 것을 목표로, 학습 데이터 구축·모델 개선 실험·측정 기능(C++) 개발 세 갈래로 참여했습니다.",
@@ -2865,7 +2992,7 @@ if len(raw_documents) == 0:
       {
         label: "제품",
         value:
-          "2D Follicle™ — 여러 개의 난포 크기를 한 화면에서 자동 측정 (적용 장비: V8 · V7 · V6 · HS60 · HS50 · HS40 · HM70 EVO)",
+          "2D Follicle™ - 여러 개의 난포 크기를 한 화면에서 자동 측정 (적용 장비: V8 · V7 · V6 · HS60 · HS50 · HS40 · HM70 EVO)",
       },
       {
         label: "목표",
@@ -2902,10 +3029,10 @@ if len(raw_documents) == 0:
     myRoleAreas: [
       {
         title: "2D Follicle™",
-        desc: "학습 데이터 구축과 모델 개선 실험으로 세그멘테이션 성능 향상 — 현재 제품 모델이 학습하는 데이터가 이 기간에 구축된 것",
+        desc: "학습 데이터 구축과 모델 개선 실험으로 세그멘테이션 성능 향상 - 현재 제품 모델이 학습하는 데이터가 이 기간에 구축된 것",
       },
       {
-        title: "AddCaliper — 난포 윤곽선 생성 (C++)",
+        title: "AddCaliper - 난포 윤곽선 생성 (C++)",
         desc: "검사자가 찍은 네 점에서 난포 윤곽선을 생성하는 스플라인 보간 로직 개발",
       },
     ],
@@ -2932,7 +3059,7 @@ if len(raw_documents) == 0:
               width: 800,
               height: 522,
               alt: "캘리퍼 마커나 윤곽선 없이 오버레이를 끈 상태로 캡처한 난소 초음파 화면 두 장",
-              caption: "수집 대상 화면의 예 — 측정 오버레이를 끈 상태로 캡처했다",
+              caption: "수집 대상 화면의 예 - 측정 오버레이를 끈 상태로 캡처했다",
             },
             points: [
               "장비에 저장된 기록에서 측정 표시를 끄는 기능을 찾아, 오버레이가 없는 상태의 영상만 캡처해 수집",
@@ -2944,8 +3071,8 @@ if len(raw_documents) == 0:
             points: [
               "병원에서 여러 차례에 걸쳐 받은 새 초음파 영상은 한 영상 안에 난포·자궁·태아가 섞여 있어, 학습에 쓸 난포 영상만 골라내는 선별을 매번 반복",
               "임신 상태인 자궁, 난포 없이 속이 불투명하거나 출혈이 고인 것으로 보이는 상, 자궁을 보는 뷰라 난포가 너무 작게 잡힌 경우는 제외",
-              "수천 장 중 학습에 쓸 영상을 선별 — 고른 영상에는 GT를 새로 그려 학습 데이터로 만듦",
-              "어떤 상이 난포이고 경계를 어디로 볼지는 혼자 판단할 수 없어 임상의와 계속 상의하며 진행 — 그 과정에서 초음파 영상을 해석하는 법과 관련 임상 지식을 자연스럽게 익힘",
+              "수천 장 중 학습에 쓸 영상을 선별 - 고른 영상에는 GT를 새로 그려 학습 데이터로 만듦",
+              "어떤 상이 난포이고 경계를 어디로 볼지는 혼자 판단할 수 없어 임상의와 계속 상의하며 진행 - 그 과정에서 초음파 영상을 해석하는 법과 관련 임상 지식을 자연스럽게 익힘",
             ],
           },
           {
@@ -2955,7 +3082,7 @@ if len(raw_documents) == 0:
               width: 800,
               height: 522,
               alt: "5D Follicle™ 볼륨 기반 초음파 화면에서 여러 난포가 색상별 윤곽으로 표시된 화면",
-              caption: "볼륨 기반 화면 — 여기서도 2D 학습에 쓸 데이터가 나온다",
+              caption: "볼륨 기반 화면 - 여기서도 2D 학습에 쓸 데이터가 나온다",
             },
             points: [
               "5D Follicle™은 별개 제품이지만 그 검사에서 나오는 데이터에도 2D Follicle™ 학습에 쓸 수 있는 것이 있어 전부 활용",
@@ -2975,9 +3102,9 @@ if len(raw_documents) == 0:
               "수집한 데이터는 임상의와 함께 레이블을 작성하고, 기존 데이터의 품질도 보정",
               "레이블링 효율을 높이기 위해 노이즈 제거를 비롯한 영상처리로 레이블 초안을 자동 생성하는 방식도 구현",
               "실제 난포보다 넓게 칠해져 경계가 부정확한 GT는 경계를 실제 크기에 맞게 다시 그림",
-              "겹쳐 있는 두 난포가 하나의 마스크로 칠해진 경우는 앞쪽 난포의 경계선을 따라 선을 지워 두 영역으로 분리 — 뒤쪽 난포에는 가려지지 않은 반달 부분만 남김",
+              "겹쳐 있는 두 난포가 하나의 마스크로 칠해진 경우는 앞쪽 난포의 경계선을 따라 선을 지워 두 영역으로 분리 - 뒤쪽 난포에는 가려지지 않은 반달 부분만 남김",
             ],
-            note: "반대 방향의 문제도 있었다 — 눈으로 보면 분명히 하나인 난포인데 GT에는 여러 조각으로 나뉜 경우는 morphology 연산으로 끊긴 영역을 이어 하나로 합쳤다. 나누는 일과 합치는 일 모두 실제 난포의 모양에 맞추기 위한 작업이었다.",
+            note: "반대 방향의 문제도 있었다 - 눈으로 보면 분명히 하나인 난포인데 GT에는 여러 조각으로 나뉜 경우는 morphology 연산으로 끊긴 영역을 이어 하나로 합쳤다. 나누는 일과 합치는 일 모두 실제 난포의 모양에 맞추기 위한 작업이었다.",
           },
         ],
       },
@@ -2988,10 +3115,10 @@ if len(raw_documents) == 0:
         metric: "손실 함수 3방향 비교 → FN 가중 채택",
         problemLabel: "EDA로 짚은 것",
         problemList: [
-          "가려짐으로 남는 반달 모양 — 난포 두 개가 나란히 있어도 초음파 상에서 하나가 다른 하나에 가려지면 GT는 보이는 부분만 표시할 수밖에 없다. 잘못된 라벨링이 아니라 가려짐이 있는 한 피할 수 없는 경우",
-          "장비별 배경색 차이 — 검은 배경과 흰 배경이 섞여 있어 같은 조직이라도 모델이 다르게 반응할 위험",
-          "출처별 밝기 분포 차이 — 같은 조직이 장비마다 더 밝거나 더 어둡게 찍힘",
-          "크기별 성능 격차 가능성 — 모델이 특정 크기대에서 유독 약한지 확인 필요",
+          "가려짐으로 남는 반달 모양 - 난포 두 개가 나란히 있어도 초음파 상에서 하나가 다른 하나에 가려지면 GT는 보이는 부분만 표시할 수밖에 없다. 잘못된 라벨링이 아니라 가려짐이 있는 한 피할 수 없는 경우",
+          "장비별 배경색 차이 - 검은 배경과 흰 배경이 섞여 있어 같은 조직이라도 모델이 다르게 반응할 위험",
+          "출처별 밝기 분포 차이 - 같은 조직이 장비마다 더 밝거나 더 어둡게 찍힘",
+          "크기별 성능 격차 가능성 - 모델이 특정 크기대에서 유독 약한지 확인 필요",
         ],
         solutionLabel: "처리 방식",
         solutionBlocks: [
@@ -3007,15 +3134,15 @@ if len(raw_documents) == 0:
             points: [],
           },
           {
-            title: "배경색 통일 — 조건을 좁혀 안전하게",
+            title: "배경색 통일 - 조건을 좁혀 안전하게",
             points: [
               "장수가 많아 손으로 할 수 없어, 영상처리로 배경 영역을 인식해 자동으로 바꾸는 함수를 만듦",
               "밝기만으로 판정하면 신호가 거의 없어 어둡게 나오는 조직 영역까지 배경으로 잘못 잡혀 실제 조직 정보가 지워지는 문제가 있었음",
-              "흰 배경 영상은 특정 한 장비에서만 나왔고 그 장비는 화면 구성이 고정이라 배경이 차지하는 위치가 항상 같음을 확인 — 배경 영역의 고정 틀을 만들어 그 부분만 0으로 채우는 방식으로 전환. 일반해를 찾다가 조직을 지우는 것보다 범위를 한정해 확실하게 처리하는 편을 택함",
+              "흰 배경 영상은 특정 한 장비에서만 나왔고 그 장비는 화면 구성이 고정이라 배경이 차지하는 위치가 항상 같음을 확인 - 배경 영역의 고정 틀을 만들어 그 부분만 0으로 채우는 방식으로 전환. 일반해를 찾다가 조직을 지우는 것보다 범위를 한정해 확실하게 처리하는 편을 택함",
             ],
           },
           {
-            title: "출처별 밝기 분포 — histogram matching",
+            title: "출처별 밝기 분포 - histogram matching",
             figure: {
               src: "/samsung-medison-detection/histogram-matching.svg",
               width: 1360,
@@ -3025,46 +3152,46 @@ if len(raw_documents) == 0:
             },
             points: [
               "CLAHE 같은 대비 조정은 커널 단위 국소 연산이라 제외 영역 경계 근처만 달라지고 전체 밝기 성질은 그대로였음",
-              "GT 마스크로 난포 영역만 어둡게 만드는 방식은 접었다 — 추론 시점에는 GT가 없어 같은 변환을 재현할 수 없고, 모델이 인위적으로 만들어진 어두움을 단서로 삼을 위험도 있었음. 정답을 입력에 섞지 않는다는 원칙을 세움",
-              "원인은 국소 대비가 아니라 출처별 밝기 분포 자체의 차이 — 한쪽 데이터로 다른 쪽을 보정했을 때 성능이 오른 것이 근거",
-              "난포 영역의 분포만 뽑아 기준으로 삼고 다른 쪽의 해당 픽셀을 어둡게 눌러 맞추는 방식도 실험 — 어느 쪽을 기준으로 할지는 양방향 모두 시도해 비교했고, 기준이 된 원본과 합친 조합도 함께 실험",
+              "GT 마스크로 난포 영역만 어둡게 만드는 방식은 접었다 - 추론 시점에는 GT가 없어 같은 변환을 재현할 수 없고, 모델이 인위적으로 만들어진 어두움을 단서로 삼을 위험도 있었음. 정답을 입력에 섞지 않는다는 원칙을 세움",
+              "원인은 국소 대비가 아니라 출처별 밝기 분포 자체의 차이 - 한쪽 데이터로 다른 쪽을 보정했을 때 성능이 오른 것이 근거",
+              "난포 영역의 분포만 뽑아 기준으로 삼고 다른 쪽의 해당 픽셀을 어둡게 눌러 맞추는 방식도 실험 - 어느 쪽을 기준으로 할지는 양방향 모두 시도해 비교했고, 기준이 된 원본과 합친 조합도 함께 실험",
             ],
           },
           {
-            title: "크기별 성능 격차 — S/M/L 분류",
+            title: "크기별 성능 격차 - S/M/L 분류",
             points: [
               "학습 데이터의 난포 장축을 모두 구해 히스토그램을 만들고, 분포 기준 S·M·L 세 구간으로 나눠 크기별 모델 성능을 따로 확인",
-              "장축 산출에는 cv2.fitEllipse 대신 cv2.minEnclosingCircle 채택 — 난포는 실제로는 구형이라 경계에서 튀어나온 부분도 노이즈가 아니라 그 방향의 실제 반지름이므로, 여러 방향을 평균 내는 대신 경계 위 두 점 사이 최대 거리를 기준으로 삼음",
+              "장축 산출에는 cv2.fitEllipse 대신 cv2.minEnclosingCircle 채택 - 난포는 실제로는 구형이라 경계에서 튀어나온 부분도 노이즈가 아니라 그 방향의 실제 반지름이므로, 여러 방향을 평균 내는 대신 경계 위 두 점 사이 최대 거리를 기준으로 삼음",
             ],
           },
           {
             title: "베이스라인과 튜닝",
             points: [
-              "새 모델을 고르는 대신 기존에 쓰던 세그멘테이션 모델을 그대로 베이스라인으로 삼고, 그 위에서 바꿀 수 있는 것들을 찾음 — 적용할 기법은 최신 논문을 조사해 선정",
-              "Augmentation — 회전, 이동·확대축소, Gaussian noise, 수직 뒤집기, zoom in",
-              "학습률 스케줄러 CosineAnnealingWarmRestarts — 학습률을 코사인 곡선을 따라 낮추다 주기적으로 다시 올려 한 지점에 갇히지 않고 더 나은 해를 탐색하도록 파라미터를 조정해 사용",
-              "zoom in 여백 — 난포를 모두 담도록 자른 영역은 원본마다 가로세로 비율이 달라, 목표 크기로 늘리면 비율이 깨지고 비율을 지키면 여백이 생김. 난포의 형태 자체가 판단 근거이므로 비율을 지키고 여백을 넣는 쪽을 택했고, 어느 쪽이 나은지는 짐작 대신 두 방식으로 데이터셋을 각각 만들어 비교하도록 준비",
-              "여백은 0(검은색)으로 채움 — 함께 학습하는 다른 출처 데이터의 바깥 영역이 이미 0이라, 여백을 0으로 두는 편이 두 데이터의 성질을 맞추는 데 유리했음",
-              "데이터는 원본·변환본·조합으로 버전을 나눠 관리하고 검증 세트도 처리 여부·출처 조합에 따라 나눠 각각 비교 — 어떤 실험에 어떤 학습·검증 데이터를 썼는지 그때그때 기록하는 것을 규칙으로 삼음",
+              "새 모델을 고르는 대신 기존에 쓰던 세그멘테이션 모델을 그대로 베이스라인으로 삼고, 그 위에서 바꿀 수 있는 것들을 찾음 - 적용할 기법은 최신 논문을 조사해 선정",
+              "Augmentation - 회전, 이동·확대축소, Gaussian noise, 수직 뒤집기, zoom in",
+              "학습률 스케줄러 CosineAnnealingWarmRestarts - 학습률을 코사인 곡선을 따라 낮추다 주기적으로 다시 올려 한 지점에 갇히지 않고 더 나은 해를 탐색하도록 파라미터를 조정해 사용",
+              "zoom in 여백 - 난포를 모두 담도록 자른 영역은 원본마다 가로세로 비율이 달라, 목표 크기로 늘리면 비율이 깨지고 비율을 지키면 여백이 생김. 난포의 형태 자체가 판단 근거이므로 비율을 지키고 여백을 넣는 쪽을 택했고, 어느 쪽이 나은지는 짐작 대신 두 방식으로 데이터셋을 각각 만들어 비교하도록 준비",
+              "여백은 0(검은색)으로 채움 - 함께 학습하는 다른 출처 데이터의 바깥 영역이 이미 0이라, 여백을 0으로 두는 편이 두 데이터의 성질을 맞추는 데 유리했음",
+              "데이터는 원본·변환본·조합으로 버전을 나눠 관리하고 검증 세트도 처리 여부·출처 조합에 따라 나눠 각각 비교 - 어떤 실험에 어떤 학습·검증 데이터를 썼는지 그때그때 기록하는 것을 규칙으로 삼음",
             ],
           },
         ],
         troublesLabel: "손실 함수 실험과 평가",
         troubles: [
           {
-            title: "손실 함수 비교 — 어느 쪽 오류에 벌점을 줄 것인가",
+            title: "손실 함수 비교 - 어느 쪽 오류에 벌점을 줄 것인가",
             table: {
               head: ["구성", "설계", "결과"],
               rows: [
                 [
                   "Dice loss 단독",
-                  "BCE를 빼고 Dice만 사용 — 비교의 기준선",
-                  "—",
+                  "BCE를 빼고 Dice만 사용 - 비교의 기준선",
+                  "-",
                 ],
                 [
                   "Tversky Loss (FN 가중 0.7 / FP 0.3)",
                   "TI = TP / (TP + αFN + βFP), 손실 = 1 − TI. 놓치는 쪽(FN)에 더 큰 벌점",
-                  "가장 좋은 결과 — 채택",
+                  "가장 좋은 결과 - 채택",
                 ],
                 [
                   "Tversky Loss (FP 가중)",
@@ -3074,7 +3201,7 @@ if len(raw_documents) == 0:
                 [
                   "Focal Tversky Loss",
                   "Tversky에 gamma를 더해 쉬운 샘플 비중을 낮추고 어려운 샘플에 집중",
-                  "—",
+                  "-",
                 ],
               ],
             },
@@ -3084,7 +3211,7 @@ if len(raw_documents) == 0:
             tech: ["PyTorch"],
           },
           {
-            title: "개수를 세는 평가 — 손실 값은 작은 난포를 놓쳐도 티가 안 난다",
+            title: "개수를 세는 평가 - 손실 값은 작은 난포를 놓쳐도 티가 안 난다",
             problem:
               "세그멘테이션 손실은 픽셀 단위로 계산되는데, 실제로 알아야 하는 것은 난포를 몇 개 찾았고 몇 개를 놓쳤는지다. 작은 난포는 전체 픽셀의 극히 일부라 하나를 통째로 놓쳐도 손실 점수는 거의 떨어지지 않는다.",
             solution:
@@ -3108,7 +3235,7 @@ if len(raw_documents) == 0:
         ],
       },
       {
-        label: "AddCaliper — 난포 윤곽선 생성 (C++)",
+        label: "AddCaliper - 난포 윤곽선 생성 (C++)",
         items: [
       {
         name: "스플라인 보간으로 윤곽선 생성",
@@ -3121,12 +3248,12 @@ if len(raw_documents) == 0:
             width: 1360,
             height: 600,
             alt: "트랙볼로 찍은 장축·단축 네 점에서 닫힌 곡선을 보간해 면적과 둘레를 산출하는 세 단계",
-            caption: "네 점 입력에서 측정값이 나오기까지 — 가운데 곡선 생성이 담당 범위",
+            caption: "네 점 입력에서 측정값이 나오기까지 - 가운데 곡선 생성이 담당 범위",
           },
         ],
         problemLabel: "왜 타원이 아닌가",
         problem:
-          "검사자가 트랙볼로 난포의 장축과 단축 끝점 네 개를 찍으면 네 점을 모두 지나는 닫힌 곡선이 그려지고, 그 곡선을 기준으로 크기가 산출됩니다. 두 축은 서로 교차하기만 하면 되고 직교일 필요는 없습니다 — 검사자는 수직으로 찍는다고 생각하지만 실제로는 조금씩 틀어지기 때문입니다. 타원은 두 축에 대해 대칭이라 한쪽만 볼록한 난포 경계를 따라가지 못합니다. 실제 난포는 인접한 난포에 눌려 비대칭인 경우가 많고, 타원으로 재면 그만큼 면적에 오차가 생깁니다.",
+          "검사자가 트랙볼로 난포의 장축과 단축 끝점 네 개를 찍으면 네 점을 모두 지나는 닫힌 곡선이 그려지고, 그 곡선을 기준으로 크기가 산출됩니다. 두 축은 서로 교차하기만 하면 되고 직교일 필요는 없습니다 - 검사자는 수직으로 찍는다고 생각하지만 실제로는 조금씩 틀어지기 때문입니다. 타원은 두 축에 대해 대칭이라 한쪽만 볼록한 난포 경계를 따라가지 못합니다. 실제 난포는 인접한 난포에 눌려 비대칭인 경우가 많고, 타원으로 재면 그만큼 면적에 오차가 생깁니다.",
         solutionLabel: "구현",
         solutionBlocks: [
           {
@@ -3140,7 +3267,7 @@ if len(raw_documents) == 0:
             },
             points: [
               "네 점을 지나는 스플라인은 구간마다 다항식이 따로 계산되므로 사분면별로 곡률이 달라져 비대칭 경계를 따라감",
-              "닫힌 곡선은 하나의 x에 y가 둘 대응해 y = f(x)로 표현되지 않음 — 곡선을 따라간 누적 거리를 매개변수로 삼아 x, y를 각각 그 매개변수의 함수로 분리해 두 개의 스플라인으로 풀었음",
+              "닫힌 곡선은 하나의 x에 y가 둘 대응해 y = f(x)로 표현되지 않음 - 곡선을 따라간 누적 거리를 매개변수로 삼아 x, y를 각각 그 매개변수의 함수로 분리해 두 개의 스플라인으로 풀었음",
               "외부 라이브러리를 반입할 수 없는 환경이라 자연 3차 스플라인을 직접 구현",
             ],
           },
@@ -3154,7 +3281,7 @@ if len(raw_documents) == 0:
               caption: "장축을 기준으로 단축의 두 끝점이 반대편이면 통과, 같은 편이거나 한 직선 위면 거부",
             },
             points: [
-              "검사자가 찍은 두 축이 실제로 교차하는지 먼저 검사 — 세 점의 방향 관계(CCW, Counter-ClockWise)로 두 선분의 위치 관계를 판정하고, 두 선분 각각을 기준으로 양쪽 모두 확인",
+              "검사자가 찍은 두 축이 실제로 교차하는지 먼저 검사 - 세 점의 방향 관계(CCW, Counter-ClockWise)로 두 선분의 위치 관계를 판정하고, 두 선분 각각을 기준으로 양쪽 모두 확인",
               "축이 빗나갔거나 네 점이 한 직선 위에 놓인 입력은 곡선이 만들어지지 않으므로 여기서 걸러내고 오류를 반환",
             ],
           },

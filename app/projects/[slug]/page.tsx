@@ -19,7 +19,7 @@ import ChallengeSection from "@/components/ChallengeSection";
 import GitHubIcon from "@/components/GitHubIcon";
 import type { Metadata } from "next";
 
-/* 문제·해결 본문 — 산문이면 빈 줄로 문단을 나누고, 불릿 배열이면 그대로 점을 찍는다 */
+/* 문제·해결 본문 - 산문이면 빈 줄로 문단을 나누고, 불릿 배열이면 그대로 점을 찍는다 */
 function ProblemSolutionBody({ value }: { value: string | string[] }) {
   if (Array.isArray(value)) {
     return (
@@ -73,7 +73,7 @@ export default async function ProjectPage({ params }: Props) {
 
   return (
     <div className="min-h-screen bg-ground">
-      {/* 상단바 — 다른 상세 페이지와 같은 한 줄 */}
+      {/* 상단바 - 다른 상세 페이지와 같은 한 줄 */}
       <div className="border-b border-line sticky top-0 z-10 bg-ground/90 backdrop-blur-md">
         <div className="max-w-5xl mx-auto px-6 h-14 flex items-center">
           <Link
@@ -86,7 +86,7 @@ export default async function ProjectPage({ params }: Props) {
       </div>
 
       <main className="section-scope max-w-5xl mx-auto px-6 py-12 sm:py-14">
-        {/* 헤더 — 메타 → 제목 → 한 줄 요약 → 요약 → 태그 → 링크.
+        {/* 헤더 - 메타 → 제목 → 한 줄 요약 → 요약 → 태그 → 링크.
             다른 상세(LightProjectView)와 같은 순서·같은 자리를 쓴다 */}
         <header className="border-b border-line pb-10">
           <p className="rail text-muted">
@@ -101,7 +101,7 @@ export default async function ProjectPage({ params }: Props) {
             {project.title}
           </h1>
 
-          {/* 한 줄 요약 — 스크롤하지 않고도 역할이 파악되도록 제목에 바로 붙인다 */}
+          {/* 한 줄 요약 - 스크롤하지 않고도 역할이 파악되도록 제목에 바로 붙인다 */}
           <p className="mt-3 max-w-3xl text-lg font-semibold leading-snug text-deep">
             {project.tagline}
           </p>
@@ -117,7 +117,7 @@ export default async function ProjectPage({ params }: Props) {
             ))}
           </ul>
 
-          {/* 외부 링크 — 비공개 저장소는 github 가 빈 문자열이다.
+          {/* 외부 링크 - 비공개 저장소는 github 가 빈 문자열이다.
               그대로 렌더하면 href="" 라 현재 페이지가 다시 열린다 */}
           {(project.github || project.demo) && (
             <div className="mt-7 flex flex-wrap gap-2.5">
@@ -147,7 +147,7 @@ export default async function ProjectPage({ params }: Props) {
           )}
         </header>
 
-        {/* 성과 — 세부(문제·기능·트러블)보다 먼저 읽히도록 헤더 바로 아래 둔다 */}
+        {/* 성과 - 세부(문제·기능·트러블)보다 먼저 읽히도록 헤더 바로 아래 둔다 */}
         <section className="mt-16">
           <h2 className={sectionTitle}>성과</h2>
           <ul className="mt-6 max-w-3xl space-y-3">
@@ -159,7 +159,7 @@ export default async function ProjectPage({ params }: Props) {
           </ul>
         </section>
 
-        {/* 담당 범위 — 다른 상세의 '내가 맡은 역할' 절과 같은 자리·같은 구성 */}
+        {/* 담당 범위 - 다른 상세의 '내가 맡은 역할' 절과 같은 자리·같은 구성 */}
         <section className="mt-16">
           <h2 className={sectionTitle}>담당 범위</h2>
           <p className={`mt-6 max-w-3xl ${leadText}`}>{project.role}</p>
@@ -183,7 +183,7 @@ export default async function ProjectPage({ params }: Props) {
           </div>
         </section>
 
-        {/* 문제와 해결 — 항목마다 한 장. 문제/해결 라벨은 기능 카드와 같은 색을 쓴다 */}
+        {/* 문제와 해결 - 항목마다 한 장. 문제/해결 라벨은 기능 카드와 같은 색을 쓴다 */}
         <section className="mt-16">
           <h2 className={sectionTitle}>문제와 해결</h2>
           <div className="mt-8 space-y-6">
@@ -200,7 +200,7 @@ export default async function ProjectPage({ params }: Props) {
 
                 {typeof item.problem === "string" ||
                 typeof item.solution === "string" ? (
-                  /* 산문 항목 — ChallengeSection과 같은 단계 카드 언어 */
+                  /* 산문 항목 - ChallengeSection과 같은 단계 카드 언어 */
                   <div className="mt-6 max-w-[52em] space-y-4">
                     <div className={stepCard}>
                       <p className={stepLabel}>문제</p>
@@ -254,7 +254,7 @@ export default async function ProjectPage({ params }: Props) {
           </div>
         </section>
 
-        {/* 주요 기능 — 카드로 펼친다 */}
+        {/* 주요 기능 - 카드로 펼친다 */}
         <section className="mt-16">
           <h2 className={sectionTitle}>주요 기능</h2>
           <div className="mt-8 space-y-6">

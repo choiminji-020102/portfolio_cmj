@@ -1,11 +1,11 @@
 @import "tailwindcss";
 
 /*
-  팔레트 — 연한 로즈 바탕에 딥 네이비퍼플 잉크.
+  팔레트 - 연한 로즈 바탕에 딥 네이비퍼플 잉크.
   두 파랑은 명암비가 낮아 본문 색으로 쓰지 않는다 (선·채움·큰 글씨 전용).
 */
 :root {
-  --ground: #fbfbfc; /* 페이지 바탕 — 아주 옅은 중성 */
+  --ground: #fbfbfc; /* 페이지 바탕 - 아주 옅은 중성 */
   --surface: #ffffff; /* 카드·블록 바탕 */
   --ink: #1a132f; /* 본문·제목        ground 대비 15.6:1 */
   --muted: #5f5668; /* 메타·캡션        ground 대비  6.5:1 */
@@ -51,7 +51,7 @@
     각 단계는 잉크(#1a132f)를 흰색과 섞어 색조를 맞추고, 원래의 명암 순서를
     유지한다. 200 은 경계선이 71곳으로 가장 많이 쓰여 --line 과 같은 값을 준다.
     텍스트로 쓰이는 400 이상은 ground(4.85:1~) · 카드 바탕(4.64:1~) 양쪽에서
-    4.5:1 을 넘긴다 — 기본 stone-400 은 2.4:1 이라 오히려 대비도 개선된다.
+    4.5:1 을 넘긴다 - 기본 stone-400 은 2.4:1 이라 오히려 대비도 개선된다.
   */
   --color-stone-50: #f6f6f7; /* 카드·블록 바탕 */
   --color-stone-100: #edecee;
@@ -76,7 +76,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* 좌측 메타축 — 기간·기관·기술을 담는 mono 칼럼 */
+/* 좌측 메타축 - 기간·기관·기술을 담는 mono 칼럼 */
 .rail {
   font-family: var(--font-plex-mono), ui-monospace, monospace;
   font-size: 0.75rem;
@@ -87,7 +87,7 @@ body {
 }
 
 /*
-  코드 블록 — 진짜 고정폭.
+  코드 블록 - 진짜 고정폭.
   --font-plex-mono 는 이름과 달리 라틴 라벨용 프로포셔널(IBM Plex Sans)이라
   코드에 쓰면 들여쓰기와 칸 맞춘 주석이 어긋난다.
 */
@@ -108,7 +108,7 @@ body {
 }
 
 /*
-  섹션 제목 — 번호 + 밑줄로 "장"이 바뀌는 지점을 표시한다.
+  섹션 제목 - 번호 + 밑줄로 "장"이 바뀌는 지점을 표시한다.
   카운터는 각 페이지의 최상위 <main>에서 .section-scope로 리셋하고,
   이 스코프 안의 h2.section-heading마다 자동으로 하나씩 늘어난다.
   컴포넌트 경계(ChallengeSection·LightProjectView)를 넘어도 DOM 트리 기준이라 이어진다.

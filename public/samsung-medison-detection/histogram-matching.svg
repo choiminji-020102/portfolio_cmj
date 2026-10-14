@@ -37,7 +37,7 @@
   <rect x="60" y="378" width="230" height="150" rx="8" fill="#f3f2f6" stroke="#cdc9d4" stroke-width="2"/>
   <ellipse cx="130" cy="438" rx="30" ry="24" fill="#3d7f97" fill-opacity="0.10" stroke="#3d7f97" stroke-width="2.5"/>
   <ellipse cx="205" cy="473" rx="26" ry="21" fill="#3d7f97" fill-opacity="0.10" stroke="#3d7f97" stroke-width="2.5"/>
-  <text x="175" y="551" text-anchor="middle" font-size="19" fill="#5f5668">변환 전 — 상대적으로 밝음</text>
+  <text x="175" y="551" text-anchor="middle" font-size="19" fill="#5f5668">변환 전 - 상대적으로 밝음</text>
 
   <line x1="310" y1="453" x2="360" y2="453" stroke="#5f5668" stroke-width="2.5" marker-end="url(#arh)"/>
   <text x="335" y="435" text-anchor="middle" font-size="17" fill="#c2603a">어둡게</text>
@@ -45,7 +45,7 @@
   <rect x="380" y="378" width="230" height="150" rx="8" fill="#f3f2f6" stroke="#cdc9d4" stroke-width="2"/>
   <ellipse cx="450" cy="438" rx="30" ry="24" fill="#3d7f97" fill-opacity="0.30" stroke="#3d7f97" stroke-width="2.5"/>
   <ellipse cx="525" cy="473" rx="26" ry="21" fill="#3d7f97" fill-opacity="0.30" stroke="#3d7f97" stroke-width="2.5"/>
-  <text x="495" y="551" text-anchor="middle" font-size="19" fill="#5f5668">변환 후 — 기준 분포에 맞춤</text>
+  <text x="495" y="551" text-anchor="middle" font-size="19" fill="#5f5668">변환 후 - 기준 분포에 맞춤</text>
 
   <!-- STEP 3 : 합쳐서 학습 -->
   <line x1="660" y1="453" x2="710" y2="453" stroke="#5f5668" stroke-width="2.5" marker-end="url(#arh)"/>
