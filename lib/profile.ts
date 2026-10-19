@@ -171,8 +171,8 @@ export const educations: Education[] = [
     status: "수료",
     period: "2025.03 - 2025.09",
     points: [
-      { text: "빅프로젝트 대상(1위) 수상", pending: true },
-      { text: "미니프로젝트 5건 수행", pending: true },
+      { text: "빅프로젝트 대상(1위) 수상" },
+      { text: "미니프로젝트 5건 수행" },
     ],
   },
   {
