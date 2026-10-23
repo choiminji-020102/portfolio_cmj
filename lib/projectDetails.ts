@@ -1358,7 +1358,7 @@ result = chain.invoke({
             solution:
               "LangGraph 서브그래프로 분리해 소 식별·목록 fallback·선택·카테고리 질의·상세 응답 5개 노드로 책임을 나누고, selected_cow_info 유무를 조건부 엣지로 평가해 이표번호를 아는 사용자는 목록 단계를 건너뛰게 했다.",
             effect:
-              "cow_info 처리 노드가 1개 → 5개로 늘어나는 동안 메인 그래프는 5개 그대로 유지됐고, 이표번호 없이도 목록 → 선택 경로가 생겼다(대신 코드량은 344줄 1파일 → 387줄 3파일로 늘고, 되묻기 한 턴이 추가됨).",
+              "cow_info 처리 노드가 1개 → 5개로 늘어나는 동안 메인 그래프는 5개 그대로 유지됐다(코드량은 344줄 1파일 → 387줄 3파일로 늘었다). 이표번호가 없을 때의 목록 안내 경로는 설계했으나, 사용자 입력을 받아 이어 가는 멀티턴 재개는 아직 구현되지 않았다.",
             tags: ["서브그래프분리", "상태관리", "폴백설계", "책임분리"],
             tech: [
               "LangGraph (Subgraph · Conditional Edge · State)",
@@ -1605,7 +1605,7 @@ if not selected_cow:
                   },
                   {
                     type: "text",
-                    text: "추측이 사라지면서 틀린 답을 주는 경우 자체가 없어졌다. 되묻기 한 번을 추가하는 대신 오답 위험을 제거한 트레이드오프다.",
+                    text: "키워드 기반 카테고리 추측을 명시적 선택 방식으로 바꿔 잘못된 정보 유형을 반환할 가능성을 줄였다. 되묻기 한 번이 추가되는 트레이드오프가 있다.",
                   },
                   { type: "sub", text: "6. 실 데이터 불완전성 방어" },
                   {
@@ -1613,52 +1613,12 @@ if not selected_cow:
                     text: "placeholder에서 실제 Firestore 연동으로 전환하자(abbaed9) 개발 중엔 보이지 않던 문제가 나왔다. 문서 누락, 스키마와 어긋난 enum 값, 빈 필드였다. 특히 enum 불일치는 ValueError로 요청 전체를 500으로 떨어뜨렸다.",
                   },
                   {
-                    type: "code",
-                    code: `def get_basic_info_by_ear_tag_number(ear_tag_number: str):
-    try:
-        docs = db.collection('cows') \\
-                 .where("ear_tag_number", "==", ear_tag_number) \\
-                 .limit(1).stream()
-        cow_doc = next(docs, None)
-
-        if cow_doc is None or not cow_doc.exists:
-            print(f"[ERROR] 해당 이표번호로 문서를 찾지 못했습니다: {ear_tag_number}")
-            return None
-
-        cow_data = cow_doc.to_dict()
-
-        health_status = None
-        if cow_data.get("health_status"):
-            try:
-                health_status = HealthStatus(cow_data["health_status"])
-            except ValueError:
-                print(f"[WARNING] 잘못된 health_status 값: {cow_data['health_status']} "
-                      f"(젖소 ID: {cow_data['id']})")
-                health_status = HealthStatus.NORMAL   # 기본값 복구
-
-        breeding_status = None
-        if cow_data.get("breeding_status"):
-            try:
-                breeding_status = BreedingStatus(cow_data["breeding_status"])
-            except ValueError:
-                print(f"[WARNING] 잘못된 breeding_status 값: {cow_data['breeding_status']} "
-                      f"(젖소 ID: {cow_data['id']})")
-                breeding_status = None                # 폴백값 없이 비움
-
-        return { ... }   # 15개 필드
-
-    except Exception as e:
-        print(f"[ERROR] 특정 젖소 *기본 정보* 조회 전체 실패 "
-              f"(ear_tag_number: {ear_tag_number}): {str(e)}")
-        return None`,
-                  },
-                  {
                     type: "text",
                     text: "폴백 전략을 필드마다 다르게 가져간 것은 의도적이다. health_status는 표시 자체가 목적이므로 NORMAL로 복구하고, breeding_status는 잘못된 값으로 번식 판단을 오도하느니 비우는 편이 안전하다고 봤다.",
                   },
                   {
                     type: "text",
-                    text: "모든 Firestore 조회를 try/except로 감싸 실패 시 None을 반환하고, 호출부에서 안내 메시지로 변환했다. 어떤 예외 경로로도 500이 나지 않는 것을 기준으로 삼았다.",
+                    text: "주요 Firestore 조회를 try/except로 감싸 실패 시 None을 반환하고, 호출부에서 안내 메시지로 변환했다.",
                   },
                   {
                     type: "table",
@@ -1673,16 +1633,6 @@ if not selected_cow:
                       ["카테고리 오입력", "9개 목록 재안내"],
                       ["기본·상세 정보 한쪽 누락", "\"정보를 찾을 수 없습니다\" 안내"],
                     ],
-                  },
-                  { type: "sub", text: "7. 서브그래프 통합 버그 (커밋 2c83f8e)" },
-                  {
-                    type: "text",
-                    text: "서브그래프를 부모 그래프에 붙이며 .as_runnable()을 호출했는데, compile()이 이미 실행 가능한 그래프를 반환하므로 불필요한 호출이었다.",
-                  },
-                  {
-                    type: "code",
-                    code: `- cow_info_subgraph = create_cow_info_graph().as_runnable()
-+ cow_info_subgraph = create_cow_info_graph()   # compile() 결과가 이미 Runnable`,
                   },
                 ],
               },
@@ -1719,24 +1669,11 @@ if not selected_cow:
                   {
                     type: "list",
                     items: [
-                      "이표번호를 몰라도 조회 경로가 생겼다. 이표번호가 없으면 무조건 거부하고 종료하던 분기를 제거하고, 목록 → 선택 경로로 연결했다.",
+                      "이표번호가 없으면 무조건 거부하고 종료하던 분기를 제거하고, 목록 → 선택 경로로 연결하도록 설계했다.",
                       "조건부 진입으로 이표번호가 명확한 경우의 경로 길이는 리팩토링 전과 동일하게 유지했다.",
-                      "키워드 추측 제거로 오답 응답 가능성을 없앴다.",
-                      "Firestore 예외 5종을 안내 메시지로 흡수해, DB 데이터가 깨져도 500이 아닌 대화로 처리된다.",
+                      "키워드 추측을 명시적 카테고리 선택으로 바꿔 잘못된 정보 유형을 반환할 가능성을 줄였다.",
+                      "Firestore 조회 예외 5종을 안내 메시지로 변환하도록 처리했다(behavioral_info enum 불일치 등 일부는 남은 과제).",
                     ],
-                  },
-                  { type: "sub", text: "git 진화 타임라인" },
-                  {
-                    type: "code",
-                    code: `ab1c23e  단일 노드 (generate_farmdata_response, 99줄)
-   ↓
-abbaed9  실 DB 연동 → generate_cow_info_response로 개명, 344줄로 비대화
-   ↓
-0de1fea  질문 분류 · 이표번호 추출 로직 개선
-   ↓
-37f642e  5노드 서브그래프 분리 (graph / nodes / service 3파일 신규)
-   ↓
-2c83f8e  서브그래프 통합 버그 수정 (.as_runnable() 제거)`,
                   },
                 ],
               },
