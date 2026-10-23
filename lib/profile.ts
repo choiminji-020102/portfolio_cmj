@@ -337,7 +337,7 @@ export const projectCards: ProjectCard[] = [
   {
     title: "소담소담 - AI 젖소 관리 앱",
     summary:
-      "센서 없이 앱의 AI 분석만으로 젖소를 관리하는 소규모 낙농가 전용 서비스. 공공데이터 AI 모델로 질병 진단·생산성 예측을 지원하고, 낙농 특화 RAG 챗봇 '소담이'를 설계·구현했습니다.",
+      "센서 장비 없이 앱과 AI로 소규모 낙농가의 개체 관리와 질병 진단·생산성 예측을 지원하는 서비스입니다. AI 파트를 단독 담당하며 낙농 특화 RAG 챗봇 ‘소담이’를 설계·구현하고, 럼피스킨병 이미지 분류와 착유량·유방염 예측 모델의 학습 및 서비스 연동을 수행했습니다. 농림축산식품 공공데이터 활용 창업경진대회에서 우수상을 수상했습니다.",
     badge: "창업경진대회 · 우수상",
     track: "AI · LLM",
     period: "2025.04 - 2025.07",
@@ -345,18 +345,17 @@ export const projectCards: ProjectCard[] = [
     // 상세 페이지(projectDetails.ts)의 stack과 같은 어휘를 쓴다
     stack: [
       "RAG",
-      "AI Agent",
-      "Query Routing",
       "LangGraph",
-      "AI 예측 모델",
-      "이미지 분류 · 회귀",
+      "Query Routing",
       "YOLOv8",
+      "RandomForest",
+      "FastAPI",
       "Flutter",
     ],
     slug: "sodam",
     thumbnail: "/covers/sodam.png",
     github: "https://github.com/BlackCows-Team",
-    role: "RAG 챗봇 '소담이' 설계 · 럼피스킨 이미지 진단(YOLOv8) · 착유량·유방염 예측 모델",
+    role: "RAG 챗봇 '소담이' 설계 · 럼피스킨 이미지 분류(YOLOv8) · 착유량·유방염 예측 모델",
     outcome: "럼피스킨 96.8% · 유방염 83.9% · 착유량 설명력 82.4%",
   },
   {
