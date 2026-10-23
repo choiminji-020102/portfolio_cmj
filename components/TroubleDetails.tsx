@@ -1,15 +1,6 @@
-"use client";
-
-import { useState } from "react";
 import Image from "next/image";
 import type { TroubleBlock, TroubleDetail } from "@/lib/projectDetails";
 import CodeBlock from "./CodeBlock";
-import SodamDrawer from "./SodamDrawer";
-
-/* 긴 heading은 부제를 떼고 탭 라벨로 쓴다 - "성능 최적화 - 피처 선정" → "성능 최적화" */
-function tabLabel(heading: string) {
-  return heading.split(" - ")[0];
-}
 
 function Block({ blk }: { blk: TroubleBlock }) {
   if (blk.type === "sub")
@@ -108,77 +99,38 @@ function Block({ blk }: { blk: TroubleBlock }) {
   return null;
 }
 
+/* 상세 본문 - 서랍(모달) 없이 항목 아래에 모든 절을 그대로 펼친다.
+   원래 서랍 형태는 docs/archive/TroubleDetails.original.tsx.bak 에 보관 */
 export default function TroubleDetails({
-  title,
-  eyebrow,
   details,
   tech,
 }: {
-  title: string;
-  eyebrow?: string;
   details: TroubleDetail[];
   tech?: string[];
 }) {
-  const [open, setOpen] = useState(false);
-  const [active, setActive] = useState(0);
-  const current = details[active];
-
   return (
-    <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="rail ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-full border border-tide/50 bg-tide/8 px-3.5 py-1.5 font-semibold text-deep transition-colors hover:border-tide hover:bg-tide/15"
-      >
-        자세히 보기
-        <span aria-hidden="true">→</span>
-      </button>
+    <div className="mt-6 ml-8 border-l-2 border-tide/30 pl-5 sm:pl-6">
+      {/* 기술 스택 - 항목 전체에 걸리는 값이라 절 바깥, 맨 위에 둔다 */}
+      {tech && tech.length > 0 && (
+        <p className="rail text-muted">
+          <span className="font-semibold text-ink">기술 스택</span>
+          &nbsp;&nbsp;{tech.join(" · ")}
+        </p>
+      )}
 
-      <SodamDrawer
-        open={open}
-        onClose={() => setOpen(false)}
-        title={title}
-        eyebrow={eyebrow}
-      >
-        {/* 기술 스택 - 항목 전체에 걸리는 값이라 탭 바깥에 둔다 */}
-        {tech && tech.length > 0 && (
-          <p className="rail border-b border-line px-6 py-3 text-muted sm:px-8">
-            <span className="font-semibold text-ink">기술 스택</span>
-            &nbsp;&nbsp;{tech.join(" · ")}
-          </p>
-        )}
-
-        {/* 섹션 탭 - 스크롤해도 상단에 고정 */}
-        <div className="sticky top-0 z-10 flex gap-1 overflow-x-auto border-b border-line bg-ground/95 px-4 pt-2 backdrop-blur-sm sm:px-6">
-          {details.map((d, i) => (
-            <button
-              key={d.heading}
-              type="button"
-              onClick={() => setActive(i)}
-              aria-current={i === active ? "true" : undefined}
-              className={`rail shrink-0 whitespace-nowrap border-b-2 px-3 pb-2 pt-1 transition-colors ${
-                i === active
-                  ? "border-tide font-semibold text-deep"
-                  : "border-transparent text-muted hover:text-ink"
-              }`}
-            >
-              {tabLabel(d.heading)}
-            </button>
-          ))}
-        </div>
-
-        <div className="px-6 py-6 sm:px-8">
-          <p className="text-[0.95rem] font-bold tracking-tight text-deep">
-            {current.heading}
-          </p>
-          {/* 서랍 본문 - 코드·표가 문단 사이에 끼므로 문단 간격보다 조금 넓게 */}
+      {details.map((d, i) => (
+        <section key={d.heading} className={i === 0 && !tech?.length ? "" : "mt-9"}>
+          <h5 className="border-b border-line pb-2 text-[0.95rem] font-bold tracking-tight text-deep">
+            {d.heading}
+          </h5>
+          {/* 코드·표가 문단 사이에 끼므로 문단 간격보다 조금 넓게 */}
           <div className="mt-4 space-y-4">
-            {current.blocks.map((blk, bi) => (
+            {d.blocks.map((blk, bi) => (
               <Block key={bi} blk={blk} />
             ))}
           </div>
-        </div>
-      </SodamDrawer>
-    </>
+        </section>
+      ))}
+    </div>
   );
 }

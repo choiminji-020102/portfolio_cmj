@@ -4,7 +4,14 @@
 
     위     - 사전 인덱싱: 문서 → Splitting/Embedding → Vector DB → 검색
     가운데 - Query Routing 4분기, '낙농 전문 지식'만 Vector DB 검색을 거친다
-    오른쪽 - 사용자 휴대폰: Query 입력 → GPT → Response 출력
+    아래   - 분기마다 처리가 다르다(graph.py 기준)
+             낙농 전문 지식: 검색 문서 기반 GPT 답변 (rag_response)
+             농장 기록 조회: Firebase 조회 값을 문장으로 조립, GPT 없음 (cow_info_graph)
+             일반 대화: 이전 대화 기록을 참조한 GPT 답변 (general_response)
+             무관 질문: 고정 문구로 거절, GPT 없음 (irrelevant_response)
+    오른쪽 - 사용자 휴대폰: Query 입력 → Response 출력
+
+  원본(분기가 하나의 GPT로 합쳐지는 형태)은 docs/archive/RagDiagram.original.tsx.bak
 
   글자 크기는 FS 하나로 통일하고, 아이콘은 scale(0.9)로 한 단계 줄였다.
 */
@@ -23,6 +30,14 @@ const ROUTES = [
   { x: 628, label: "농장 기록 조회" },
   { x: 766, label: "일반 대화" },
   { x: 904, label: "무관 질문" },
+];
+
+/* 분기별 처리 설명 - 한 줄 9자 안팎(분기 간격 138에 맞춤) */
+const HANDLERS = [
+  { x: 490, lines: ["검색 문서 기반", "답변 생성"] },
+  { x: 628, lines: ["DB 값으로 응답", "(GPT 없음)"] },
+  { x: 766, lines: ["이전 대화 참조", "대화 응답"] },
+  { x: 904, lines: ["정해진 거절 문구", "(GPT 없음)"] },
 ];
 
 /* 파란 로봇 - 중심은 x + 24 (몸통 60 × 0.8) */
@@ -53,7 +68,7 @@ export default function RagDiagram() {
   return (
     <div className="overflow-x-auto">
       <svg
-        viewBox="4 10 1202 406"
+        viewBox="4 10 1202 476"
         className="h-auto w-full min-w-[860px]"
         role="img"
         aria-label="소담이 챗봇의 RAG 및 Query Routing 파이프라인 구조도"
@@ -239,14 +254,13 @@ export default function RagDiagram() {
           />
         </g>
 
-        {/* 검색 결과 → '낙농 전문 지식' 분기 */}
-        <line
-          x1="533"
-          y1="68"
-          x2="440"
-          y2="264"
+        {/* 검색 결과 → '낙농 전문 지식' 분기의 GPT (분기선·라벨을 피해 왼쪽으로 돌아 들어간다) */}
+        <path
+          d="M533 68L420 230V361H454"
+          fill="none"
           stroke="var(--ink)"
           strokeWidth="2"
+          strokeLinejoin="round"
           markerEnd="url(#rag-arrow)"
         />
 
@@ -346,10 +360,19 @@ export default function RagDiagram() {
         >
           GPT
         </text>
+        <text
+          x="697"
+          y="191"
+          textAnchor="middle"
+          fill="var(--muted)"
+          fontSize="14.5"
+        >
+          질문 의도 분류
+        </text>
 
         <text
           x="697"
-          y="212"
+          y="218"
           textAnchor="middle"
           fill="#e8453c"
           fontSize={FS}
@@ -369,7 +392,7 @@ export default function RagDiagram() {
         />
         <line
           x1="697"
-          y1="220"
+          y1="226"
           x2="697"
           y2="240"
           stroke="var(--ink)"
@@ -400,22 +423,25 @@ export default function RagDiagram() {
           </text>
         ))}
 
-        {/* 분기 다음 단계 - 가운데에서 답변 생성으로 */}
-        <line
-          x1="697"
-          y1="304"
-          x2="697"
-          y2="326"
-          stroke="var(--ink)"
-          strokeWidth="2"
-          markerEnd="url(#rag-arrow)"
-        />
+        {/* ───────── 아래 - 분기별 처리 (합치지 않고 각자 끝낸다) ───────── */}
+        {ROUTES.map((r) => (
+          <line
+            key={r.x}
+            x1={r.x}
+            y1="296"
+            x2={r.x}
+            y2="324"
+            stroke="var(--ink)"
+            strokeWidth="2"
+            markerEnd="url(#rag-arrow)"
+          />
+        ))}
 
-        {/* 답변 생성 GPT */}
-        <Robot x={673} y={342} />
+        {/* 낙농 전문 지식 - 검색 문서를 바탕으로 GPT 답변 */}
+        <Robot x={ROUTES[0].x - 24} y={340} />
         <text
-          x="697"
-          y="404"
+          x={ROUTES[0].x}
+          y="402"
           textAnchor="middle"
           fill="var(--ink)"
           fontSize={FS}
@@ -424,9 +450,101 @@ export default function RagDiagram() {
           GPT
         </text>
 
-        {/* 답변 GPT → Response */}
+        {/* 농장 기록 조회 - DB 값을 문장으로 조립 (GPT 없음) */}
+        <rect
+          x={ROUTES[1].x - 46}
+          y="334"
+          width="92"
+          height="44"
+          rx="10"
+          fill="none"
+          stroke="var(--ink)"
+          strokeWidth="2"
+        />
+        <text
+          x={ROUTES[1].x}
+          y="361"
+          textAnchor="middle"
+          fill="var(--ink)"
+          fontSize={FS}
+          fontWeight="700"
+        >
+          농장 DB
+        </text>
+
+        {/* 일반 대화 - 이전 대화 기록을 참조한 GPT 답변 */}
+        <Robot x={ROUTES[2].x - 24} y={340} />
+        <text
+          x={ROUTES[2].x}
+          y="402"
+          textAnchor="middle"
+          fill="var(--ink)"
+          fontSize={FS}
+          fontWeight="700"
+        >
+          GPT
+        </text>
+
+        {/* 무관 질문 - 고정 문구로 거절 (GPT 없음) */}
+        <rect
+          x={ROUTES[3].x - 46}
+          y="334"
+          width="92"
+          height="44"
+          rx="10"
+          fill="none"
+          stroke="var(--ink)"
+          strokeWidth="2"
+        />
+        <text
+          x={ROUTES[3].x}
+          y="361"
+          textAnchor="middle"
+          fill="var(--ink)"
+          fontSize={FS}
+          fontWeight="700"
+        >
+          고정 문구
+        </text>
+
+        {/* 분기별 처리 설명 */}
+        {HANDLERS.map((h) => (
+          <g key={h.x}>
+            <text
+              x={h.x}
+              y="426"
+              textAnchor="middle"
+              fill="var(--muted)"
+              fontSize="14.5"
+            >
+              {h.lines[0]}
+            </text>
+            <text
+              x={h.x}
+              y="446"
+              textAnchor="middle"
+              fill="var(--muted)"
+              fontSize="14.5"
+            >
+              {h.lines[1]}
+            </text>
+          </g>
+        ))}
+
+        {/* 네 경로가 각자 Response 로 모인다 */}
+        {ROUTES.map((r) => (
+          <line
+            key={`out-${r.x}`}
+            x1={r.x}
+            y1="454"
+            x2={r.x}
+            y2="468"
+            stroke="var(--ink)"
+            strokeWidth="2"
+          />
+        ))}
         <path
-          d="M745 363H1110V240"
+          d="M490 468H1110V240"
           fill="none"
           stroke="var(--ink)"
           strokeWidth="2"

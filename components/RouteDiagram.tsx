@@ -29,7 +29,7 @@ const ROUTES = [
   {
     node: "rag_response",
     label: "낙농 지식",
-    desc: "RAG로 문서 검색 → 못 찾으면 상식으로 답변(fallback)",
+    desc: "RAG 문서 검색 → 참고 자료에서 답을 찾지 못하면 모델 지식으로 답변(fallback)",
   },
   {
     node: "cow_info_graph",
@@ -109,7 +109,7 @@ export default function RouteDiagram() {
       <Down />
 
       <div className="w-full max-w-xs rounded-lg border border-line bg-surface px-4 py-1.5 text-center">
-        <span className="text-[0.85rem] font-medium">답변 생성 → END</span>
+        <span className="text-[0.85rem] font-medium">각 노드가 응답 반환 → END</span>
       </div>
     </div>
   );

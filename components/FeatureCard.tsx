@@ -388,34 +388,26 @@ export default function FeatureCard({ feature }: { feature: AiFeature }) {
                               </div>
                             )}
 
-                            {/* 태그 + 상세 열기 - 한 줄에 좌우로 */}
-                            <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 pl-8">
-                              {trouble.tags && trouble.tags.length > 0 && (
-                                <ul className="flex flex-wrap gap-1.5">
-                                  {trouble.tags.map((tag) => (
-                                    <li
-                                      key={tag}
-                                      className="rail rounded-md bg-ground border border-line px-2 py-0.5 text-muted"
-                                    >
-                                      #{tag}
-                                    </li>
-                                  ))}
-                                </ul>
-                              )}
+                            {trouble.tags && trouble.tags.length > 0 && (
+                              <ul className="mt-4 flex flex-wrap gap-1.5 pl-8">
+                                {trouble.tags.map((tag) => (
+                                  <li
+                                    key={tag}
+                                    className="rail rounded-md bg-ground border border-line px-2 py-0.5 text-muted"
+                                  >
+                                    #{tag}
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
 
-                              {trouble.details &&
-                                trouble.details.length > 0 && (
-                                  <TroubleDetails
-                                    title={trouble.title}
-                                    eyebrow={
-                                      feature.troublesLabel ??
-                                      "트러블슈팅 · 기술적 의사결정"
-                                    }
-                                    details={trouble.details}
-                                    tech={trouble.tech}
-                                  />
-                                )}
-                            </div>
+                            {/* 상세 - 모달 없이 항목 아래에 전부 펼친다 */}
+                            {trouble.details && trouble.details.length > 0 && (
+                              <TroubleDetails
+                                details={trouble.details}
+                                tech={trouble.tech}
+                              />
+                            )}
                           </div>
                         ))}
                       </div>
