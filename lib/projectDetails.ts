@@ -51,12 +51,77 @@ export type TroubleBlock =
   | { type: "text"; text: string } // 문단
   | { type: "code"; code: string; lang?: CodeLang } // 코드 블록
   | { type: "list"; items: string[] } // 불릿 리스트
-  | { type: "table"; head: string[]; rows: string[][] } // 표
+  | { type: "stats"; items: { label: string; value: string; wide?: boolean }[] } // 핵심 수치 목록
+| { type: "decisions"; items: { title: string; text: string; variables?: string[] }[] } // 전처리 판단 카드
+  | { type: "chips"; label: string; items: string[] } // 입력 변수 태그
+  | {
+      type: "correlation";
+      image: { src: string; width: number; height: number; alt: string };
+      findings: { label: string; value: string }[];
+      note: string;
+      caption?: string;
+    }
+  | {
+      type: "table";
+      head: string[];
+      rows: string[][];
+      highlightColumn?: number;
+      highlightRow?: number;
+      highlightRange?: [number, number];
+      nowrapData?: boolean;
+      columnGroups?: { label: string; span: number; highlight?: boolean }[];
+    } // 표
   | {
       // 왼쪽 설명 + 오른쪽 작은 캡처 (학습 결과 그래프·리포트)
       type: "split";
       text: string;
       images: { src: string; width: number; height: number; alt: string }[];
+      caption?: string;
+      compact?: boolean;
+    }
+  | {
+      // 변수 중요도 표와 그래프를 좌우로 배치하고 해석은 그래프 아래에 둔다.
+      type: "importance";
+      head: string[];
+      rows: string[][];
+      image: { src: string; width: number; height: number; alt: string };
+      text: string;
+      caption?: string;
+    }
+  | {
+      // 최종 변수표와 선정 근거·성능·도메인 해석을 한 컴팩트 영역으로 묶는다.
+      type: "finalFeatures";
+      rationale: string;
+      head: string[];
+      rows: string[][];
+      outcome: string;
+      interpretation: string;
+    }
+  | {
+      // 분류 규칙 코드와 그 규칙으로 만든 등급 분포를 한 행에 놓는다.
+      type: "codeTable";
+      code: string;
+      head: string[];
+      rows: string[][];
+    }
+  | {
+      // 진단 문장·원인과 혼동행렬을 하나의 분석 레이아웃으로 묶는다.
+      type: "diagnostic";
+      text: string;
+      interpretation: string;
+      findingIntro?: string;
+      findings: string[];
+      image: { src: string; width: number; height: number; alt: string };
+      caption?: string;
+    }
+  | {
+      // 분류 성능표와 혼동행렬·개선 해석을 한 결과 영역으로 묶는다.
+      type: "reportFigure";
+      label: string;
+      head: string[];
+      rows: string[][];
+      text: string;
+      image: { src: string; width: number; height: number; alt: string };
       caption?: string;
     };
 
@@ -68,10 +133,12 @@ export interface TroubleDetail {
 /* 트러블슈팅·기술적 의사결정 - 슬림(문제→해결→효과) + 풀버전(details) */
 export interface TroubleItem {
   title: string;
+  /** 한 흐름으로 묶인 모델 개발 단계의 짧은 설명 */
+  summary?: string;
   /* 표(table)가 문제와 원인을 다 담는 항목은 두 줄을 비운다 - 같은 말을 두 번 쓰지 않는다 */
   problem?: string;
   solution?: string;
-  effect: string;
+  effect?: string;
   tags?: string[];
   tech?: string[]; // 풀버전 상단 기술 스택
   diagram?: "route"; // 곁들일 다이어그램
@@ -86,7 +153,7 @@ export interface AiFeature {
   name: string;
   tagline?: string; // 기능 한 줄 부제
   when?: string; // 작업 시점 (타임라인이 있는 프로젝트에서 항목을 짚어준다)
-  metric?: string; // 강조 수치 (정확도 96.8% 등)
+  metric?: string; // 강조 수치 (정확도 83.9% 등)
   problemLabel?: string; // 문제 섹션 라벨 (기본 "문제")
   problem?: string; // 단순 문제 (한 문단)
   problemList?: string[]; // 여러 문제 불릿
@@ -120,6 +187,16 @@ export interface AiFeature {
   troubles?: TroubleItem[]; // 트러블슈팅·기술적 의사결정
   /** troubles 섹션 라벨. 기본값 '트러블슈팅 · 기술적 의사결정' */
   troublesLabel?: string;
+  /** 개발 과정을 단계별 흐름으로 표시 */
+  troublesLayout?: "process";
+  /** 과정 전체에 공통으로 적용되는 기술 스택 */
+  troublesTech?: string[];
+  /** 과정 카드 아래 별도 접이식으로 보여 줄 한계·후속 과제 */
+  troublesAppendix?: {
+    title: string;
+    summary?: string;
+    details: TroubleDetail[];
+  };
   /** 이 항목을 다룬 외부 글 - 하단 목록과 별개로, 읽는 자리에서 바로 넘어갈 수 있게 */
   writeups?: { title: string; href: string }[];
 }
@@ -976,7 +1053,6 @@ return tags[:hi]`,
     github: "https://github.com/BlackCows-Team",
     homepage: "https://blackcows-team.github.io/blackcows-privacy/index.html",
     homepageLabel: "소개 페이지",
-    slides: "/sodam/presentation.pdf",
     screenshots: ["/sodam/home.png"],
     backgroundLabel: "과제 배경",
     background: "낙농업의 위기 - '소규모 농가가 버틸 수 없는 구조'",
@@ -1028,7 +1104,7 @@ return tags[:hi]`,
       },
       {
         title: "럼피스킨병 이미지 분류",
-        desc: "피부 병변 이미지 기반 럼피스킨병 분류 모델 학습·평가 (테스트 정확도 96.8%)",
+        desc: "피부 병변 이미지 기반 럼피스킨병 분류 모델 학습·평가 (테스트 정확도 86.5%)",
       },
       {
         title: "AI 예측 모델",
@@ -1846,7 +1922,7 @@ if len(raw_documents) == 0:
       },
       {
         name: "럼피스킨병 AI 진단",
-        metric: "테스트 정확도 96.8%",
+        metric: "테스트 정확도 86.5%",
         problemLabel: "럼피스킨병의 위협",
         problemList: [
           "제1종 가축전염병으로 젖소에 치명적 - 유량 감소·유산·불임을 유발",
@@ -1855,22 +1931,23 @@ if len(raw_documents) == 0:
         solutionLabel: "소담소담 솔루션",
         solutionBlocks: [
           {
-            title: "데이터셋 (Training / Test · 공개 데이터 2종)",
+            title: "데이터셋 (Train / Val / Test · 공개 데이터 2종)",
             points: [
-              "Training set - Kaggle·Mendeley 럼피스킨 이미지(정상 700 + 럼피스킨 324) + Kaggle Cow Lumpy Disease(정상 515 + 럼피스킨 421), 약 2,000장",
-              "Test set - 두 데이터셋에서 정상·럼피스킨 각 50장씩 균형 있게 구성",
+              "Training set - 공개 이미지 데이터셋 2종 통합(Kaggle·Mendeley 럼피스킨 이미지, Kaggle Cow Lumpy Disease), 완전 중복 3장·라벨 충돌 3건 제거 후 총 1,960장 중 학습 1,371장(정상 884 · 럼피스킨 487) + 검증 293장",
+              "Test set - 학습과 분리한 296장(정상 191 · 럼피스킨 105), 클래스 비율 유지",
             ],
           },
           {
             title: "AI 모델 개발",
             points: [
-              "사전 학습된 YOLOv8 분류 모델을 Training set으로 추가 학습",
+              "사전 학습된 YOLOv8 분류 모델(yolov8m-cls)을 공개 이미지 데이터셋으로 추가 학습(Fine-tuning)",
               "2개 클래스 분류: 정상 / 럼피스킨병 의심",
-              "정확도 96.8% (Test set 기준)",
+              "테스트 정확도 86.5% (256/296) · 럼피스킨 재현율 80.0%, 정밀도 81.6%",
+              "오분류 이미지 분석에서 라벨 오류와 소 피부가 보이지 않는 이미지(캡처·포스터·원경)가 상당수 확인돼, 데이터 품질이 성능 한계로 보임",
             ],
           },
           {
-            title: "예측 결과 제공 항목",
+            title: "앱 결과 화면 구성",
             points: [
               "정상 여부 및 위험도 표시",
               "신뢰도 수치 제공",
@@ -1975,10 +2052,10 @@ if len(raw_documents) == 0:
               {
                 heading: "타겟(종속변수) - 4등급에서 3등급으로",
                 blocks: [
-                  { type: "sub", text: "1. 임계값의 근거" },
+                  { type: "sub", text: "문헌상 분류 근거" },
                   {
                     type: "text",
-                    text: "임의로 자르지 않고 낙농 문헌의 통용 기준을 따랐다.",
+                    text: "유방 건강 상태를 나누는 낙농 문헌의 기준을 등급 설정 근거로 삼았다.",
                   },
                   {
                     type: "table",
@@ -1989,17 +2066,18 @@ if len(raw_documents) == 0:
                       ["≥ 5×10⁵ (50만)", "유방에 심한 자극 - 세균성 유방염 의심"],
                     ],
                   },
-                  { type: "sub", text: "2. 1차 시도 - 4등급 분류" },
                   {
-                    type: "code",
+                    type: "text",
+                    text: "아래 코드는 이 기준을 원천 데이터 값으로 나눈 분류 규칙이다.",
+                  },
+                  { type: "sub", text: "4등급 분류 기준" },
+                  {
+                    type: "codeTable",
                     code: `def categorize_scc(value):
     if value <= 100:   return 0  # 정상
     elif value <= 300: return 1  # 주의
     elif value <= 500: return 2  # 염증 가능성
     else:              return 3  # 유방염 의심`,
-                  },
-                  {
-                    type: "table",
                     head: ["등급", "건수", "비율"],
                     rows: [
                       ["0 정상", "61,184", "79.1%"],
@@ -2008,10 +2086,18 @@ if len(raw_documents) == 0:
                       ["3 유방염 의심", "2,626", "3.4%"],
                     ],
                   },
+                  { type: "sub", text: "4등급 모델 비교 · 입력 10개" },
                   {
-                    type: "text",
-                    text: "Random Forest 클래스별 성능 (Accuracy 0.833)",
+                    type: "table",
+                    head: ["모델", "Accuracy", "Precision", "Recall", "F1"],
+                    highlightRow: 1,
+                    rows: [
+                      ["Logistic Regression", "0.791", "0.712", "0.791", "0.727"],
+                      ["Random Forest", "0.833", "0.806", "0.833", "0.814"],
+                      ["XGBoost", "0.819", "0.786", "0.819", "0.779"],
+                    ],
                   },
+                  { type: "sub", text: "Random Forest 분류 결과 · 4등급" },
                   {
                     type: "table",
                     head: ["등급", "Precision", "Recall", "F1", "Support"],
@@ -2025,43 +2111,36 @@ if len(raw_documents) == 0:
                     ],
                   },
                   {
-                    type: "split",
-                    text: "Accuracy 83%는 겉보기 숫자였다. 데이터의 79%가 '정상'이라 모델이 다수 클래스에 쏠려 있을 뿐, 정작 잡아내야 할 유방염 의심군의 Recall은 0.32, 염증 가능성은 0.06으로 사실상 탐지에 실패한 상태였다. Confusion Matrix에서도 염증 가능성(23건)과 유방염 의심(167건)의 정답 예측이 극히 적고, 대부분이 '정상'과 '주의'로 흡수되고 있다.",
-                    images: [
-                      {
-                        src: "/sodam/mastitis/cm-4class.png",
-                        width: 581,
-                        height: 490,
-                        alt: "4등급 분류 Confusion Matrix",
-                      },
-                    ],
-                    caption: "4등급 분류 Confusion Matrix",
-                  },
-                  {
                     type: "text",
-                    text: "이 괴리는 weighted avg F1 0.81 vs macro avg F1 0.48에서 그대로 드러난다. 클래스별 표본 수로 가중하면 좋아 보이지만, 모든 클래스를 동등하게 보면 절반도 안 되는 성능이다. 불균형 데이터에서 Accuracy와 weighted 지표만 보면 안 되는 이유다. 원인은 두 가지로 판단했다.",
+                    text: "⚠️ 정확도는 높았지만, 유방염 의심군은 놓쳤다",
                   },
                   {
-                    type: "list",
-                    items: [
+                    type: "diagnostic",
+                    text: "Accuracy 83%는 겉보기 숫자였다. 데이터의 79%가 '정상'이라 모델이 다수 클래스에 쏠려 있을 뿐, 정작 잡아내야 할 유방염 의심군의 Recall은 0.32, 염증 가능성은 0.06으로 사실상 탐지에 실패한 상태였다. Confusion Matrix에서도 염증 가능성(23건)과 유방염 의심(167건)의 정답 예측이 극히 적고, 대부분이 '정상'과 '주의'로 흡수되고 있다.",
+                    interpretation: "이 괴리는 weighted avg F1 0.81 vs macro avg F1 0.48에서 그대로 드러난다. 클래스별 표본 수로 가중하면 좋아 보이지만, 모든 클래스를 동등하게 보면 절반도 안 되는 성능이다. 불균형 데이터에서 Accuracy와 weighted 지표만 보면 안 되는 이유다.",
+                    findingIntro: "원인은 두 가지로 판단했다.",
+                    findings: [
                       "클래스 불균형 - 정상:주의:염증:의심 ≈ 24:5:1:2",
                       "중간 구간 경계의 모호성 - 주의(100~300)와 염증 가능성(300~500)은 센서 노이즈·개체 편차에 민감해 분리가 어려움",
                     ],
+                    image: {
+                      src: "/sodam/mastitis/cm-4class.png",
+                      width: 581,
+                      height: 490,
+                      alt: "4등급 분류 Confusion Matrix",
+                    },
                   },
-                  { type: "sub", text: "3. 2차 설계 - 3등급으로 재분류" },
+                  { type: "sub", text: "3등급 분류 기준" },
                   {
                     type: "text",
                     text: "문헌의 5×10⁵ 기준을 살리되, 실질적으로 동일한 조치(수의사 확인)가 필요한 2·3등급을 통합했다.",
                   },
                   {
-                    type: "code",
+                    type: "codeTable",
                     code: `def categorize_scc(value):
     if value <= 100:   return 0  # 정상
     elif value <= 300: return 1  # 주의
     else:              return 2  # 유방염 의심 (염증 가능성 + 의심 통합)`,
-                  },
-                  {
-                    type: "table",
                     head: ["등급", "건수"],
                     rows: [
                       ["0 정상", "61,184"],
@@ -2069,9 +2148,20 @@ if len(raw_documents) == 0:
                       ["2 유방염 의심", "4,409"],
                     ],
                   },
-                  { type: "text", text: "개선 결과 (Random Forest)" },
+                  { type: "sub", text: "3등급 모델 비교 · 입력 8개" },
                   {
                     type: "table",
+                    head: ["모델", "Accuracy", "Precision", "Recall", "F1"],
+                    highlightRow: 1,
+                    rows: [
+                      ["Logistic Regression", "0.790", "0.719", "0.790", "0.729"],
+                      ["Random Forest", "0.842", "0.825", "0.842", "0.828"],
+                      ["XGBoost", "0.822", "0.793", "0.822", "0.786"],
+                    ],
+                  },
+                  {
+                    type: "reportFigure",
+                    label: "Random Forest 분류 결과 · 3등급",
                     head: ["등급", "Precision", "Recall", "F1", "Support"],
                     rows: [
                       ["정상", "0.88", "0.95", "0.92", "12,237"],
@@ -2080,26 +2170,20 @@ if len(raw_documents) == 0:
                       ["macro avg", "0.71", "0.59", "0.64", "15,475"],
                       ["weighted avg", "0.82", "0.84", "0.83", "15,475"],
                     ],
-                  },
-                  {
-                    type: "split",
-                    text: "유방염 의심군 F1이 0.41 → 0.49, Precision이 0.57 → 0.67로 올랐고, macro F1은 0.48 → 0.64로 개선됐다. Confusion Matrix에서도 유방염 의심 정답 예측이 167건 → 346건으로 2배 이상 늘었다. 모델 파라미터가 아니라 등급 체계 자체를 문제로 보고 재설계한 판단이 유효했다.",
-                    images: [
-                      {
-                        src: "/sodam/mastitis/cm-3class.png",
-                        width: 581,
-                        height: 490,
-                        alt: "3등급 분류 Confusion Matrix",
-                      },
-                    ],
-                    caption: "3등급 재분류 후 Confusion Matrix",
+                    text: "유방염 의심군 F1이 0.41 → 0.49, Precision이 0.57 → 0.67로 올랐고, macro F1은 0.48 → 0.64로 개선됐다.\nConfusion Matrix에서도 유방염 의심 정답 예측이 167건 → 346건으로 2배 이상 늘었다. 모델 파라미터가 아니라 등급 체계 자체를 문제로 보고 재설계한 판단이 유효했다.",
+                    image: {
+                      src: "/sodam/mastitis/cm-3class.png",
+                      width: 581,
+                      height: 490,
+                      alt: "3등급 분류 Confusion Matrix",
+                    },
                   },
                 ],
               },
               {
                 heading: "성능 최적화 - 피처 선정",
                 blocks: [
-                  { type: "sub", text: "1. 제조사 필터링" },
+                  { type: "sub", text: "제조사 필터링" },
                   {
                     type: "text",
                     text: "전체 데이터의 제조사 분포는 이미 한쪽으로 크게 쏠려 있었다.",
@@ -2116,13 +2200,13 @@ if len(raw_documents) == 0:
                     type: "text",
                     text: "체세포수 결측치를 제거하고 나니 delaval 데이터는 사실상 전부 사라져 제조사 ID가 한 종류만 남았다. 변수로서 정보량이 0이므로 학습에서 제외하고, 단일 기기(agrirobotech) 기준 모델로 범위를 한정했다.",
                   },
-                  { type: "sub", text: "2. 변수 중요도 분석 - 1차 제거" },
+                  { type: "sub", text: "변수 중요도 분석 · 1차 제거" },
                   {
                     type: "text",
                     text: "1차 학습(전체 변수 10개)의 Random Forest 변수 중요도.",
                   },
                   {
-                    type: "table",
+                    type: "importance",
                     head: ["변수", "중요도"],
                     rows: [
                       ["전도율", "0.265"],
@@ -2136,21 +2220,25 @@ if len(raw_documents) == 0:
                       ["수집건수", "0.001"],
                       ["혈액흐름여부_Y", "≈ 0.000"],
                     ],
-                  },
-                  {
-                    type: "split",
+                    image: {
+                      src: "/sodam/mastitis/importance-base.png",
+                      width: 989,
+                      height: 590,
+                      alt: "1차 학습 Random Forest 변수 중요도",
+                    },
                     text: "상위 5개(전도율·유지방비율·유단백비율·착유량·산차수)가 전체 중요도의 97.6%를 차지했고, 반대로 수집건수와 혈액흐름여부_Y는 둘을 합쳐도 0.07%에 불과했다. 예측에 기여하지 않으면서 결측·수집 실패 리스크만 늘리는 변수로 판단해 이 둘을 1차로 제거했다.",
-                    images: [
-                      {
-                        src: "/sodam/mastitis/importance-base.png",
-                        width: 989,
-                        height: 590,
-                        alt: "1차 학습 Random Forest 변수 중요도",
-                      },
-                    ],
-                    caption: "1차 학습(전체 변수 10개) 변수 중요도",
                   },
-                  { type: "sub", text: "3. Ablation Study - 단계별 성능 변화" },
+                  { type: "sub", text: "입력 8개 · 변수 제거 후 모델 비교" },
+                  {
+                    type: "table",
+                    head: ["모델", "Accuracy", "Precision", "Recall", "F1"],
+                    rows: [
+                      ["Logistic Regression", "0.791", "0.713", "0.791", "0.727"],
+                      ["Random Forest", "0.833", "0.807", "0.833", "0.815"],
+                      ["XGBoost", "0.819", "0.786", "0.819", "0.779"],
+                    ],
+                  },
+                  { type: "sub", text: "변수 제거 단계별 성능" },
                   {
                     type: "text",
                     text: "변수를 단계적으로 제거하며 성능 변화를 측정했다. (Random Forest 기준)",
@@ -2167,6 +2255,7 @@ if len(raw_documents) == 0:
                   },
                   {
                     type: "split",
+                    compact: true,
                     text: "세 차례의 변수 중요도를 비교하면 전도율 > 유지방비율 > 유단백비율 > 착유량 순위가 조건에 관계없이 일정하게 유지된다. 상위 신호가 특정 실험 설정에 의존하지 않는다는 뜻으로, 피처 제거 판단의 근거가 됐다.",
                     images: [
                       {
@@ -2185,13 +2274,11 @@ if len(raw_documents) == 0:
                     caption:
                       "좌: 실험 2(8개 변수) · 우: 실험 3(3등급 재분류). 상위 4개 변수의 순위와 크기가 거의 변하지 않는다.",
                   },
-                  { type: "sub", text: "4. 최종 피처 5개 선정 - 2차 제거" },
+                  { type: "sub", text: "최종 입력 5개 선정 · 2차 제거" },
                   {
-                    type: "text",
-                    text: "실험 3까지 남아 있던 8개 중 온도(0.005)·공기흐름값(0.007)·착유횟차(0.011)는 중요도 합계가 2.3%에 그쳤다. 상위 5개만으로 이미 전체 중요도의 97.6%가 설명되므로, 이 셋을 빼도 정보 손실이 크지 않다고 보고 2차로 제거했다.",
-                  },
-                  {
-                    type: "table",
+                    type: "finalFeatures",
+                    rationale:
+                      "실험 3까지 남아 있던 8개 중 온도(0.005)·공기흐름값(0.007)·착유횟차(0.011)는 중요도 합계가 2.3%에 그쳤다. 상위 5개만으로 이미 전체 중요도의 97.6%가 설명되므로, 이 셋을 빼도 정보 손실이 크지 않다고 보고 2차로 제거했다.",
                     head: ["최종 피처", "중요도"],
                     rows: [
                       ["전도율", "0.265"],
@@ -2200,15 +2287,10 @@ if len(raw_documents) == 0:
                       ["착유량", "0.182"],
                       ["산차수", "0.096"],
                     ],
-                  },
-                  {
-                    type: "text",
-                    text: "결과적으로 실험 3 대비 Weighted F1은 0.828 → 0.827로 사실상 동일했다(-0.001). 성능을 거의 그대로 유지한 채 변수를 10개 → 5개로 줄여 모델 경량화와 해석 가능성을 확보했고, 실서비스에서는 입력 항목이 적을수록 센서 수집 실패 지점이 줄어드는 이점이 더 크다고 판단해 이 조합을 최종 채택했다.",
-                  },
-                  { type: "sub", text: "5. 도메인 해석" },
-                  {
-                    type: "text",
-                    text: "가장 중요한 변수가 전도율로 나온 것은 도메인 지식과 일치한다. 유방에 염증이 생기면 혈액 내 Na⁺·Cl⁻ 이온이 유즙으로 유입되어 전기전도율이 상승하기 때문이다. 모델이 통계적 우연이 아니라 생리학적으로 타당한 신호를 학습했다는 근거로 볼 수 있다.",
+                    outcome:
+                      "실험 3과 비교해 Weighted F1은 0.828에서 0.827로 거의 같았습니다. 변수를 10개에서 5개로 줄여 모델을 단순화하고 해석 가능성을 높였으며, 입력 항목 감소로 센서 수집 실패 가능성도 줄일 수 있다고 판단해 최종 채택했습니다.",
+                    interpretation:
+                      "전도율이 가장 중요한 변수로 나온 것은 유방 염증 시 혈액의 Na⁺·Cl⁻ 이온이 유즙으로 유입되어 전기전도율이 높아진다는 설명과 맞습니다. 생리학적으로 타당한 신호가 모델에 반영된 것으로 해석했습니다.",
                   },
                 ],
               },
@@ -2229,7 +2311,7 @@ if len(raw_documents) == 0:
                       ["Tuned XGBoost (GridSearchCV)", "0.834", "0.816", "0.834", "0.822"],
                     ],
                   },
-                  { type: "sub", text: "GridSearchCV - 3-fold, 108개 조합 × 324 fits" },
+                  { type: "sub", text: "XGBoost 하이퍼파라미터 탐색" },
                   {
                     type: "code",
                     code: `Best Params: {
@@ -2259,12 +2341,12 @@ if len(raw_documents) == 0:
               {
                 heading: "한계와 다음 스텝",
                 blocks: [
-                  { type: "sub", text: "1. 체세포수 단위 기준 불명확" },
+                  { type: "sub", text: "체세포수 단위 기준 불명확" },
                   {
                     type: "text",
                     text: "데이터셋에 체세포수의 측정 단위(유즙 몇 mL 기준인지)가 명시되어 있지 않다. 문헌 기준(1mL당)을 가정해 등급을 나눴으나, 실서비스 적용 전 데이터 제공처 확인이 필수다. 단위가 다르면 임계값 전체를 재조정해야 한다.",
                   },
-                  { type: "sub", text: "2. 소수 클래스 Recall 0.39 - 아직 부족" },
+                  { type: "sub", text: "소수 클래스 Recall 0.39 · 개선 필요" },
                   {
                     type: "text",
                     text: "유방염 의심 개체 10마리 중 4마리만 잡아낸다. 낙농 현장에서는 오탐(FP) 비용보다 미탐(FN) 비용이 크므로, Accuracy가 아니라 Recall을 우선 지표로 삼는 재튜닝이 필요하다.",
@@ -2278,12 +2360,12 @@ if len(raw_documents) == 0:
                       "평가지표를 Accuracy → macro F1 / PR-AUC로 전환",
                     ],
                   },
-                  { type: "sub", text: "3. 개체별 baseline 미반영" },
+                  { type: "sub", text: "개체별 기준선 미반영" },
                   {
                     type: "text",
                     text: "현재는 단일 착유 시점의 절대값만 사용한다. 소마다 정상 전도율·유지방비율이 다르므로, 개체별 평상시 값 대비 편차를 피처로 추가하면 개체 편차 노이즈를 상당 부분 제거할 수 있을 것으로 본다. (예: 최근 7회 이동평균 대비 z-score)",
                   },
-                  { type: "sub", text: "4. 단일 기종 데이터 기반" },
+                  { type: "sub", text: "단일 기종 데이터 기반" },
                   {
                     type: "text",
                     text: "체세포수 결측을 제거하고 나면 agrirobotech 한 기종만 남아, 학습 데이터가 사실상 단일 착유로봇 기준이다. 기종마다 센서 측정 방식과 값의 스케일이 다를 수 있으므로, 타 기종 적용 전에는 별도 검증이 필요하다.",
@@ -2297,7 +2379,7 @@ if len(raw_documents) == 0:
       {
         name: "착유량 예측",
         tagline: "생산량 변화에 미리 대비하세요.",
-        metric: "모델 설명력 82.4%",
+        metric: "모델 설명력 82.1%",
         problemLabel: "착유량, 왜 중요한가",
         problemList: [
           "젖소 건강과 농장 수익성의 대표 지표",
@@ -2316,7 +2398,324 @@ if len(raw_documents) == 0:
               "입력 8개 피처 - 착유횟수·전도율·환경온도·유지방비율·유단백비율·농후사료섭취량·착유 측정월·착유 측정요일",
               "출력: 예측 착유량(L) + AI 확신도 + 모델 설명력",
               "확신도는 RandomForest 각 트리 예측값의 변동계수(표준편차÷평균)를 0~100%로 환산 - 회귀에는 predict_proba가 없어 앙상블의 예측 분산을 불확실성 지표로 활용",
-              "모델 설명력 82.4% (MAE 3.41 · RMSE 4.94)",
+              "최종 모델 성능 · 설명력 82.1% (MAE 3.41 · RMSE 4.94)",
+            ],
+          },
+        ],
+        troublesLabel: "모델 개발 과정 · 성능 최적화",
+        troublesLayout: "process",
+        troublesTech: ["Python", "pandas", "scikit-learn", "Random Forest", "XGBoost", "TensorFlow"],
+        troubles: [
+          {
+            title: "원천 데이터 분석과 예측 변수 설계",
+            summary:
+              "86,936행·19개 컬럼의 원천 데이터에서 식별자와 정보량이 없는 컬럼을 제외해 착유량 예측 데이터를 구성했습니다. 착유기측정일자는 월·요일 변수로 파생하고, 결측이 있는 입력 변수는 평균으로 대체했습니다. 상관 분석으로 착유량과 착유횟수·농후사료섭취량의 관계를 확인해 변수 후보를 살폈습니다.",
+            details: [
+              {
+                heading: "데이터와 전처리",
+                blocks: [
+                  {
+                    type: "sub",
+                    text: "예측 목표와 원천 데이터",
+                  },
+                  {
+                    type: "stats",
+                    items: [
+                      { label: "원천 데이터", value: "낙농_로봇착유기_군사급이기_데이터", wide: true },
+                      { label: "데이터 규모", value: "86,936행" },
+                      { label: "컬럼 수", value: "19개" },
+                      { label: "예측 목표", value: "착유량 · 회귀" },
+                    ],
+                  },
+                  {
+                    type: "sub",
+                    text: "착유량 기술통계 · 원자료 단위",
+                  },
+                  {
+                    type: "stats",
+                    items: [
+                      { label: "측정 건수", value: "86,936" },
+                      { label: "평균", value: "33.375426" },
+                      { label: "표준편차", value: "11.685032" },
+                      { label: "최솟값", value: "0" },
+                      { label: "25%", value: "26" },
+                      { label: "중앙값", value: "34" },
+                      { label: "75%", value: "41" },
+                      { label: "최댓값", value: "89" },
+                    ],
+                  },
+                  {
+                    type: "sub",
+                    text: "예측 대상과 초기 입력 후보",
+                  },
+                  {
+                    type: "chips",
+                    label: "초기 후보 변수 · 착유량은 타깃",
+                    items: [
+                      "착유기측정일자",
+                      "착유량 · 타깃",
+                      "착유횟수",
+                      "전도율",
+                      "온도",
+                      "유지방비율",
+                      "유단백비율",
+                      "농후사료섭취량",
+                      "기타사료섭취량",
+                    ],
+                  },
+                  {
+                    type: "sub",
+                    text: "전처리 기준",
+                  },
+                  {
+                    type: "decisions",
+                    items: [
+                      {
+                        title: "날짜 변수 파생",
+                        variables: ["착유기측정일자 → 착유기측정월 · 착유기측정요일"],
+                        text: "파생 변수를 사용하고 원본 날짜는 제거했습니다.",
+                      },
+                      {
+                        title: "식별자·단일값 컬럼 제외",
+                        variables: ["농장ID", "개체번호", "사육마릿수", "착유기제조사ID", "급이기제조사ID"],
+                        text: "식별 정보와 구분력이 없는 컬럼을 제외했습니다. 두 제조사ID는 한 회사 값만 있어 정보량이 없었습니다.",
+                      },
+                      {
+                        title: "산차수 제외",
+                        variables: ["산차수"],
+                        text: "전체 86,936건 중 16,698건(19.2%)만 값이 있고 70,238건(80.8%)은 결측이라 전체 행을 사용하는 모델에서 제외했습니다.",
+                      },
+                      {
+                        title: "급이기측정일자 제외",
+                        variables: ["급이기측정일자", "착유기측정일자"],
+                        text: "착유량과 직접 관련이 적고, 착유 측정일과 시간 흐름 정보가 중복돼 제외했습니다.",
+                      },
+                      {
+                        title: "결측값 대체",
+                        variables: ["유지방비율", "유단백비율", "기타사료섭취량"],
+                        text: "결측이 있는 입력 변수는 평균으로 채웠습니다.",
+                      },
+                    ],
+                  },
+                  {
+                    type: "sub",
+                    text: "상관계수 분석 결과",
+                  },
+                  {
+                    type: "correlation",
+                    image: {
+                      src: "/sodam/milk/correlation-robot-mt.png",
+                      width: 715,
+                      height: 587,
+                      alt: "낙농 로봇착유기·군사급이기 데이터의 변수별 상관계수 히트맵",
+                    },
+                    findings: [
+                      { label: "착유량 ↔ 착유횟수", value: "+0.68 · 가장 높음" },
+                      { label: "착유량 ↔ 농후사료섭취량", value: "+0.50" },
+                      { label: "착유횟수 ↔ 농후사료섭취량", value: "+0.45" },
+                      { label: "그 외 변수 ↔ 착유량", value: "|r| ≤ 0.36" },
+                    ],
+                    note: "상관분석은 변수 후보를 살피는 데 활용했습니다. 상관관계만으로 원인이나 예측력을 단정하지 않고, 최종 입력은 모델 성능 비교와 변수 제거 실험으로 결정했습니다.",
+                  },
+                  {
+                    type: "chips",
+                    label: "최종 모델 입력 변수 8개 · Random Forest 회귀",
+                    items: [
+                      "착유횟수",
+                      "전도율",
+                      "온도",
+                      "유지방비율",
+                      "유단백비율",
+                      "농후사료섭취량",
+                      "착유기측정월",
+                      "착유기측정요일",
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            title: "기준 모델 비교와 Random Forest 선정",
+            summary:
+              "네 회귀 모델을 MAE·RMSE·R²로 비교해 Random Forest를 기준 모델로 선정했습니다. 기준 실험에서 MAE 3.38 · RMSE 4.89 · R² 0.825를 기록했습니다.",
+            details: [
+              {
+                heading: "모델별 성능 비교",
+                blocks: [
+                  {
+                    type: "split",
+                    text: "세 평가 지표 모두에서 Random Forest가 가장 좋은 값을 기록했습니다.",
+                    images: [
+                      {
+                        src: "/sodam/milk/model-performance.png",
+                        width: 1790,
+                        height: 495,
+                        alt: "Linear Regression, Random Forest, XGBoost, DNN의 MAE, RMSE, R² 비교 그래프",
+                      },
+                    ],
+                    caption: "모델별 성능 비교 · MAE·RMSE는 낮을수록, R²는 높을수록 좋음",
+                  },
+                  {
+                    type: "table",
+                    head: ["모델", "MAE", "RMSE", "R²"],
+                    rows: [
+                      ["Linear Regression", "6.09", "7.75", "0.559"],
+                      ["Random Forest", "3.38", "4.89", "0.825"],
+                      ["XGBoost", "5.09", "6.58", "0.683"],
+                      ["DNN (TensorFlow)", "5.10", "6.60", "0.680"],
+                    ],
+                  },
+                ],
+              },
+              {
+                heading: "Random Forest를 선택한 이유",
+                blocks: [
+                  {
+                    type: "text",
+                    text: "평균 오차(MAE), 큰 오차에 민감한 RMSE, 설명력(R²)을 함께 비교했습니다.",
+                  },
+                  {
+                    type: "text",
+                    text: "착유량은 착유횟수와 사료량 등 여러 조건에 따라 달라집니다. 이런 변수 조합과 구간별 차이를 반영할 수 있는 트리 모델을 비교했고, 세 지표에서 가장 좋은 결과를 낸 Random Forest를 기준 모델로 정했습니다.",
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            title: "성능 최적화 실험과 최종 입력 확정",
+            summary:
+              "XGBoost 튜닝, 이상치 비교, 변수 제거 실험을 거쳐 8개 입력을 확정했습니다. 최종 Random Forest는 MAE 3.41 · RMSE 4.94 · R² 0.821을 기록했습니다.",
+            details: [
+              {
+                heading: "XGBoost 하이퍼파라미터 튜닝",
+                blocks: [
+                  {
+                    type: "text",
+                    text: "GridSearchCV 최적 조합: max_depth 9 · learning_rate 0.2 · n_estimators 200 · subsample 0.8 · colsample_bytree 1.0",
+                  },
+                  {
+                    type: "text",
+                    text: "튜닝 결과 MAE 3.87 · RMSE 5.36 · R² 0.789. 기준 Random Forest(R² 0.825)에 못 미쳐 최종 모델은 변경하지 않았습니다.",
+                  },
+                ],
+              },
+              {
+                heading: "일반 이상치 제거 전후 비교",
+                blocks: [
+                  {
+                    type: "table",
+                    head: ["모델", "MAE · 전 → 후", "RMSE · 전 → 후", "R² · 전 → 후"],
+                    rows: [
+                      ["Linear Regression", "6.09 → 6.00", "7.75 → 7.60", "0.559 → 0.502"],
+                      ["Random Forest", "3.38 → 3.23", "4.89 → 4.70", "0.825 → 0.810"],
+                      ["XGBoost", "5.09 → 5.03", "6.58 → 6.48", "0.683 → 0.639"],
+                    ],
+                  },
+                  {
+                    type: "text",
+                    text: "세 모델 모두 MAE·RMSE는 낮아졌지만 R²도 하락했습니다. 한 지표만으로 개선을 판단하기 어려워, 이상치를 일괄 제거하지 않고 이후 변수 구성별 결과와 함께 검토했습니다.",
+                  },
+                ],
+              },
+              {
+                heading: "변수 중요도 기반 제거 실험",
+                blocks: [
+                  {
+                    type: "split",
+                    text: "여러 회귀 모델에서 착유횟수가 가장 큰 신호로 나타났습니다. Random Forest에서는 유지방비율·전도율·온도·유단백비율·농후사료섭취량이 뒤를 이었습니다. 중요도만으로 변수를 결정하지 않고, 제거 후 검증 지표도 확인했습니다.",
+                    images: [
+                      {
+                        src: "/sodam/milk/feature-importance-original.png",
+                        width: 1790,
+                        height: 495,
+                        alt: "초기 학습 변수 9개의 Linear Regression, Random Forest, XGBoost 모델별 착유량 변수 중요도 비교 그래프",
+                      },
+                    ],
+                    caption: "초기 학습 결과 · 모델별 변수 중요도",
+                  },
+                  {
+                    type: "table",
+                    head: [
+                      "변수 구성 실험",
+                      "MAE",
+                      "RMSE",
+                      "R²",
+                      "MAE",
+                      "RMSE",
+                      "R²",
+                      "MAE",
+                      "RMSE",
+                      "R²",
+                    ],
+                    columnGroups: [
+                      { label: "Linear Regression", span: 3 },
+                      { label: "Random Forest", span: 3, highlight: true },
+                      { label: "XGBoost", span: 3 },
+                    ],
+                    highlightRange: [4, 6],
+                    nowrapData: true,
+                    rows: [
+                      ["착유기측정요일·기타사료섭취량 제외 + 이상치 제거", "5.98", "7.62", "0.498", "3.45", "5.00", "0.784", "5.09", "6.58", "0.625"],
+                      ["착유기측정요일·기타사료섭취량 제외", "6.09", "7.75", "0.559", "3.41", "4.96", "0.819", "5.12", "6.61", "0.679"],
+                      ["착유기측정월·착유기측정요일·기타사료섭취량 제외", "6.10", "7.77", "0.557", "3.65", "5.26", "0.797", "5.29", "6.82", "0.658"],
+                      ["착유기측정요일·기타사료섭취량·유단백비율 제외", "6.09", "7.75", "0.559", "3.67", "5.29", "0.795", "5.25", "6.77", "0.663"],
+                      ["기타사료섭취량 제외 (최종 모델)", "6.09", "7.75", "0.559", "3.41", "4.94", "0.821", "5.12", "6.61", "0.679"],
+                      ["기타사료섭취량 제외 · 농후사료섭취량 값 13·14 제거 (최종 모델 미반영)", "6.05", "7.69", "0.564", "3.38", "4.89", "0.824", "4.95", "6.41", "0.697"],
+                    ],
+                  },
+                  {
+                    type: "sub",
+                    text: "최종 입력 8개",
+                  },
+                  {
+                    type: "text",
+                    text: "착유횟수 · 전도율 · 온도 · 유지방비율 · 유단백비율 · 농후사료섭취량 · 착유기측정월 · 착유기측정요일",
+                  },
+                  {
+                    type: "list",
+                    items: [
+                      "착유기측정월·착유기측정요일 등 날짜 파생 변수와 유단백비율을 빼면 성능이 떨어져 유지했습니다.",
+                      "기타사료섭취량을 제외한 구성을 최종 모델로 확정했습니다. 노션 예측 테스트에 기록된 추론시간은 0.0088이며, 단위는 기재되어 있지 않습니다.",
+                    ],
+                  },
+                ],
+              },
+              {
+                heading: "채택하지 않은 실험: 농후사료섭취량 13·14 제거",
+                blocks: [
+                  {
+                    type: "text",
+                    text: "원천 데이터에서 농후사료섭취량 값별 개체 수를 확인했습니다.",
+                  },
+                  {
+                    type: "table",
+                    head: ["농후사료섭취량", "개체 수"],
+                    rows: [
+                      ["7", "19,280"],
+                      ["5", "16,469"],
+                      ["6", "15,039"],
+                      ["8", "8,548"],
+                      ["4", "7,661"],
+                      ["9", "5,357"],
+                      ["2", "4,441"],
+                      ["3", "4,080"],
+                      ["10", "3,734"],
+                      ["1", "1,483"],
+                      ["11", "470"],
+                      ["12", "294"],
+                      ["0", "76"],
+                      ["13", "3"],
+                      ["14", "1"],
+                    ],
+                  },
+                  {
+                    type: "text",
+                    text: "농후사료섭취량 값 13은 3개체, 14는 1개체로 드물었습니다. 이 네 값을 제거한 실험에서는 Random Forest 점수가 소폭 올랐습니다(MAE 3.41→3.38 · RMSE 4.94→4.89 · R² 0.821→0.824). 하지만 값이 1회 섭취량인지 하루 총섭취량인지 측정 기준을 확인하지 못해, 적은 빈도만으로 이상치라고 단정할 수 없었습니다. 점수는 참고로만 남기고 두 값을 유지한 구성을 최종 모델로 정했습니다.",
+                  },
+                ],
+              },
             ],
           },
         ],
@@ -3210,6 +3609,119 @@ if len(raw_documents) == 0:
     ],
   },
 ];
+
+/* 노션에서 기록한 실험 순서에 맞춰 유방염 모델 상세를 단계별로 묶는다.
+   기존 블록은 이동만 하며, 적용 한계는 과정 카드와 분리해 끝에 둔다. */
+function organizeMastitisDevelopment() {
+  const project = lightProjects.find((item) => item.slug === "sodam");
+  const feature = project?.aiFeatures?.find(
+    (item) => item.name === "유방염 위험도 예측",
+  );
+  const source = feature?.troubles?.[0];
+  const details = source?.details;
+  if (!feature || !source || !details || details.length < 5) return;
+
+  const [problem, target, featureSelection, modelComparison, limitations] =
+    details;
+  if (
+    !problem ||
+    !target ||
+    !featureSelection ||
+    !modelComparison ||
+    !limitations
+  )
+    return;
+  const baselineStart = target.blocks.findIndex(
+    (block) =>
+      block.type === "sub" &&
+      (block.text === "4등급 분류 기준" || block.text.startsWith("2.")),
+  );
+  const redesignStart = target.blocks.findIndex(
+    (block) =>
+      block.type === "sub" &&
+      (block.text === "3등급 분류 기준" || block.text.startsWith("3.")),
+  );
+  const featureSelectionStart = featureSelection.blocks.findIndex(
+    (block) =>
+      block.type === "sub" &&
+      (block.text.startsWith("변수 중요도 분석") || block.text.startsWith("2.")),
+  );
+  if (baselineStart < 0 || redesignStart < 0 || featureSelectionStart < 0)
+    return;
+
+  const overviewDetails: TroubleDetail[] = [
+    problem,
+    {
+      heading: "체세포수 등급 기준과 초기 데이터 분포",
+      blocks: target.blocks.slice(0, baselineStart),
+    },
+    {
+      heading: "제조사 필터링",
+      blocks: featureSelection.blocks.slice(1, featureSelectionStart),
+    },
+  ];
+
+  if (!feature.troublesTech && source.tech)
+    feature.troublesTech = source.tech;
+
+  feature.troubles = [
+    {
+      title: "체세포수 측정 공백을 ML 예측으로 보완",
+      summary:
+        "체세포수는 유방 건강 지표지만 전체 착유 기록 732,660건 중 77,372건(10.6%)에만 있었습니다. 실측값이 있으면 기준값으로 판정하고, 없는 89.4%는 착유량·전도율·유지방비율·유단백비율·산차수 5개 값으로 등급을 예측하도록 설계했습니다.",
+      details: overviewDetails,
+    },
+    {
+      title: "4등급 분류에서 소수 등급 탐지 문제 확인",
+      summary:
+        "정상·주의·염증 가능성·유방염 의심을 나눠 예측했지만, 정상 개체가 데이터의 79.1%였습니다. 전체 정답률은 83.3%였어도 실제 염증 가능 개체의 6%, 유방염 의심 개체의 32%만 찾아내 소수 등급 탐지가 부족했습니다.",
+      details: [
+        {
+          heading: "4등급 분류 결과와 탐지 한계",
+          blocks: target.blocks.slice(baselineStart, redesignStart),
+        },
+      ],
+    },
+    {
+      title: "염증 가능성과 유방염 의심을 합쳐 3등급으로 재설계",
+      summary:
+        "4등급 모델은 ‘염증 가능성’과 ‘유방염 의심’을 각각 Recall 0.06, 0.32로만 탐지했습니다. 두 등급 모두 수의사 확인이 필요한 단계라 하나의 ‘유방염 의심’ 등급으로 통합했습니다. 재설계 후 유방염 의심군 F1은 0.41에서 0.49로, 모든 등급을 고르게 반영하는 macro F1은 0.48에서 0.64로 높아졌습니다.",
+      details: [
+        {
+          heading: "3등급 재분류 결과와 성능 변화",
+          blocks: target.blocks.slice(redesignStart),
+        },
+      ],
+    },
+    {
+      title: "변수 제거 실험으로 최종 입력 5개 선정",
+      summary:
+        "중요도가 낮은 수집건수·혈액흐름여부를 먼저 제외하고, 온도·공기흐름값·착유횟차도 제거했습니다. 착유량·전도율·유지방비율·유단백비율·산차수 5개만 남겼으며, 표본 수를 반영한 종합 점수(Weighted F1)는 0.828에서 0.827로 거의 유지됐습니다.",
+      details: [
+        {
+          heading: "변수 중요도와 제거 실험",
+          blocks: featureSelection.blocks.slice(featureSelectionStart),
+        },
+      ],
+    },
+    {
+      title: "네 모델 비교와 XGBoost 하이퍼파라미터 튜닝",
+      summary:
+        "최종 입력 5개로 Logistic Regression·Random Forest·XGBoost를 비교하고 XGBoost도 튜닝했습니다. 정답률·Weighted F1은 각각 Logistic Regression 0.790·0.728, Random Forest 0.839·0.827, XGBoost 0.823·0.787, 튜닝 XGBoost 0.834·0.822였습니다. 두 지표에서 가장 높은 Random Forest를 최종 선택했습니다.",
+      details: [modelComparison],
+    },
+  ];
+
+  feature.troublesAppendix = {
+    title: "적용 전 확인할 한계와 다음 단계",
+    summary:
+      "체세포수 단위와 다른 착유기종에서의 성능을 확인해야 합니다. 현재 모델은 유방염 의심 개체 10마리 중 약 4마리를 찾아내므로, 실제 적용 전 재현율 개선도 필요합니다.",
+    details: [limitations],
+  };
+  feature.troublesLayout = "process";
+}
+
+organizeMastitisDevelopment();
 
 export function getLightProject(slug: string): LightProject | undefined {
   return lightProjects.find((p) => p.slug === slug);

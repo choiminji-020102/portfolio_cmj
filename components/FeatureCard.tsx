@@ -341,76 +341,122 @@ export default function FeatureCard({ feature }: { feature: AiFeature }) {
                       <p className="font-semibold text-deep mb-1">
                         {feature.troublesLabel ?? "트러블슈팅 · 기술적 의사결정"}
                       </p>
-                      <div className="divide-y divide-line">
-                        {feature.troubles.map((trouble, ti) => (
-                          <div key={trouble.title} className="py-6">
-                            <h4 className="flex flex-wrap gap-x-2.5 gap-y-1 items-baseline leading-snug">
-                              <span className="rail text-tide shrink-0">
-                                {String(ti + 1).padStart(2, "0")}
-                              </span>
-                              <span className="font-semibold">
-                                {trouble.title}
-                              </span>
-                            </h4>
-
-                            {/* 표 - 문제·해결 두 줄을 대신한다 */}
-                            {trouble.table && (
-                              <div className="mt-3 pl-8">
-                                <DataTable
-                                  head={trouble.table.head}
-                                  rows={trouble.table.rows}
-                                />
-                              </div>
-                            )}
-
-                            <dl className="mt-3 pl-8 space-y-2.5 text-[0.9rem] leading-relaxed">
-                              {[
-                                ["문제", trouble.problem, "text-muted"],
-                                ["해결", trouble.solution, "text-deep"],
-                                ["효과", trouble.effect, "text-tide"],
-                              ]
-                                .filter(([, text]) => text)
-                                .map(([label, text, color]) => (
-                                  <div key={label} className="flex gap-3">
-                                    <dt
-                                      className={`shrink-0 w-11 text-[0.8rem] font-bold tracking-tight ${color}`}
-                                    >
-                                      {label}
-                                    </dt>
-                                    <dd className="text-ink/85">{text}</dd>
+                      {feature.troublesLayout === "process" ? (
+                        <>
+                          {feature.troublesTech && feature.troublesTech.length > 0 && (
+                            <p className="rail mt-2 text-muted">
+                              <span className="font-semibold text-ink">기술</span>
+                              &nbsp;&nbsp;{feature.troublesTech.join(" · ")}
+                            </p>
+                          )}
+                          <ol className="mt-5 space-y-5">
+                            {feature.troubles.map((step, si) => (
+                              <li key={step.title} className="relative border-l border-tide/40 pl-5 pb-1">
+                                <span className="rail absolute -left-[0.7rem] top-0 rounded-full border border-tide/40 bg-ground px-1.5 py-0.5 text-tide">
+                                  {String(si + 1).padStart(2, "0")}
+                                </span>
+                                <h4 className="font-semibold leading-snug">{step.title}</h4>
+                                {step.summary && (
+                                  <p className="mt-1.5 text-[0.9rem] leading-relaxed text-muted">
+                                    {step.summary}
+                                  </p>
+                                )}
+                                {step.details && step.details.length > 0 && (
+                                  <div className="mt-3">
+                                    <TroubleDetails details={step.details} />
                                   </div>
-                                ))}
-                            </dl>
-
-                            {trouble.diagram === "route" && (
-                              <div className="mt-5 pl-8">
-                                <RouteDiagram />
-                              </div>
-                            )}
-
-                            {trouble.tags && trouble.tags.length > 0 && (
-                              <ul className="mt-4 flex flex-wrap gap-1.5 pl-8">
-                                {trouble.tags.map((tag) => (
-                                  <li
-                                    key={tag}
-                                    className="rail rounded-md bg-ground border border-line px-2 py-0.5 text-muted"
-                                  >
-                                    #{tag}
-                                  </li>
-                                ))}
-                              </ul>
-                            )}
-
-                            {/* 상세 - 모달 없이 항목 아래에 전부 펼친다 */}
-                            {trouble.details && trouble.details.length > 0 && (
+                                )}
+                              </li>
+                            ))}
+                          </ol>
+                          {feature.troublesAppendix && (
+                            <section className="mt-6 rounded-xl border border-line bg-ground/40 px-4 py-4 sm:px-5">
+                              <h4 className="font-semibold leading-snug text-deep">
+                                {feature.troublesAppendix.title}
+                              </h4>
+                              {feature.troublesAppendix.summary && (
+                                <p className="mt-1.5 text-[0.9rem] leading-relaxed text-muted">
+                                  {feature.troublesAppendix.summary}
+                                </p>
+                              )}
                               <TroubleDetails
-                                details={trouble.details}
-                                tech={trouble.tech}
+                                details={feature.troublesAppendix.details}
                               />
-                            )}
-                          </div>
-                        ))}
-                      </div>
+                            </section>
+                          )}
+                        </>
+                      ) : (
+                        <div className="divide-y divide-line">
+                          {feature.troubles.map((trouble, ti) => (
+                            <div key={trouble.title} className="py-6">
+                              <h4 className="flex flex-wrap gap-x-2.5 gap-y-1 items-baseline leading-snug">
+                                <span className="rail text-tide shrink-0">
+                                  {String(ti + 1).padStart(2, "0")}
+                                </span>
+                                <span className="font-semibold">
+                                  {trouble.title}
+                                </span>
+                              </h4>
+
+                              {/* 표 - 문제·해결 두 줄을 대신한다 */}
+                              {trouble.table && (
+                                <div className="mt-3 pl-8">
+                                  <DataTable
+                                    head={trouble.table.head}
+                                    rows={trouble.table.rows}
+                                  />
+                                </div>
+                              )}
+
+                              <dl className="mt-3 pl-8 space-y-2.5 text-[0.9rem] leading-relaxed">
+                                {[
+                                  ["문제", trouble.problem, "text-muted"],
+                                  ["해결", trouble.solution, "text-deep"],
+                                  ["효과", trouble.effect, "text-tide"],
+                                ]
+                                  .filter(([, text]) => text)
+                                  .map(([label, text, color]) => (
+                                    <div key={label} className="flex gap-3">
+                                      <dt
+                                        className={`shrink-0 w-11 text-[0.8rem] font-bold tracking-tight ${color}`}
+                                      >
+                                        {label}
+                                      </dt>
+                                      <dd className="text-ink/85">{text}</dd>
+                                    </div>
+                                  ))}
+                              </dl>
+
+                              {trouble.diagram === "route" && (
+                                <div className="mt-5 pl-8">
+                                  <RouteDiagram />
+                                </div>
+                              )}
+
+                              {trouble.tags && trouble.tags.length > 0 && (
+                                <ul className="mt-4 flex flex-wrap gap-1.5 pl-8">
+                                  {trouble.tags.map((tag) => (
+                                    <li
+                                      key={tag}
+                                      className="rail rounded-md bg-ground border border-line px-2 py-0.5 text-muted"
+                                    >
+                                      #{tag}
+                                    </li>
+                                  ))}
+                                </ul>
+                              )}
+
+                              {/* 상세 - 모달 없이 항목 아래에 전부 펼친다 */}
+                              {trouble.details && trouble.details.length > 0 && (
+                                <TroubleDetails
+                                  details={trouble.details}
+                                  tech={trouble.tech}
+                                />
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   )}
 

@@ -356,7 +356,7 @@ export const projectCards: ProjectCard[] = [
     thumbnail: "/covers/sodam.png",
     github: "https://github.com/BlackCows-Team",
     role: "RAG 챗봇 '소담이' 설계 · 럼피스킨 이미지 분류(YOLOv8) · 착유량·유방염 예측 모델",
-    outcome: "럼피스킨 96.8% · 유방염 83.9% · 착유량 설명력 82.4%",
+    outcome: "럼피스킨 86.5% · 유방염 83.9% · 착유량 설명력 82.4%",
   },
   {
     title: "부인과 초음파 난포 검출 - 2D Follicle™",
