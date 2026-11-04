@@ -128,7 +128,7 @@ export const projects: Project[] = [
       "서버 배포",
     ],
     teamSize: "프리랜서 단독 개발 (1인)",
-    period: "2025년 10월 ~ 현재",
+    period: "2025년 10월 ~ 2026년 7월 구축",
     status: "2026년 7월 실운영 이관 · 유지보수·추가개발 중",
     tags: [
       "Python",
