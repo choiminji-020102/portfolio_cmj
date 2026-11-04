@@ -2097,7 +2097,11 @@ if len(raw_documents) == 0:
                       ["XGBoost", "0.819", "0.786", "0.819", "0.779"],
                     ],
                   },
-                  { type: "sub", text: "Random Forest 분류 결과 · 4등급" },
+                  {
+                    type: "text",
+                    text: "수집건수와 혈액흐름여부는 중요도가 거의 0이라 제거하고 8개 입력으로 다시 학습했다(근거는 '성능 최적화' 절의 변수 중요도). Random Forest의 F1은 0.814에서 0.815로 거의 같았다. 아래는 이 8개 입력 모델의 등급별 결과다.",
+                  },
+                  { type: "sub", text: "Random Forest 분류 결과 · 4등급 · 입력 8개" },
                   {
                     type: "table",
                     head: ["등급", "Precision", "Recall", "F1", "Support"],
@@ -2120,7 +2124,7 @@ if len(raw_documents) == 0:
                     interpretation: "이 괴리는 weighted avg F1 0.81 vs macro avg F1 0.48에서 그대로 드러난다. 클래스별 표본 수로 가중하면 좋아 보이지만, 모든 클래스를 동등하게 보면 절반도 안 되는 성능이다. 불균형 데이터에서 Accuracy와 weighted 지표만 보면 안 되는 이유다.",
                     findingIntro: "원인은 두 가지로 판단했다.",
                     findings: [
-                      "클래스 불균형 - 정상:주의:염증:의심 ≈ 24:5:1:2",
+                      "클래스 불균형 - 정상:주의:염증:의심 ≈ 34:7:1:1.5",
                       "중간 구간 경계의 모호성 - 주의(100~300)와 염증 가능성(300~500)은 센서 노이즈·개체 편차에 민감해 분리가 어려움",
                     ],
                     image: {
