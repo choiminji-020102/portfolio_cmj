@@ -204,47 +204,42 @@ function Block({ blk }: { blk: TroubleBlock }) {
     );
   }
 
-  /* 이미지가 없으면 값 막대를 표 행 안에 그려 표와 그래프를 하나로 합친다. */
+  /* 이미지가 없으면 값 막대를 표 행 안에 그려 표와 그래프를 하나로 합치고, 해석은 오른쪽에 나란히 둔다. */
   if (blk.type === "importance" && !blk.image) {
     const values = blk.rows.map((row) => parseFloat(row[1].replace(/[^0-9.]/g, "")) || 0);
     const max = Math.max(...values, 0);
+    const th = "border border-line bg-tide/8 px-2 py-1 text-left font-semibold";
     return (
-      <div className="space-y-3">
-        <div className="max-w-[620px] min-w-0 overflow-hidden">
-          <table className="w-full table-fixed border-collapse text-[0.8rem]">
+      <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,24rem)_minmax(0,1fr)]">
+        <div className="min-w-0 overflow-hidden">
+          <table className="w-full table-fixed border-collapse text-[0.74rem] leading-tight">
             <colgroup>
-              <col className="w-[30%]" />
-              <col className="w-[54%]" />
-              <col className="w-[16%]" />
+              <col className="w-[34%]" />
+              <col className="w-[40%]" />
+              <col className="w-[26%]" />
             </colgroup>
             <thead>
               <tr>
-                <th className="border border-line bg-tide/8 px-2.5 py-1.5 text-left font-semibold">
-                  {blk.head[0]}
-                </th>
-                <th className="border border-line bg-tide/8 px-2.5 py-1.5 text-left font-semibold">
-                  {blk.head[1]}
-                </th>
-                <th className="border border-line bg-tide/8 px-2.5 py-1.5 text-left font-semibold">
-                  값
-                </th>
+                <th className={th}>{blk.head[0]}</th>
+                <th className={th}>{blk.head[1]}</th>
+                <th className={th}>값</th>
               </tr>
             </thead>
             <tbody>
               {blk.rows.map((row, rowIndex) => (
                 <tr key={rowIndex}>
-                  <td className="break-words border border-line px-2.5 py-1.5 align-middle font-medium text-ink">
+                  <td className="break-words border border-line px-2 py-1 align-middle font-medium text-ink">
                     {row[0]}
                   </td>
-                  <td className="border border-line px-2.5 py-1.5 align-middle">
+                  <td className="border border-line px-2 py-1 align-middle">
                     <div
                       role="img"
                       aria-label={`${row[0]} 중요도 ${row[1]}`}
-                      className="h-2.5 rounded-sm bg-tide"
+                      className="h-1.5 rounded-sm bg-tide"
                       style={{ width: `${max ? (values[rowIndex] / max) * 100 : 0}%` }}
                     />
                   </td>
-                  <td className="whitespace-nowrap border border-line px-2.5 py-1.5 align-middle text-muted">
+                  <td className="whitespace-nowrap border border-line px-2 py-1 align-middle text-muted">
                     {row[1]}
                   </td>
                 </tr>
@@ -252,10 +247,12 @@ function Block({ blk }: { blk: TroubleBlock }) {
             </tbody>
           </table>
         </div>
-        <p className="text-[0.85rem] leading-relaxed text-muted">{blk.text}</p>
-        {blk.caption && (
-          <p className="text-[0.72rem] leading-snug text-muted">{blk.caption}</p>
-        )}
+        <div className="space-y-2">
+          <p className="text-[0.85rem] leading-relaxed text-muted">{blk.text}</p>
+          {blk.caption && (
+            <p className="text-[0.72rem] leading-snug text-muted">{blk.caption}</p>
+          )}
+        </div>
       </div>
     );
   }
