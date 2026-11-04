@@ -204,7 +204,63 @@ function Block({ blk }: { blk: TroubleBlock }) {
     );
   }
 
-  if (blk.type === "importance")
+  /* 이미지가 없으면 값 막대를 표 행 안에 그려 표와 그래프를 하나로 합친다. */
+  if (blk.type === "importance" && !blk.image) {
+    const values = blk.rows.map((row) => parseFloat(row[1].replace(/[^0-9.]/g, "")) || 0);
+    const max = Math.max(...values, 0);
+    return (
+      <div className="space-y-3">
+        <div className="max-w-[620px] min-w-0 overflow-hidden">
+          <table className="w-full table-fixed border-collapse text-[0.8rem]">
+            <colgroup>
+              <col className="w-[30%]" />
+              <col className="w-[54%]" />
+              <col className="w-[16%]" />
+            </colgroup>
+            <thead>
+              <tr>
+                <th className="border border-line bg-tide/8 px-2.5 py-1.5 text-left font-semibold">
+                  {blk.head[0]}
+                </th>
+                <th className="border border-line bg-tide/8 px-2.5 py-1.5 text-left font-semibold">
+                  {blk.head[1]}
+                </th>
+                <th className="border border-line bg-tide/8 px-2.5 py-1.5 text-left font-semibold">
+                  값
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {blk.rows.map((row, rowIndex) => (
+                <tr key={rowIndex}>
+                  <td className="break-words border border-line px-2.5 py-1.5 align-middle font-medium text-ink">
+                    {row[0]}
+                  </td>
+                  <td className="border border-line px-2.5 py-1.5 align-middle">
+                    <div
+                      role="img"
+                      aria-label={`${row[0]} 중요도 ${row[1]}`}
+                      className="h-2.5 rounded-sm bg-tide"
+                      style={{ width: `${max ? (values[rowIndex] / max) * 100 : 0}%` }}
+                    />
+                  </td>
+                  <td className="whitespace-nowrap border border-line px-2.5 py-1.5 align-middle text-muted">
+                    {row[1]}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p className="text-[0.85rem] leading-relaxed text-muted">{blk.text}</p>
+        {blk.caption && (
+          <p className="text-[0.72rem] leading-snug text-muted">{blk.caption}</p>
+        )}
+      </div>
+    );
+  }
+
+  if (blk.type === "importance" && blk.image)
     return (
       <div className="grid items-start gap-5 lg:grid-cols-[minmax(17rem,0.8fr)_minmax(22rem,1.2fr)]">
         <div className="min-w-0 overflow-hidden">
@@ -218,7 +274,7 @@ function Block({ blk }: { blk: TroubleBlock }) {
                 {blk.head.map((heading, index) => (
                   <th
                     key={`${heading}-${index}`}
-                    className="border border-line bg-surface px-2.5 py-1.5 text-left font-semibold"
+                    className="border border-line bg-tide/8 px-2.5 py-1.5 text-left font-semibold"
                   >
                     {heading}
                   </th>
@@ -290,7 +346,7 @@ function Block({ blk }: { blk: TroubleBlock }) {
                 {blk.head.map((heading, index) => (
                   <th
                     key={`${heading}-${index}`}
-                    className="border border-line bg-surface px-2.5 py-1.5 text-left font-semibold"
+                    className="border border-line bg-tide/8 px-2.5 py-1.5 text-left font-semibold"
                   >
                     {heading}
                   </th>
@@ -342,7 +398,7 @@ function Block({ blk }: { blk: TroubleBlock }) {
                 {blk.head.map((heading, index) => (
                   <th
                     key={`${heading}-${index}`}
-                    className="whitespace-nowrap border border-line bg-surface px-2.5 py-1.5 text-left font-semibold"
+                    className="whitespace-nowrap border border-line bg-tide/8 px-2.5 py-1.5 text-left font-semibold"
                   >
                     {heading}
                   </th>
@@ -437,7 +493,7 @@ function Block({ blk }: { blk: TroubleBlock }) {
                 {blk.head.map((heading, index) => (
                   <th
                     key={`${heading}-${index}`}
-                    className="whitespace-nowrap border border-line bg-surface px-2.5 py-1.5 text-left font-semibold"
+                    className="whitespace-nowrap border border-line bg-tide/8 px-2.5 py-1.5 text-left font-semibold"
                   >
                     {heading}
                   </th>
@@ -501,7 +557,7 @@ function Block({ blk }: { blk: TroubleBlock }) {
                 <tr>
                   <th
                     rowSpan={2}
-                    className="border border-line bg-surface px-2.5 py-1.5 text-left font-semibold align-middle"
+                    className="border border-line bg-tide/8 px-2.5 py-1.5 text-left font-semibold align-middle"
                   >
                     {blk.head[0]}
                   </th>
@@ -512,7 +568,7 @@ function Block({ blk }: { blk: TroubleBlock }) {
                       className={`border border-line px-2.5 py-1.5 text-center font-semibold ${
                         group.highlight
                           ? "bg-tide/15 text-deep"
-                          : "bg-surface"
+                          : "bg-tide/8"
                       }`}
                     >
                       {group.label}
@@ -532,7 +588,7 @@ function Block({ blk }: { blk: TroubleBlock }) {
                         className={`whitespace-nowrap border border-line px-2.5 py-1.5 text-left font-semibold ${
                           highlighted
                             ? "bg-tide/15 text-deep"
-                            : "bg-surface"
+                            : "bg-tide/8"
                         }`}
                       >
                         {h}
@@ -549,7 +605,7 @@ function Block({ blk }: { blk: TroubleBlock }) {
                     className={`border border-line px-2.5 py-1.5 text-left font-semibold ${
                       ci === blk.highlightColumn
                         ? "bg-tide/15 text-deep"
-                        : "bg-surface"
+                        : "bg-tide/8"
                     }`}
                   >
                     {h}
