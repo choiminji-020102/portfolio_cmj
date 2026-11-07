@@ -4,6 +4,7 @@
   - 왼쪽 청록 세로선 + 노드 점 + 흰 카드 박스로 각 항목을 덩어리로 묶는다
   - 본문은 진한 잉크색 + 보통 굵기. 흐린 회색·가는 웨이트를 성과 텍스트에 쓰지 않는다.
 */
+import Link from "next/link";
 import type { ReactNode } from "react";
 
 export function Section({
@@ -102,7 +103,11 @@ export function CardLabel({ children }: { children: ReactNode }) {
 export function Points({
   points,
 }: {
-  points: { text: string; pending?: boolean }[];
+  points: {
+    text: string;
+    pending?: boolean;
+    link?: { href: string; label: string };
+  }[];
 }) {
   return (
     <ul className="space-y-3">
@@ -112,6 +117,14 @@ export function Points({
           className="relative pl-5 text-[0.95rem] leading-relaxed before:absolute before:left-0 before:top-[0.6em] before:h-1.5 before:w-1.5 before:rounded-full before:bg-deep"
         >
           {point.text}
+          {point.link && (
+            <Link
+              href={point.link.href}
+              className="rail ml-3 inline-flex items-center gap-1 rounded-md border border-line px-2.5 py-0.5 align-middle text-deep transition-colors hover:border-deep hover:bg-ground"
+            >
+              {point.link.label} <span aria-hidden="true">→</span>
+            </Link>
+          )}
         </li>
       ))}
     </ul>

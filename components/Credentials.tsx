@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { awards, certifications, papers } from "@/lib/profile";
 import { Card, CardLabel, Section } from "./Section";
 
@@ -26,6 +27,14 @@ export default function Credentials() {
               <p className="rail mt-1.5">
                 {award.org} · {award.date}
               </p>
+              {award.link && (
+                <Link
+                  href={award.link.href}
+                  className="rail mt-3 inline-flex items-center gap-1 rounded-md border border-line px-2.5 py-0.5 text-deep transition-colors hover:border-deep hover:bg-ground"
+                >
+                  {award.link.label} <span aria-hidden="true">→</span>
+                </Link>
+              )}
             </li>
           ))}
         </ul>

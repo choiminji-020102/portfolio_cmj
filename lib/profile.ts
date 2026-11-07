@@ -158,7 +158,11 @@ export interface Education {
   detail?: string;
   status: string;
   period: string;
-  points: { text: string; pending?: boolean }[];
+  points: {
+    text: string;
+    pending?: boolean;
+    link?: { href: string; label: string };
+  }[];
   stack?: string[];
   projectSlug?: string;
 }
@@ -171,7 +175,10 @@ export const educations: Education[] = [
     status: "수료",
     period: "2025.03 - 2025.09",
     points: [
-      { text: "빅프로젝트 대상(1위) 수상" },
+      {
+        text: "빅프로젝트 대상(1위) 수상",
+        link: { href: "/projects/damatketing", label: "다 맡케팅 보기" },
+      },
       { text: "미니프로젝트 5건 수행" },
     ],
   },
@@ -212,6 +219,7 @@ export interface Award {
   org: string;
   date: string;
   result: string;
+  link?: { href: string; label: string };
 }
 
 export const awards: Award[] = [
@@ -220,6 +228,7 @@ export const awards: Award[] = [
     org: "농림축산식품부",
     date: "2025.08",
     result: "우수상",
+    link: { href: "/projects/sodam", label: "소담소담 보기" },
   },
   {
     name: "AI 보건의료통계분석 경진대회",
