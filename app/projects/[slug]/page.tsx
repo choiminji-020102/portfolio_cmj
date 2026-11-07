@@ -185,7 +185,7 @@ export default async function ProjectPage({ params }: Props) {
 
         {/* 문제와 해결 - 항목마다 한 장. 문제/해결 라벨은 기능 카드와 같은 색을 쓴다 */}
         <section className="mt-16">
-          <h2 className={sectionTitle}>문제와 해결</h2>
+          <h2 className={sectionTitle}>현장의 문제를 자동화한 방법</h2>
           <div className="mt-8 space-y-6">
             {project.problemSolutions.map((item, i) => (
               <div key={item.title} className={card}>
